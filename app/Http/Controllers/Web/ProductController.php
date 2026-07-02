@@ -14,7 +14,7 @@ class ProductController extends Controller
         $product = Product::query()
             ->where('slug', $slug)
             ->where('is_active', true)
-            ->with(['category', 'variants' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'), 'ingredients'])
+            ->with(['category', 'variants' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'), 'ingredients', 'images'])
             ->firstOrFail();
 
         $removableIngredients = $product->ingredients

@@ -4,7 +4,12 @@
     use Illuminate\Support\Facades\Storage;
     $seoTitle = ($product->seo_title ?? $product->name).' | Allo! Pizza';
     $seoDescription = $product->seo_description ?? $product->short_description;
-    $image = $product->image ? Storage::url($product->image) : null;
+    $galleryPaths = collect([$product->image])
+        ->merge($product->images->pluck('image'))
+        ->filter()
+        ->unique()
+        ->values();
+    $galleryUrls = $galleryPaths->map(fn ($path) => Storage::url($path));
     $firstVariant = $product->variants->first();
     $firstPrice = $firstVariant->price ?? $product->base_price;
 @endphp
@@ -21,13 +26,46 @@
         <input type="hidden" name="product_id" value="{{ $product->id }}">
 
         <div class="flex items-start justify-center">
-            <div class="flex aspect-square w-full max-w-md items-center justify-center overflow-hidden rounded-3xl border border-stone-100 bg-white">
-                @if ($image)
-                    <img src="{{ $image }}" alt="{{ $product->name }}" class="h-full w-full object-contain p-4 sm:p-6">
-                @else
+            @if ($galleryUrls->isNotEmpty())
+                <div id="product-gallery" data-product-gallery class="w-full max-w-md space-y-3">
+                    <button type="button"
+                            data-gallery-open
+                            aria-label="Увеличи снимката"
+                            class="group relative flex aspect-square w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-3xl border border-stone-100 bg-white">
+                        <img data-gallery-main-image
+                             src="{{ $galleryUrls->first() }}"
+                             alt="{{ $product->name }}"
+                             class="h-full w-full object-contain p-4 transition duration-300 group-hover:scale-[1.02] sm:p-6">
+                        <span class="pointer-events-none absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M11 18a7 7 0 100-14 7 7 0 000 14zM11 8v6M8 11h6"/>
+                            </svg>
+                        </span>
+                    </button>
+
+                    @foreach ($galleryUrls as $url)
+                        <a href="{{ $url }}" data-pswp-item class="hidden" aria-hidden="true"></a>
+                    @endforeach
+
+                    @if ($galleryUrls->count() > 1)
+                        <div class="flex gap-2 overflow-x-auto pb-1">
+                            @foreach ($galleryUrls as $index => $url)
+                                <button type="button"
+                                        data-gallery-thumb="{{ $index }}"
+                                        aria-label="Снимка {{ $index + 1 }}"
+                                        aria-current="{{ $index === 0 ? 'true' : 'false' }}"
+                                        class="{{ $index === 0 ? 'border-brand-500 ring-2 ring-brand-500/30' : 'border-stone-200' }} flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl border bg-white p-1 transition hover:border-brand-300">
+                                    <img src="{{ $url }}" alt="" class="h-full w-full object-contain" loading="lazy">
+                                </button>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+            @else
+                <div class="flex aspect-square w-full max-w-md items-center justify-center overflow-hidden rounded-3xl border border-stone-100 bg-white">
                     <span class="text-7xl sm:text-[8rem]">🍕</span>
-                @endif
-            </div>
+                </div>
+            @endif
         </div>
 
         <div>

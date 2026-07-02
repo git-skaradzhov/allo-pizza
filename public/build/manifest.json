@@ -1,6 +1,22 @@
 {
+  "node_modules/photoswipe/dist/photoswipe-lightbox.esm.js": {
+    "file": "assets/photoswipe-lightbox.esm-4VpeJUsy.js",
+    "name": "photoswipe-lightbox.esm",
+    "src": "node_modules/photoswipe/dist/photoswipe-lightbox.esm.js",
+    "isDynamicEntry": true
+  },
+  "node_modules/photoswipe/dist/photoswipe.css": {
+    "file": "assets/photoswipe-DSulWsr7.css",
+    "src": "node_modules/photoswipe/dist/photoswipe.css"
+  },
+  "node_modules/photoswipe/dist/photoswipe.esm.js": {
+    "file": "assets/photoswipe.esm-D2Nf-uDI.js",
+    "name": "photoswipe.esm",
+    "src": "node_modules/photoswipe/dist/photoswipe.esm.js",
+    "isDynamicEntry": true
+  },
   "resources/css/app.css": {
-    "file": "assets/app-B45FQ4Uy.css",
+    "file": "assets/app-Qcc7r_ft.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -10,9 +26,13 @@
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-Crpq6mT7.js",
+    "file": "assets/app-e1ZJNQxC.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "dynamicImports": [
+      "node_modules/photoswipe/dist/photoswipe-lightbox.esm.js",
+      "node_modules/photoswipe/dist/photoswipe.esm.js"
+    ]
   }
 }

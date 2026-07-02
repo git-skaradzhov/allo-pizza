@@ -1,4 +1,5 @@
 import './bootstrap';
+import './product-gallery';
 
 function enableDragScroll(track) {
     if (track.dataset.dragScrollInit === 'true') {
