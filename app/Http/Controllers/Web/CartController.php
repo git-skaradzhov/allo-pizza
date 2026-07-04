@@ -72,9 +72,12 @@ class CartController extends Controller
             'note' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $product = Product::query()->findOrFail($validated['product_id']);
+        $product = Product::query()
+            ->where('is_active', true)
+            ->findOrFail($validated['product_id']);
         $variant = ProductVariant::query()
             ->where('product_id', $product->id)
+            ->where('is_active', true)
             ->findOrFail($validated['product_variant_id']);
 
         $options = [];

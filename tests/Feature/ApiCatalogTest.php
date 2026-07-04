@@ -41,4 +41,40 @@ class ApiCatalogTest extends TestCase
 
         $response->assertOk();
     }
+
+    public function test_inactive_product_page_returns_not_found(): void
+    {
+        $category = Category::factory()->create(['is_active' => true]);
+        $product = Product::factory()->create([
+            'category_id' => $category->id,
+            'slug' => 'skrit-produkt',
+            'is_active' => false,
+        ]);
+
+        $this->get(route('product.show', $product->slug))->assertNotFound();
+    }
+
+    public function test_inactive_product_cannot_be_added_to_cart(): void
+    {
+        $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class);
+
+        $category = Category::factory()->create(['is_active' => true]);
+        $product = Product::factory()->create([
+            'category_id' => $category->id,
+            'is_active' => false,
+        ]);
+        $variant = \App\Models\ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'name' => 'Стандартна',
+            'price' => 10,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $this->post('/cart/add', [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ])->assertNotFound();
+    }
 }

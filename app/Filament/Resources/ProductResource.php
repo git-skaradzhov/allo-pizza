@@ -98,7 +98,8 @@ class ProductResource extends Resource
                 Forms\Components\Section::make('Статус и етикети')
                     ->schema([
                         Forms\Components\Toggle::make('is_active')
-                            ->label('Активен')
+                            ->label('Видим на сайта')
+                            ->helperText('Изключете, за да скриете продукта от менюто и страниците на сайта.')
                             ->default(true),
                         Forms\Components\Toggle::make('is_featured')
                             ->label('Препоръчан'),
@@ -158,9 +159,9 @@ class ProductResource extends Resource
                     ->label('Цена')
                     ->money('EUR')
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->label('Активен')
-                    ->boolean(),
+                Tables\Columns\ToggleColumn::make('is_active')
+                    ->label('Видим на сайта')
+                    ->sortable(),
                 Tables\Columns\IconColumn::make('is_featured')
                     ->label('Препоръчан')
                     ->boolean(),
@@ -182,7 +183,7 @@ class ProductResource extends Resource
                     ->label('Категория')
                     ->relationship('category', 'name'),
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('Активен'),
+                    ->label('Видим на сайта'),
                 Tables\Filters\TernaryFilter::make('is_featured')
                     ->label('Препоръчан'),
             ])
@@ -192,6 +193,16 @@ class ProductResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\BulkAction::make('show')
+                        ->label('Покажи на сайта')
+                        ->icon('heroicon-o-eye')
+                        ->action(fn ($records) => $records->each->update(['is_active' => true]))
+                        ->deselectRecordsAfterCompletion(),
+                    Tables\Actions\BulkAction::make('hide')
+                        ->label('Скрий от сайта')
+                        ->icon('heroicon-o-eye-slash')
+                        ->action(fn ($records) => $records->each->update(['is_active' => false]))
+                        ->deselectRecordsAfterCompletion(),
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
