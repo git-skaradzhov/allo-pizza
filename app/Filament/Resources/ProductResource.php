@@ -145,9 +145,7 @@ class ProductResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
                     ->label('Изображение')
-                    ->disk('public')
-                    ->visibility('public')
-                    ->getStateUsing(fn (Product $record): ?string => product_image_storage_path($record->image, 'small')),
+                    ->getStateUsing(fn (Product $record): ?string => product_image_admin_url($record->image, 'small')),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Име')
                     ->searchable()

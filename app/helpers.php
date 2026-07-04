@@ -143,3 +143,22 @@ if (! function_exists('product_image_url')) {
         return $url.'?v='.$modifiedAt;
     }
 }
+
+if (! function_exists('product_image_admin_url')) {
+    function product_image_admin_url(?string $storedPath, string $tier = 'small'): ?string
+    {
+        $url = product_image_url($storedPath, product_image_tier_size($tier));
+
+        if ($url !== null) {
+            return url($url);
+        }
+
+        $path = product_image_storage_path($storedPath, $tier);
+
+        if ($path === null) {
+            return null;
+        }
+
+        return url(Storage::disk('public')->url($path));
+    }
+}
