@@ -33,7 +33,7 @@ class HomeController extends Controller
             'heroBanners' => Banner::query()->active()->where('position', BannerPosition::HomeHero)->orderBy('sort_order')->get(),
             'smallBanners' => Banner::query()->active()->where('position', BannerPosition::HomeSmallCards)->orderBy('sort_order')->get(),
             'promoBanners' => Banner::query()->active()->where('position', BannerPosition::PromoSection)->orderBy('sort_order')->get(),
-            'featuredProducts' => Product::query()->where('is_active', true)->where('is_featured', true)->with('variants')->orderBy('sort_order')->limit(6)->get(),
+            'featuredProducts' => Product::query()->where('is_active', true)->where('is_featured', true)->with('variants')->inRandomOrder()->limit(6)->get(),
             'categories' => Category::query()->where('is_active', true)->orderBy('sort_order')->get(),
             'menuCategories' => $menuCategories,
             'lunchMenu' => LunchMenu::query()

@@ -5,6 +5,7 @@
     "require": {
         "php": "^8.2",
         "filament/filament": "^3.2",
+        "intervention/image": "^3.0",
         "laravel/breeze": "^2.0",
         "laravel/framework": "^11.0",
         "laravel/reverb": "^1.10",

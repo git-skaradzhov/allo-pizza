@@ -28,7 +28,7 @@
                     @php
                         $itemImage = $item->isLunchItem()
                             ? ($item->item_image ? Storage::url($item->item_image) : null)
-                            : ($item->product?->image ? Storage::url($item->product->image) : null);
+                            : ($item->product?->image ? product_image_url($item->product->image, product_image_tier_size('small')) : null);
                         $itemIcon = $item->isLunchItem() ? '🍽️' : '🍕';
                     @endphp
                     <div class="flex gap-4 rounded-3xl border border-stone-200 bg-white p-4">

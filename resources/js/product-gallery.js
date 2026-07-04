@@ -64,7 +64,7 @@ async function initProductGallery() {
             return;
         }
 
-        mainImage.src = anchor.href;
+        mainImage.src = anchor.dataset.galleryDisplayUrl || anchor.href;
         mainButton.setAttribute('aria-label', `Увеличи снимката ${index + 1} от ${anchors.length}`);
     }
 

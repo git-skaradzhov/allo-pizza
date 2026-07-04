@@ -1,7 +1,6 @@
 @extends('layouts.app')
 
 @php
-    use Illuminate\Support\Facades\Storage;
     $seoTitle = ($product->seo_title ?? $product->name).' | Allo! Pizza';
     $seoDescription = $product->seo_description ?? $product->short_description;
     $galleryPaths = collect([$product->image])
@@ -9,7 +8,7 @@
         ->filter()
         ->unique()
         ->values();
-    $galleryUrls = $galleryPaths->map(fn ($path) => Storage::url($path));
+    $galleryDisplayUrls = $galleryPaths->map(fn ($path) => product_image_url($path, 650));
     $firstVariant = $product->variants->first();
     $firstPrice = $firstVariant->price ?? $product->base_price;
 @endphp
@@ -26,14 +25,14 @@
         <input type="hidden" name="product_id" value="{{ $product->id }}">
 
         <div class="flex items-start justify-center">
-            @if ($galleryUrls->isNotEmpty())
+            @if ($galleryDisplayUrls->isNotEmpty())
                 <div id="product-gallery" data-product-gallery class="w-full max-w-md space-y-3">
                     <button type="button"
                             data-gallery-open
                             aria-label="Увеличи снимката"
                             class="group relative flex aspect-square w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-3xl border border-stone-100 bg-white">
                         <img data-gallery-main-image
-                             src="{{ $galleryUrls->first() }}"
+                             src="{{ $galleryDisplayUrls->first() }}"
                              alt="{{ $product->name }}"
                              class="h-full w-full object-contain p-4 transition duration-300 group-hover:scale-[1.02] sm:p-6">
                         <span class="pointer-events-none absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm">
@@ -43,13 +42,17 @@
                         </span>
                     </button>
 
-                    @foreach ($galleryUrls as $url)
-                        <a href="{{ $url }}" data-pswp-item class="hidden" aria-hidden="true"></a>
+                    @foreach ($galleryPaths as $path)
+                        <a href="{{ product_image_url($path, 1024) }}"
+                           data-gallery-display-url="{{ product_image_url($path, 650) }}"
+                           data-pswp-item
+                           class="hidden"
+                           aria-hidden="true"></a>
                     @endforeach
 
-                    @if ($galleryUrls->count() > 1)
+                    @if ($galleryDisplayUrls->count() > 1)
                         <div class="flex gap-2 overflow-x-auto pb-1">
-                            @foreach ($galleryUrls as $index => $url)
+                            @foreach ($galleryDisplayUrls as $index => $url)
                                 <button type="button"
                                         data-gallery-thumb="{{ $index }}"
                                         aria-label="Снимка {{ $index + 1 }}"

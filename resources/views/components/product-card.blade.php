@@ -1,9 +1,7 @@
 @props(['product'])
 
 @php
-    use Illuminate\Support\Facades\Storage;
-
-    $image = $product->image ? Storage::url($product->image) : null;
+    $image = $product->image ? product_image_url($product->image, product_image_tier_size('small')) : null;
 
     $variants = $product->relationLoaded('variants') ? $product->variants : collect();
     $prices = $variants->pluck('price')->filter()->map(fn ($p) => (float) $p);

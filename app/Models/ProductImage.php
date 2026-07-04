@@ -20,4 +20,9 @@ class ProductImage extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function imageUrl(int $size = 650): ?string
+    {
+        return product_image_url($this->image, $size);
+    }
 }

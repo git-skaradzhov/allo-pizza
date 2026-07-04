@@ -49,3 +49,97 @@ if (! function_exists('public_media_url')) {
         return route('media.public', ['path' => $image], false);
     }
 }
+
+if (! function_exists('product_image_tier_size')) {
+    function product_image_tier_size(string $tier): int
+    {
+        return (int) config("product-images.sizes.{$tier}");
+    }
+}
+
+if (! function_exists('product_image_sizes')) {
+    function product_image_sizes(): array
+    {
+        return array_map('intval', array_values(config('product-images.sizes')));
+    }
+}
+
+if (! function_exists('product_image_storage_path')) {
+    function product_image_storage_path(?string $storedPath, string $tier = 'small'): ?string
+    {
+        if (! is_string($storedPath) || $storedPath === '') {
+            return null;
+        }
+
+        $disk = Storage::disk('public');
+        $path = product_image_path($storedPath, product_image_tier_size($tier));
+
+        if ($path !== null && $disk->exists($path)) {
+            return $path;
+        }
+
+        if ($tier === 'small') {
+            $legacyPath = product_image_path($storedPath, 200);
+
+            if ($legacyPath !== null && $disk->exists($legacyPath)) {
+                return $legacyPath;
+            }
+        }
+
+        return $disk->exists($storedPath) ? $storedPath : null;
+    }
+}
+
+if (! function_exists('product_image_path')) {
+    function product_image_path(?string $storedPath, int $size = 650): ?string
+    {
+        if (! is_string($storedPath) || $storedPath === '') {
+            return null;
+        }
+
+        if (! in_array($size, product_image_sizes(), true)) {
+            return $storedPath;
+        }
+
+        if (preg_match('/-(\d+)\.(webp|jpg|jpeg|png)$/i', $storedPath, $matches)) {
+            $extension = $matches[2];
+
+            return preg_replace('/-\d+\.(webp|jpg|jpeg|png)$/i', "-{$size}.{$extension}", $storedPath) ?? $storedPath;
+        }
+
+        return $storedPath;
+    }
+}
+
+if (! function_exists('product_image_url')) {
+    function product_image_url(?string $storedPath, int $size = 650): ?string
+    {
+        $path = product_image_path($storedPath, $size);
+
+        if ($path === null) {
+            return null;
+        }
+
+        if ($path !== $storedPath && ! Storage::disk('public')->exists($path)) {
+            if ($size === product_image_tier_size('small')) {
+                $legacyPath = product_image_path($storedPath, 200);
+
+                if ($legacyPath !== $storedPath && Storage::disk('public')->exists($legacyPath)) {
+                    return public_media_url($legacyPath);
+                }
+            }
+
+            return public_media_url($storedPath);
+        }
+
+        $url = public_media_url($path);
+
+        if ($url === null) {
+            return null;
+        }
+
+        $modifiedAt = Storage::disk('public')->lastModified($path);
+
+        return $url.'?v='.$modifiedAt;
+    }
+}

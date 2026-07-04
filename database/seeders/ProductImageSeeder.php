@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Product;
+use App\Services\ProductImageProcessor;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
 
 class ProductImageSeeder extends Seeder
 {
@@ -33,6 +33,8 @@ class ProductImageSeeder extends Seeder
             'domashna-limonada' => 'domashna-limonada.png',
         ];
 
+        $processor = app(ProductImageProcessor::class);
+
         foreach ($images as $slug => $filename) {
             $source = database_path("seeders/assets/products/{$filename}");
 
@@ -40,12 +42,15 @@ class ProductImageSeeder extends Seeder
                 continue;
             }
 
-            $destination = "products/{$filename}";
-            Storage::disk('public')->put($destination, file_get_contents($source));
+            $product = Product::query()->where('slug', $slug)->first();
 
-            Product::query()
-                ->where('slug', $slug)
-                ->update(['image' => $destination]);
+            if (! $product) {
+                continue;
+            }
+
+            $storedPath = $processor->storeFromPath($product, $source);
+
+            $product->forceFill(['image' => $storedPath])->saveQuietly();
         }
     }
 }

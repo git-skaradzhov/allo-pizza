@@ -5,12 +5,15 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
+use App\Services\ProductImageProcessor;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ProductResource extends Resource
 {
@@ -59,8 +62,24 @@ class ProductResource extends Resource
                         Forms\Components\FileUpload::make('image')
                             ->label('Основно изображение')
                             ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->directory('products')
-                            ->visibility('public'),
+                            ->disk('public')
+                            ->visibility('public')
+                            ->saveUploadedFileUsing(function (TemporaryUploadedFile $file, ?Product $record, Get $get): string {
+                                $product = $record ?? new Product;
+                                $product->slug = $product->slug ?: $get('slug');
+
+                                if (blank($product->slug)) {
+                                    throw \Illuminate\Validation\ValidationException::withMessages([
+                                        'image' => 'Първо попълнете slug, след това качете снимка.',
+                                    ]);
+                                }
+
+                                return app(ProductImageProcessor::class)->storeMain($product, $file);
+                            })
+                            ->deleteUploadedFileUsing(fn (?string $file) => app(ProductImageProcessor::class)->deleteVariants($file))
+                            ->helperText('JPG, PNG или WebP. Минимум 1024×1024 px. Запазват се автоматично като WebP.'),
                     ])
                     ->columns(2),
                 Forms\Components\Section::make('Цени')
@@ -125,7 +144,10 @@ class ProductResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
-                    ->label('Изображение'),
+                    ->label('Изображение')
+                    ->disk('public')
+                    ->visibility('public')
+                    ->getStateUsing(fn (Product $record): ?string => product_image_storage_path($record->image, 'small')),
                 Tables\Columns\TextColumn::make('name')
                     ->label('Име')
                     ->searchable()

@@ -19,6 +19,11 @@ class ProductResource extends JsonResource
             'base_price' => (float) $this->base_price,
             'old_price' => $this->old_price ? (float) $this->old_price : null,
             'image' => $this->image,
+            'image_urls' => [
+                'small' => product_image_url($this->image, product_image_tier_size('small')),
+                'medium' => product_image_url($this->image, product_image_tier_size('medium')),
+                'large' => product_image_url($this->image, product_image_tier_size('large')),
+            ],
             'is_active' => $this->is_active,
             'is_featured' => $this->is_featured,
             'is_promo' => $this->is_promo,

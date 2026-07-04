@@ -69,4 +69,9 @@ class Product extends Model
     {
         return $this->belongsToMany(LunchMenu::class, 'lunch_menu_product');
     }
+
+    public function imageUrl(int $size = 650): ?string
+    {
+        return product_image_url($this->image, $size);
+    }
 }
