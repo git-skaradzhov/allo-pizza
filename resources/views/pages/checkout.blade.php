@@ -4,7 +4,6 @@
     use App\Support\Seo\SeoBuilder;
 
     $seo = app(SeoBuilder::class)->forPrivatePage('Поръчка');
-@endphp
     $savedAddresses = auth()->user()?->customer?->addresses ?? collect();
 @endphp
 

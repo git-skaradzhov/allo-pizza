@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Redirect;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\Response;
 
 class HandleRedirects
@@ -12,6 +13,10 @@ class HandleRedirects
     public function handle(Request $request, Closure $next): Response
     {
         if (! in_array($request->method(), ['GET', 'HEAD'], true)) {
+            return $next($request);
+        }
+
+        if (! Schema::hasTable('redirects')) {
             return $next($request);
         }
 
