@@ -18,6 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('styles')
 </head>
 <body class="min-h-screen bg-stone-50 font-sans text-stone-900 antialiased">
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">

@@ -8,37 +8,110 @@
 @section('full')
     <div class="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-5">
         @php
-            $hero = $heroBanners->first();
-            $heroImage = public_media_url($hero?->image);
+            $isHeroCarousel = $heroBanners->count() > 1;
         @endphp
-        @if ($hero)
-            <section class="relative mb-5 overflow-hidden rounded-[1.5rem] shadow-soft sm:rounded-[2rem]">
-                <div class="relative aspect-[16/9] w-full sm:aspect-[21/8]">
-                    @if ($heroImage)
-                        <img src="{{ $heroImage }}" alt="{{ $hero->title }}"
-                             class="absolute inset-0 z-0 h-full w-full object-cover"
-                             loading="eager">
-                        <span class="absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-black/15 to-transparent"></span>
-                        <span class="absolute inset-x-0 bottom-0 z-10 h-2/5 bg-gradient-to-t from-black/45 to-transparent"></span>
-                    @else
-                        <span class="absolute inset-0 z-0 bg-gradient-to-br from-brand-600 via-brand-500 to-gold-500"></span>
-                    @endif
+        @if ($heroBanners->isNotEmpty())
+            <section class="relative mb-5 overflow-hidden rounded-[1.5rem] shadow-soft sm:rounded-[2rem]"
+                     @if ($isHeroCarousel) data-hero-carousel data-hero-interval="5000" @endif>
+                <div class="relative aspect-square w-full sm:aspect-[21/8]">
+                    @foreach ($heroBanners as $index => $hero)
+                        @php
+                            $heroImage = public_media_url($hero->image);
+                        @endphp
+                        <div @if ($isHeroCarousel)
+                                 data-hero-slide
+                                 class="absolute inset-0 {{ $index === 0 ? 'is-active' : '' }}"
+                                 aria-hidden="{{ $index === 0 ? 'false' : 'true' }}"
+                             @else
+                                 class="relative h-full w-full"
+                             @endif>
+                            @if ($heroImage)
+                                <img src="{{ $heroImage }}" alt="{{ $hero->title }}"
+                                     class="hero-slide-image absolute inset-0 z-0 h-full w-full object-cover"
+                                     loading="{{ $index === 0 ? 'eager' : 'lazy' }}">
+                                <span class="absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-black/15 to-transparent"></span>
+                                <span class="absolute inset-x-0 bottom-0 z-10 h-2/5 bg-gradient-to-t from-black/45 to-transparent"></span>
+                            @else
+                                <span class="absolute inset-0 z-0 bg-gradient-to-br from-brand-600 via-brand-500 to-gold-500"></span>
+                            @endif
 
-                    <div class="absolute inset-0 z-20 flex flex-col justify-end p-5 sm:p-8">
-                        <p class="text-sm font-bold uppercase tracking-wide text-gold-300">Allo! Pizza · Русе</p>
-                        <h1 class="mt-1 max-w-xl text-2xl font-black tracking-tight text-white sm:text-4xl">{{ $hero->title }}</h1>
-                        @if ($hero->subtitle)
-                            <p class="mt-2 max-w-lg text-sm text-white/90 sm:text-base">{{ $hero->subtitle }}</p>
-                        @endif
-                        @if ($hero->button_text)
-                            <a href="{{ $hero->button_url ?: route('menu') }}"
-                               class="mt-4 inline-flex w-fit rounded-full bg-white px-5 py-2.5 text-sm font-bold text-brand-700 shadow-soft transition hover:bg-gold-500 hover:text-brand-900">
-                                {{ $hero->button_text }}
-                            </a>
-                        @endif
-                    </div>
+                            <div class="hero-slide-overlay absolute inset-0 z-20 flex flex-col justify-end p-5 sm:p-8">
+                                <div @if ($isHeroCarousel) class="hero-slide-content max-w-xl" @else class="max-w-xl" @endif>
+                                    <p class="text-sm font-bold uppercase tracking-wide text-gold-300">Allo! Pizza · Русе</p>
+                                    <h1 class="mt-1 text-2xl font-black tracking-tight text-white sm:text-4xl">{{ $hero->title }}</h1>
+                                    @if ($hero->subtitle)
+                                        <p class="mt-2 max-w-lg text-sm text-white/90 sm:text-base">{{ $hero->subtitle }}</p>
+                                    @endif
+                                    @if ($hero->button_text)
+                                        <a href="{{ $hero->button_url ?: route('menu') }}"
+                                           class="mt-4 inline-flex w-fit rounded-full bg-white px-5 py-2.5 text-sm font-bold text-brand-700 shadow-soft transition hover:bg-gold-500 hover:text-brand-900">
+                                            {{ $hero->button_text }}
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
+
+                @if ($isHeroCarousel)
+                    @php
+                        $nextPeekImage = public_media_url($heroBanners->get(1)?->image);
+                    @endphp
+                    <div class="hero-peek absolute inset-y-0 right-0 z-[15] hidden w-7 overflow-hidden sm:block {{ $nextPeekImage ? '' : 'hidden' }}"
+                         data-hero-peek
+                         aria-hidden="true">
+                        <img src="{{ $nextPeekImage ?: '' }}"
+                             alt=""
+                             class="hero-peek-image h-full w-full object-cover"
+                             draggable="false">
+                    </div>
+
+                    <button type="button"
+                            class="absolute left-3 top-1/2 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/50 sm:flex sm:left-4"
+                            data-hero-prev
+                            aria-label="Предишен банер">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+                    <button type="button"
+                            class="absolute right-3 top-1/2 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/50 sm:flex sm:right-4"
+                            data-hero-next
+                            aria-label="Следващ банер">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+
+                    <div class="hero-carousel-dots absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/45 px-3 py-2 backdrop-blur-sm sm:gap-3 sm:px-4 sm:py-2.5"
+                         data-hero-dots
+                         role="tablist"
+                         aria-label="Hero банери">
+                        <div class="flex items-center gap-2">
+                            @foreach ($heroBanners as $index => $hero)
+                                <button type="button"
+                                        role="tab"
+                                        aria-label="Банер {{ $index + 1 }}: {{ $hero->title }}"
+                                        aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
+                                        data-hero-dot="{{ $index }}"
+                                        @if ($index === 0) class="is-active" @endif>
+                                </button>
+                            @endforeach
+                        </div>
+                        <span class="text-xs font-bold tabular-nums text-white/90" data-hero-counter>1 / {{ $heroBanners->count() }}</span>
+                    </div>
+                @endif
             </section>
+
+            @if ($isHeroCarousel)
+                @push('styles')
+                    <link rel="stylesheet" href="{{ asset('css/hero-carousel.css') }}">
+                @endpush
+                @push('scripts')
+                    <script src="{{ asset('js/hero-carousel.js') }}" defer></script>
+                @endpush
+            @endif
         @endif
 
         {{-- Delivery information strip --}}

@@ -1,0 +1,112 @@
+[data-hero-slide] {
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity 500ms ease;
+}
+
+[data-hero-slide].is-active {
+    opacity: 1;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+[data-hero-slide].is-entering-forward {
+    animation: hero-enter-forward 650ms ease forwards;
+}
+
+[data-hero-slide].is-entering-backward {
+    animation: hero-enter-backward 650ms ease forwards;
+}
+
+@keyframes hero-enter-forward {
+    from {
+        opacity: 0;
+        transform: translateX(1.25rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes hero-enter-backward {
+    from {
+        opacity: 0;
+        transform: translateX(-1.25rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+[data-hero-dot] {
+    display: block;
+    height: 0.375rem;
+    width: 1.5rem;
+    border-radius: 9999px;
+    background-color: rgba(255, 255, 255, 0.8);
+    transition: width 300ms ease, background-color 300ms ease, opacity 300ms ease;
+}
+
+[data-hero-dot]:hover {
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+[data-hero-dot].is-active,
+[data-hero-dot][aria-selected='true'] {
+    width: 2.5rem;
+    background-color: #fff;
+}
+
+.hero-peek {
+    pointer-events: none;
+    box-shadow: inset 4px 0 12px rgba(0, 0, 0, 0.25);
+}
+
+.hero-peek-image {
+    object-position: left center;
+    transform: scale(1.15);
+}
+
+@media (min-width: 640px) {
+    [data-hero-carousel] .hero-slide-overlay {
+        padding-bottom: 4.5rem;
+    }
+}
+
+@media (max-width: 639px) {
+    [data-hero-dot] {
+        height: 0.3125rem;
+        width: 1.125rem;
+    }
+
+    [data-hero-dot].is-active,
+    [data-hero-dot][aria-selected='true'] {
+        width: 2rem;
+    }
+
+    [data-hero-carousel] {
+        touch-action: pan-y pinch-zoom;
+    }
+
+    [data-hero-carousel] .hero-slide-overlay {
+        padding-bottom: 4.25rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-hero-slide],
+    [data-hero-dot] {
+        transition: none;
+        animation: none;
+    }
+
+    [data-hero-slide].is-active {
+        opacity: 1;
+        transform: none;
+    }
+}
