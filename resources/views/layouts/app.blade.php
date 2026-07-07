@@ -5,22 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <x-seo-meta
-        :title="$seoTitle ?? config('app.name', 'Allo! Pizza')"
-        :description="$seoDescription ?? null"
-        :image="$seoImage ?? null"
-        :canonical="$seoCanonical ?? null"
-    />
+    <x-seo-meta :seo="$seo ?? null" />
+    <x-analytics />
+    <x-structured-data :graphs="$structuredData ?? []" />
 
     <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
 <body class="min-h-screen bg-stone-50 font-sans text-stone-900 antialiased">
+    <a href="#main-content"
+       class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-brand-500 focus:px-4 focus:py-2 focus:text-white">
+        Към съдържанието
+    </a>
+
+    @if (! empty($storeSetting->google_tag_manager_id))
+        <noscript>
+            <iframe src="https://www.googletagmanager.com/ns.html?id={{ $storeSetting->google_tag_manager_id }}"
+                    height="0" width="0" style="display:none;visibility:hidden" title="Google Tag Manager"></iframe>
+        </noscript>
+    @endif
+
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">
         <div class="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3">
             <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2">
@@ -107,7 +117,7 @@
     @hasSection('full')
         @yield('full')
     @else
-        <main class="mx-auto max-w-7xl px-3 py-6 sm:px-4 sm:py-8">
+        <main id="main-content" class="mx-auto max-w-7xl px-3 py-6 sm:px-4 sm:py-8">
             @yield('content')
         </main>
     @endif

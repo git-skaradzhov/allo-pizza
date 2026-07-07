@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Forms\SeoFormSection;
 use App\Filament\Resources\PageResource\Pages;
 use App\Models\Page;
 use Filament\Forms;
@@ -74,19 +75,7 @@ class PageResource extends Resource
                             ->label('Активна')
                             ->default(true),
                     ]),
-                Forms\Components\Section::make('SEO')
-                    ->schema([
-                        Forms\Components\TextInput::make('seo_title')
-                            ->label('SEO заглавие')
-                            ->maxLength(255)
-                            ->helperText('Заглавието в Google и споделянията в социални мрежи.'),
-                        Forms\Components\Textarea::make('seo_description')
-                            ->label('SEO описание')
-                            ->rows(3)
-                            ->columnSpanFull()
-                            ->helperText('Кратко описание до ~160 символа.'),
-                    ])
-                    ->columns(2),
+                SeoFormSection::make(false),
             ]);
     }
 

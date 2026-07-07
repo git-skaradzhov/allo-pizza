@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Forms\SeoFormSection;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
@@ -80,6 +81,10 @@ class ProductResource extends Resource
                             })
                             ->deleteUploadedFileUsing(fn (?string $file) => app(ProductImageProcessor::class)->deleteVariants($file))
                             ->helperText('JPG, PNG или WebP. Минимум 1024×1024 px. Запазват се автоматично като WebP.'),
+                        Forms\Components\TextInput::make('image_alt')
+                            ->label('Alt текст на изображението')
+                            ->maxLength(255)
+                            ->helperText('Описание за достъпност и SEO. Оставете празно за името на продукта.'),
                     ])
                     ->columns(2),
                 Forms\Components\Section::make('Цени')
@@ -125,18 +130,7 @@ class ProductResource extends Resource
                             ->searchable()
                             ->columnSpanFull(),
                     ]),
-                Forms\Components\Section::make('SEO')
-                    ->schema([
-                        Forms\Components\TextInput::make('seo_title')
-                            ->label('SEO заглавие')
-                            ->maxLength(255),
-                        Forms\Components\Textarea::make('seo_description')
-                            ->label('SEO описание')
-                            ->rows(2)
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(2)
-                    ->collapsed(),
+                SeoFormSection::make(),
             ]);
     }
 

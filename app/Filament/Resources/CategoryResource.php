@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Forms\SeoFormSection;
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Models\Category;
 use Filament\Forms;
@@ -60,18 +61,7 @@ class CategoryResource extends Resource
                             ->default(0),
                     ])
                     ->columns(2),
-                Forms\Components\Section::make('SEO')
-                    ->schema([
-                        Forms\Components\TextInput::make('seo_title')
-                            ->label('SEO заглавие')
-                            ->maxLength(255),
-                        Forms\Components\Textarea::make('seo_description')
-                            ->label('SEO описание')
-                            ->rows(2)
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(2)
-                    ->collapsed(),
+                SeoFormSection::make(),
             ]);
     }
 

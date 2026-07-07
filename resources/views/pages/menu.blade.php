@@ -1,12 +1,13 @@
 @extends('layouts.app')
 
 @php
-    $seoTitle = 'Меню | Allo! Pizza';
-    $seoDescription = 'Разгледайте пълното меню с пици, паста, салати и напитки.';
+    use App\Support\Seo\SeoBuilder;
+
+    $seo = app(SeoBuilder::class)->forMenu();
 @endphp
 
 @section('full')
-    <div class="mx-auto max-w-7xl px-3 py-5 sm:px-4 sm:py-6">
+    <div id="main-content" class="mx-auto max-w-7xl px-3 py-5 sm:px-4 sm:py-6">
         <x-breadcrumbs :items="[
             ['label' => 'Начало', 'url' => route('home')],
             ['label' => 'Меню'],

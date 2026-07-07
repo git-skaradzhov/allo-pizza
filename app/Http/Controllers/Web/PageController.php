@@ -16,10 +16,6 @@ class PageController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
 
-        $seoImage = $page->featured_image
-            ? Storage::url($page->featured_image)
-            : null;
-
         $galleryImages = $slug === 'kontakti'
             ? collect(config('store-gallery.contacts', []))
                 ->map(fn (string $path) => Storage::url($path))
@@ -27,6 +23,6 @@ class PageController extends Controller
                 ->all()
             : [];
 
-        return view('pages.page', compact('page', 'seoImage', 'galleryImages'));
+        return view('pages.page', compact('page', 'galleryImages'));
     }
 }

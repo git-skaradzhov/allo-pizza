@@ -3,6 +3,21 @@
 use App\Support\Money;
 use Illuminate\Support\Facades\Storage;
 
+if (! function_exists('absolute_url')) {
+    function absolute_url(?string $url): ?string
+    {
+        if (! is_string($url) || $url === '') {
+            return null;
+        }
+
+        if (str_starts_with($url, 'http://') || str_starts_with($url, 'https://')) {
+            return $url;
+        }
+
+        return url($url);
+    }
+}
+
 if (! function_exists('money')) {
     function money(float|int|string|null $amount, ?int $decimals = null): string
     {

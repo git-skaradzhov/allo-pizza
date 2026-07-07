@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
-@php $seoTitle = 'Потвърждение на имейл | Allo! Pizza'; @endphp
+@php
+    use App\Support\Seo\SeoBuilder;
+
+    $seo = app(SeoBuilder::class)->forPrivatePage('Потвърждение на имейл');
+@endphp
 
 @section('content')
     <div class="mx-auto max-w-md">

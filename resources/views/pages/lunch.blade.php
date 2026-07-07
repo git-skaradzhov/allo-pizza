@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @php
-    use Illuminate\Support\Facades\Storage;
+    use App\Support\Seo\SeoBuilder;
 
     $pageTitle = $page?->title ?? 'Обедно меню';
-    $seoTitle = $page?->seo_title ?? ($pageTitle.' | Allo! Pizza');
-    $seoDescription = $page?->seo_description ?? 'Специални обедни предложения с пица, пърленки, салати и напитки на промо цена.';
+    $seo = app(SeoBuilder::class)->forLunch($page);
+@endphp
 
     $dayLabels = [
         1 => 'Пон',

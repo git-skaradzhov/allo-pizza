@@ -1,5 +1,11 @@
 @extends('layouts.app')
 
+@php
+    use App\Support\Seo\SeoBuilder;
+
+    $seo = app(SeoBuilder::class)->forPrivatePage('Забравена парола');
+@endphp
+
 @section('content')
     <div class="mx-auto max-w-md">
         <h1 class="mb-6 text-center text-3xl font-bold">Забравена парола</h1>
@@ -30,6 +36,3 @@
     </div>
 @endsection
 
-@php
-    $seoTitle = 'Забравена парола | Allo! Pizza';
-@endphp

@@ -1,9 +1,10 @@
 @extends('layouts.app')
 
 @php
+    use App\Support\Seo\SeoBuilder;
     use Illuminate\Support\Facades\Storage;
 
-    $seoTitle = 'Количка | Allo! Pizza';
+    $seo = app(SeoBuilder::class)->forPrivatePage('Количка');
     $belowMinimum = $subtotal > 0 && $subtotal < (float) $settings->minimum_order_amount;
 @endphp
 

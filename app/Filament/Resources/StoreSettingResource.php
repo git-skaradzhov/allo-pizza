@@ -118,6 +118,48 @@ class StoreSettingResource extends Resource
                             ->rows(3)
                             ->columnSpanFull(),
                     ]),
+                Forms\Components\Section::make('SEO и аналитика')
+                    ->schema([
+                        Forms\Components\TextInput::make('seo_title_suffix')
+                            ->label('Суфикс на заглавията')
+                            ->default('| Allo! Pizza')
+                            ->maxLength(255),
+                        Forms\Components\Textarea::make('seo_default_description')
+                            ->label('Стандартно meta описание')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                        Forms\Components\FileUpload::make('seo_default_image')
+                            ->label('Стандартно OG изображение')
+                            ->image()
+                            ->directory('seo')
+                            ->disk('public')
+                            ->visibility('public'),
+                        Forms\Components\Textarea::make('organization_description')
+                            ->label('Описание на организацията')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                        Forms\Components\FileUpload::make('organization_logo')
+                            ->label('Лого за schema.org')
+                            ->image()
+                            ->directory('seo')
+                            ->disk('public')
+                            ->visibility('public'),
+                        Forms\Components\TextInput::make('google_analytics_id')
+                            ->label('Google Analytics 4 ID')
+                            ->placeholder('G-XXXXXXXXXX'),
+                        Forms\Components\TextInput::make('google_tag_manager_id')
+                            ->label('Google Tag Manager ID')
+                            ->placeholder('GTM-XXXXXXX'),
+                        Forms\Components\TextInput::make('google_site_verification')
+                            ->label('Google Search Console verification'),
+                        Forms\Components\TextInput::make('bing_site_verification')
+                            ->label('Bing Webmaster verification'),
+                        Forms\Components\TextInput::make('meta_pixel_id')
+                            ->label('Meta Pixel ID')
+                            ->placeholder('Meta Pixel placeholder'),
+                    ])
+                    ->columns(2)
+                    ->collapsed(),
             ]);
     }
 

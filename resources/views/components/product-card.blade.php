@@ -43,7 +43,7 @@
 
             <div class="flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border border-stone-100 bg-white sm:rounded-3xl">
                 @if ($image)
-                    <img src="{{ $image }}" alt="{{ $product->name }}" loading="lazy"
+                    <img src="{{ $image }}" alt="{{ $product->image_alt ?: $product->name }}" loading="lazy"
                          class="h-full w-full object-contain p-2 transition duration-300 group-hover:scale-105 sm:p-3">
                 @else
                     <span class="text-5xl sm:text-6xl">{{ $fallbackIcon }}</span>

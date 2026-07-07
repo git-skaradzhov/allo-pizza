@@ -1,14 +1,17 @@
 @extends('layouts.app')
 
 @php
-    use Illuminate\Support\Facades\Storage;
+    use App\Support\Seo\SeoBuilder;
 
-    $seoTitle = $page->seo_title ?? ($page->title.' | Allo! Pizza');
-    $seoDescription = $page->seo_description;
-    $featuredImage = $page->featured_image ? Storage::url($page->featured_image) : null;
+    $seo = app(SeoBuilder::class)->forPage($page, route('pages.show', $page->slug));
 @endphp
 
 @section('content')
+    @php
+        use Illuminate\Support\Facades\Storage;
+
+        $featuredImage = $page->featured_image ? Storage::url($page->featured_image) : null;
+    @endphp
     <x-breadcrumbs :items="[
         ['label' => 'Начало', 'url' => route('home')],
         ['label' => $page->title],

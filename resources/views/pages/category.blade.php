@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @php
-    $seoTitle = ($category->seo_title ?? $category->name).' | Allo! Pizza';
-    $seoDescription = $category->seo_description ?? $category->description;
+    use App\Support\Seo\SeoBuilder;
+
+    $seo = app(SeoBuilder::class)->forCategory($category);
 @endphp
 
 @section('content')

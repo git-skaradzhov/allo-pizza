@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @php
-    $seoTitle = ($product->seo_title ?? $product->name).' | Allo! Pizza';
-    $seoDescription = $product->seo_description ?? $product->short_description;
+    use App\Support\Seo\SeoBuilder;
+
+    $seo = app(SeoBuilder::class)->forProduct($product);
     $galleryPaths = collect([$product->image])
         ->merge($product->images->pluck('image'))
         ->filter()
@@ -33,7 +34,7 @@
                             class="group relative flex aspect-square w-full cursor-zoom-in items-center justify-center overflow-hidden rounded-3xl border border-stone-100 bg-white">
                         <img data-gallery-main-image
                              src="{{ $galleryDisplayUrls->first() }}"
-                             alt="{{ $product->name }}"
+                             alt="{{ $product->image_alt ?: $product->name }}"
                              class="h-full w-full object-contain p-4 transition duration-300 group-hover:scale-[1.02] sm:p-6">
                         <span class="pointer-events-none absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">

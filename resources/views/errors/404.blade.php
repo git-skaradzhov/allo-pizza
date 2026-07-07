@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @php
-    $seoTitle = '404 | Allo! Pizza';
-    $seoDescription = 'Тази страница се е изплъзнала като парче пица от кутията.';
+    use App\Support\Seo\SeoBuilder;
+
+    $seo = app(SeoBuilder::class)->forNotFound();
     $redirectAfterSeconds = 10;
 @endphp
 

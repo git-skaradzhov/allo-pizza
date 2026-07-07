@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
+use App\Concerns\HasSeoFields;
+use App\Contracts\SeoMeta;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Product extends Model
+class Product extends Model implements SeoMeta
 {
     use HasFactory;
+    use HasSeoFields;
 
     protected $fillable = [
         'category_id',
@@ -21,6 +24,7 @@ class Product extends Model
         'base_price',
         'old_price',
         'image',
+        'image_alt',
         'is_active',
         'is_featured',
         'is_promo',
@@ -29,6 +33,15 @@ class Product extends Model
         'sort_order',
         'seo_title',
         'seo_description',
+        'canonical_url',
+        'meta_robots',
+        'og_title',
+        'og_description',
+        'og_image',
+        'twitter_title',
+        'twitter_description',
+        'twitter_image',
+        'focus_keyword',
     ];
 
     protected function casts(): array

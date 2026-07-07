@@ -1,5 +1,11 @@
 @extends('layouts.app')
 
+@php
+    use App\Support\Seo\SeoBuilder;
+
+    $seo = app(SeoBuilder::class)->forPrivatePage('Моите поръчки');
+@endphp
+
 @section('content')
     <x-breadcrumbs :items="[
         ['label' => 'Начало', 'url' => route('home')],
@@ -34,6 +40,3 @@
     @endif
 @endsection
 
-@php
-    $seoTitle = 'Моите поръчки | Allo! Pizza';
-@endphp

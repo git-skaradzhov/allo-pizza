@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Web\RobotsController;
+use App\Http\Controllers\Web\SitemapController;
 use App\Http\Controllers\Web\AccountController;
 use App\Http\Controllers\Web\CartController;
 use App\Http\Controllers\Web\CategoryController;
@@ -13,6 +15,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [RobotsController::class, 'index'])->name('robots');
 Route::get('/media/{path}', function (string $path) {
     abort_unless(Storage::disk('public')->exists($path), 404);
 

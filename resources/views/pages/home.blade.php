@@ -1,12 +1,19 @@
 @extends('layouts.app')
 
 @php
-    $seoTitle = 'Allo! Pizza – Поръчай пица онлайн';
-    $seoDescription = 'Свежа пица с доставка до 30 минути. Поръчай онлайн от Allo! Pizza.';
+    use App\Support\Seo\SeoBuilder;
+
+    $pageHeading = 'Allo! Pizza – Поръчай пица онлайн';
+    $seo = app(SeoBuilder::class)->forHome($homeInfoPage);
 @endphp
 
 @section('full')
-    <div class="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-5">
+    <div id="main-content" class="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-5">
+        <h1 @class([
+            'font-extrabold tracking-tight',
+            'sr-only' => $heroBanners->isNotEmpty(),
+            'mb-5 text-3xl' => $heroBanners->isEmpty(),
+        ])>{{ $pageHeading }}</h1>
         @php
             $isHeroCarousel = $heroBanners->count() > 1;
         @endphp
@@ -38,7 +45,7 @@
                             <div class="hero-slide-overlay absolute inset-0 z-20 flex flex-col justify-end p-5 sm:p-8">
                                 <div @if ($isHeroCarousel) class="hero-slide-content max-w-xl" @else class="max-w-xl" @endif>
                                     <p class="text-sm font-bold uppercase tracking-wide text-gold-300">Allo! Pizza · Русе</p>
-                                    <h1 class="mt-1 text-2xl font-black tracking-tight text-white sm:text-4xl">{{ $hero->title }}</h1>
+                                    <p class="mt-1 text-2xl font-black tracking-tight text-white sm:text-4xl">{{ $hero->title }}</p>
                                     @if ($hero->subtitle)
                                         <p class="mt-2 max-w-lg text-sm text-white/90 sm:text-base">{{ $hero->subtitle }}</p>
                                     @endif

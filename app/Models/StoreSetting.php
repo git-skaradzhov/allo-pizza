@@ -27,6 +27,16 @@ class StoreSetting extends Model
         'average_delivery_time',
         'is_store_open',
         'closed_message',
+        'seo_title_suffix',
+        'seo_default_description',
+        'seo_default_image',
+        'organization_description',
+        'organization_logo',
+        'google_analytics_id',
+        'google_tag_manager_id',
+        'google_site_verification',
+        'bing_site_verification',
+        'meta_pixel_id',
     ];
 
     protected function casts(): array
