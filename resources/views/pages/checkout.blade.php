@@ -18,7 +18,7 @@
 
     @unless ($isOpen)
         <div class="mb-6 rounded-2xl bg-gold-500/10 px-4 py-3 text-brand-700">
-            {{ $settings->closed_message ?? 'В момента не приемаме поръчки.' }}
+            {{ app(\App\Services\StoreService::class)->ordersClosedMessage() }}
         </div>
     @endunless
 

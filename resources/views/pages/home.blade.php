@@ -189,8 +189,7 @@
             ];
         @endphp
 
-        @if ($smallBanners->isNotEmpty())
-            <section class="mb-7" data-horizontal-slider>
+        <section class="mb-7" data-horizontal-slider>
                 <div class="flex items-center sm:gap-3">
                     <button type="button"
                             class="hidden h-12 w-7 shrink-0 items-center justify-center text-brand-500 transition hover:text-brand-600 disabled:pointer-events-none disabled:opacity-0 sm:flex"
@@ -204,6 +203,7 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex cursor-grab snap-x snap-mandatory gap-3 overflow-x-auto pb-2 scroll-smooth [scrollbar-width:none] sm:gap-4 [&::-webkit-scrollbar]:hidden"
                              data-slider-track>
+                            <x-working-hours-summary />
                             @foreach ($smallBanners as $index => $banner)
                                 @php
                                     $bannerImage = public_media_url($banner->image);
@@ -263,7 +263,6 @@
                     </button>
                 </div>
             </section>
-        @endif
 
         {{-- Category navigation --}}
         @if ($menuCategories->isNotEmpty())

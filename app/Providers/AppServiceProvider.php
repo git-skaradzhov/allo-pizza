@@ -35,28 +35,41 @@ class AppServiceProvider extends ServiceProvider
         Product::observe(ProductObserver::class);
         ProductImage::observe(ProductImageObserver::class);
 
-        View::composer('layouts.app', function ($view) {
+        View::composer([
+            'layouts.app',
+            'pages.*',
+            'errors.*',
+            'auth.*',
+            'account.*',
+        ], function ($view) {
             $settings = StoreSetting::current();
             $data = $view->getData();
+            $storeService = app(StoreService::class);
 
-            $seo = $data['seo'] ?? null;
-            $seoBuilder = app(SeoBuilder::class);
+            $shared = [
+                'storeSetting' => $settings,
+                'storeIsOpen' => $storeService->isOpen(),
+                'isOpen' => $storeService->isOpen(),
+                'workingHoursMessage' => $storeService->workingHoursMessage(),
+                'weeklyWorkingHoursSummary' => $storeService->weeklyScheduleSummary(),
+                'cartCount' => app(CartService::class)->itemCount(),
+            ];
 
-            if (! $seo instanceof SeoData) {
-                $seo = $seoBuilder->fromLegacyViewData($data);
-            } else {
-                $seo = $seoBuilder->finalize($seo);
+            if ($view->name() === 'layouts.app') {
+                $seo = $data['seo'] ?? null;
+                $seoBuilder = app(SeoBuilder::class);
+
+                if (! $seo instanceof SeoData) {
+                    $seo = $seoBuilder->fromLegacyViewData($data);
+                } else {
+                    $seo = $seoBuilder->finalize($seo);
+                }
+
+                $shared['seo'] = $seo;
+                $shared['structuredData'] = app(StructuredDataGenerator::class)->generate($seo);
             }
 
-            $structuredData = app(StructuredDataGenerator::class)->generate($seo);
-
-            $view->with([
-                'storeSetting' => $settings,
-                'storeIsOpen' => app(StoreService::class)->isOpen(),
-                'cartCount' => app(CartService::class)->itemCount(),
-                'seo' => $seo,
-                'structuredData' => $structuredData,
-            ]);
+            $view->with($shared);
         });
     }
 }

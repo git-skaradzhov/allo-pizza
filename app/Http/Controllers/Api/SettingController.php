@@ -19,6 +19,7 @@ class SettingController extends Controller
             'settings' => new StoreSettingResource($this->storeService->settings()),
             'is_open' => $this->storeService->isOpen(),
             'working_hours_message' => $this->storeService->workingHoursMessage(),
+            'weekly_schedule_summary' => $this->storeService->weeklyScheduleSummary(),
         ]);
     }
 }

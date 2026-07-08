@@ -30,7 +30,7 @@ class StoreSettingSeeder extends Seeder
             'minimum_order_amount' => Money::fromBgn(15.00),
             'average_delivery_time' => 30,
             'is_store_open' => true,
-            'closed_message' => 'В момента не приемаме поръчки. Работно време: 09:00 – 21:00 ч., неделя почивен ден.',
+            'closed_message' => null,
         ])->save();
     }
 }

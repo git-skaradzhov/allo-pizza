@@ -115,6 +115,7 @@ class StoreSettingResource extends Resource
                             ->default(true),
                         Forms\Components\Textarea::make('closed_message')
                             ->label('Съобщение при затворен магазин')
+                            ->helperText('Оставете празно за автоматично съобщение с динамично работно време от настройките.')
                             ->rows(3)
                             ->columnSpanFull(),
                     ]),

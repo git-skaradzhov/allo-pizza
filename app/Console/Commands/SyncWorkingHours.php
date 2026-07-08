@@ -1,13 +1,17 @@
 <?php
 
-namespace Database\Seeders;
+namespace App\Console\Commands;
 
 use App\Models\WorkingHour;
-use Illuminate\Database\Seeder;
+use Illuminate\Console\Command;
 
-class WorkingHourSeeder extends Seeder
+class SyncWorkingHours extends Command
 {
-    public function run(): void
+    protected $signature = 'store:sync-hours';
+
+    protected $description = 'Синхронизира работното време: Пон–Съб 09:00–21:00, неделя затворена';
+
+    public function handle(): int
     {
         $schedule = [
             1 => ['opens_at' => '09:00:00', 'closes_at' => '21:00:00', 'is_closed' => false],
@@ -22,8 +26,12 @@ class WorkingHourSeeder extends Seeder
         foreach ($schedule as $dayOfWeek => $hours) {
             WorkingHour::query()->updateOrCreate(
                 ['day_of_week' => $dayOfWeek],
-                $hours
+                $hours,
             );
         }
+
+        $this->info('Работното време е синхронизирано: Понеделник – Събота 09:00–21:00, неделя затворена.');
+
+        return self::SUCCESS;
     }
 }

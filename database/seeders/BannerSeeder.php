@@ -18,6 +18,11 @@ class BannerSeeder extends Seeder
             ])
             ->update(['is_active' => false]);
 
+        Banner::query()
+            ->where('title', 'Работно време')
+            ->where('position', BannerPosition::HomeSmallCards)
+            ->update(['is_active' => false]);
+
         $banners = [
             [
                 'title' => 'Топла пица до вратата',
@@ -69,7 +74,7 @@ class BannerSeeder extends Seeder
             ],
             [
                 'title' => 'Обедно меню',
-                'subtitle' => 'Пица, салата или пърленка от 11:00 до 15:00.',
+                'subtitle' => 'Пица, салата или пърленка от 12:00 до 16:00.',
                 'button_text' => 'Виж обедното меню',
                 'button_url' => '/obedno-menyu',
                 'position' => BannerPosition::LunchSection,

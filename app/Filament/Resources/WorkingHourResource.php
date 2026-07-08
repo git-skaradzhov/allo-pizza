@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\WorkingHourResource\Pages;
 use App\Models\WorkingHour;
+use App\Support\DayOfWeek;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -24,15 +25,7 @@ class WorkingHourResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static array $daysOfWeek = [
-        0 => 'Неделя',
-        1 => 'Понеделник',
-        2 => 'Вторник',
-        3 => 'Сряда',
-        4 => 'Четвъртък',
-        5 => 'Петък',
-        6 => 'Събота',
-    ];
+    protected static array $daysOfWeek = DayOfWeek::ISO_LABELS;
 
     public static function form(Form $form): Form
     {
@@ -42,9 +35,10 @@ class WorkingHourResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('day_of_week')
                             ->label('Ден от седмицата')
-                            ->options(static::$daysOfWeek)
+                            ->options(DayOfWeek::isoOptions())
                             ->required()
-                            ->native(false),
+                            ->native(false)
+                            ->helperText('Използва се ISO формат: 1 = понеделник, 7 = неделя.'),
                         Forms\Components\TimePicker::make('opens_at')
                             ->label('Отваря')
                             ->seconds(false),
