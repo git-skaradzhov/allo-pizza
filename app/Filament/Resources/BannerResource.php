@@ -39,14 +39,24 @@ class BannerResource extends Resource
                             ->label('Подзаглавие')
                             ->maxLength(255),
                         Forms\Components\FileUpload::make('image')
-                            ->label('Изображение')
+                            ->label(fn (Forms\Get $get): string => $get('position') === BannerPosition::HomeHero->value
+                                ? 'Изображение (десктоп)'
+                                : 'Изображение')
                             ->image()
                             ->disk('public')
                             ->directory('banners')
                             ->helperText(fn (Forms\Get $get): string => $get('position') === BannerPosition::HomeHero->value
-                                ? 'Препоръчителен размер: 2100×800 px (21:8). Изображението запълва целия банер без празно пространство.'
+                                ? 'Препоръчителен размер: 2100×800 px (21:8).'
                                 : 'По желание. Ако липсва, началната страница показва цветна промо карта.')
                             ->visibility('public'),
+                        Forms\Components\FileUpload::make('mobile_image')
+                            ->label('Изображение (мобилен)')
+                            ->image()
+                            ->disk('public')
+                            ->directory('banners')
+                            ->helperText('650×650 px (1:1). По желание — ако липсва, се ползва десктопното.')
+                            ->visibility('public')
+                            ->visible(fn (Forms\Get $get): bool => $get('position') === BannerPosition::HomeHero->value),
                         Forms\Components\Toggle::make('image_only')
                             ->label('Само изображение')
                             ->helperText('Скрива текста и градиента върху hero банера. Използвай, когато текстът е вграден в самото изображение.')

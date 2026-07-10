@@ -14,6 +14,7 @@ class Banner extends Model
         'title',
         'subtitle',
         'image',
+        'mobile_image',
         'image_only',
         'button_text',
         'button_url',

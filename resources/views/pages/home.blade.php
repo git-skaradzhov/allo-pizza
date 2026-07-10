@@ -28,7 +28,8 @@
             ])>
                     @foreach ($heroBanners as $index => $hero)
                         @php
-                            $heroImage = public_media_url($hero->image);
+                            $heroDesktopImage = public_media_url($hero->image);
+                            $heroMobileImage = public_media_url($hero->mobile_image ?? null) ?: $heroDesktopImage;
                             $heroLink = $hero->button_url ?: ($hero->button_text ? route('menu') : null);
                         @endphp
                         <div @if ($isHeroCarousel)
@@ -45,11 +46,16 @@
                                     <span class="sr-only">{{ $hero->button_text ?: $hero->title }}</span>
                                 </a>
                             @endif
-                            @if ($heroImage)
-                                <img src="{{ $heroImage }}" alt="{{ $hero->title }}"
-                                     class="hero-slide-image"
-                                     loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
-                                     decoding="async">
+                            @if ($heroDesktopImage || $heroMobileImage)
+                                <picture class="hero-slide-picture">
+                                    @if ($heroDesktopImage)
+                                        <source media="(min-width: 640px)" srcset="{{ $heroDesktopImage }}">
+                                    @endif
+                                    <img src="{{ $heroMobileImage ?: $heroDesktopImage }}" alt="{{ $hero->title }}"
+                                         class="hero-slide-image"
+                                         loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                         decoding="async">
+                                </picture>
                                 @unless ($hero->image_only ?? false)
                                     <span class="absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-black/15 to-transparent"></span>
                                     <span class="absolute inset-x-0 bottom-0 z-10 h-2/5 bg-gradient-to-t from-black/45 to-transparent"></span>
