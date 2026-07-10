@@ -1,0 +1,72 @@
+/* Dark theme — само за страницата /novo-v-menuto */
+
+/* --- Тъмен хедър (само на тази страница) --- */
+.nm-dark-page header {
+    background-color: rgba(12, 12, 12, 0.95) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.nm-dark-page header .text-stone-700 {
+    color: #ededed !important;
+}
+
+.nm-dark-page header .text-stone-500 {
+    color: #9ca3af !important;
+}
+
+.nm-dark-page header .text-brand-700 {
+    color: #ff6166 !important;
+}
+
+.nm-dark-page header .bg-white {
+    background-color: transparent !important;
+}
+
+.nm-dark-page header .hover\:bg-stone-100:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.nm-dark-page header .hover\:bg-brand-50:hover {
+    background-color: rgba(235, 28, 34, 0.15) !important;
+}
+
+/* --- Секция --- */
+.new-menu-dark {
+    --nm-red: #eb1c22;
+    --nm-red-glow: rgba(235, 28, 34, 0.45);
+    background-color: #0a0a0a;
+    color: #f5f5f5;
+    margin-top: -1px;
+}
+
+.new-menu-dark::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 15% 8%, rgba(235, 28, 34, 0.14) 0%, transparent 35%),
+        radial-gradient(circle at 85% 18%, rgba(255, 203, 8, 0.05) 0%, transparent 30%),
+        radial-gradient(circle at 50% 85%, rgba(235, 28, 34, 0.08) 0%, transparent 42%);
+}
+
+.new-menu-dark > * {
+    position: relative;
+    z-index: 1;
+}
+
+.new-menu-hero__brush {
+    display: block;
+    height: 0.5em;
+    margin: -0.1em 0 0.05em;
+    max-width: 13rem;
+    border-radius: 0.15em;
+    background: linear-gradient(90deg, #eb1c22 0%, #c5171c 55%, rgba(235, 28, 34, 0.15) 100%);
+    transform: skewX(-8deg);
+    box-shadow: 0 0 28px var(--nm-red-glow);
+}
+
+.new-menu-footer-bar {
+    background: linear-gradient(180deg, #161616 0%, #101010 100%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}

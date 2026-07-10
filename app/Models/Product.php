@@ -86,8 +86,7 @@ class Product extends Model implements SeoMeta
     public function newMenuHighlights(): BelongsToMany
     {
         return $this->belongsToMany(NewMenuHighlight::class, 'new_menu_highlight_product')
-            ->withPivot('sort_order')
-            ->orderByPivot('sort_order');
+            ->withPivot('sort_order');
     }
 
     public function imageUrl(int $size = 650): ?string

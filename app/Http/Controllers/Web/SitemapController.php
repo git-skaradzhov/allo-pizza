@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\NewMenuHighlight;
 use App\Models\Page;
 use App\Models\Product;
 use Illuminate\Http\Response;
@@ -17,6 +18,10 @@ class SitemapController extends Controller
             $this->entry(route('menu'), now(), 'weekly', config('seo.sitemap.menu_priority')),
             $this->entry(route('lunch.index'), now(), 'weekly', config('seo.sitemap.lunch_priority')),
         ]);
+
+        if (NewMenuHighlight::isPublished()) {
+            $urls->push($this->entry(route('new-menu.index'), now(), 'weekly', config('seo.sitemap.menu_priority')));
+        }
 
         Category::query()
             ->where('is_active', true)
@@ -55,7 +60,7 @@ class SitemapController extends Controller
 
         Page::query()
             ->where('is_active', true)
-            ->whereNotIn('slug', ['home-info', 'obedno-menyu'])
+            ->whereNotIn('slug', ['home-info', 'obedno-menyu', 'novo-v-menuto'])
             ->orderBy('updated_at', 'desc')
             ->get(['slug', 'updated_at'])
             ->each(fn (Page $page) => $urls->push(

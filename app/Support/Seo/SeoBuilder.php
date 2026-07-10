@@ -120,6 +120,25 @@ class SeoBuilder
         );
     }
 
+    public function forNewMenu(?Page $page, ?\App\Models\NewMenuHighlight $highlight = null): SeoData
+    {
+        $pageTitle = $page?->title ?? $highlight?->title ?? 'Ново в менюто';
+
+        return $this->fromEntity(
+            entity: $page,
+            defaultTitle: $pageTitle,
+            defaultDescription: $highlight?->description ?? 'Открийте най-новите предложения в менюто на Allo! Pizza.',
+            canonical: route('new-menu.index'),
+            imagePath: $page?->featured_image,
+            pageType: 'webpage',
+            breadcrumbs: [
+                ['label' => 'Начало', 'url' => route('home')],
+                ['label' => $pageTitle],
+            ],
+            context: ['page' => $page],
+        );
+    }
+
     public function forPrivatePage(string $title, ?string $description = null): SeoData
     {
         return $this->make([

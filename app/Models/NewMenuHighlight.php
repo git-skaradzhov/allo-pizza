@@ -29,8 +29,7 @@ class NewMenuHighlight extends Model
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'new_menu_highlight_product')
-            ->withPivot('sort_order')
-            ->orderByPivot('sort_order');
+            ->withPivot('sort_order');
     }
 
     public function visibleProducts(): Collection
@@ -38,14 +37,21 @@ class NewMenuHighlight extends Model
         return $this->products()
             ->where('products.is_active', true)
             ->with('variants')
+            ->orderByPivot('sort_order')
             ->get();
     }
 
     public static function isPublished(): bool
     {
         return static::query()
-            ->where('is_active', true)
-            ->whereHas('products', fn ($query) => $query->where('products.is_active', true))
+            ->where('new_menu_highlights.is_active', true)
+            ->whereExists(function ($query) {
+                $query->selectRaw('1')
+                    ->from('new_menu_highlight_product')
+                    ->join('products', 'products.id', '=', 'new_menu_highlight_product.product_id')
+                    ->whereColumn('new_menu_highlight_product.new_menu_highlight_id', 'new_menu_highlights.id')
+                    ->where('products.is_active', true);
+            })
             ->exists();
     }
 }

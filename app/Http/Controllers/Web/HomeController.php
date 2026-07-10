@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Banner;
 use App\Models\Category;
 use App\Models\LunchMenu;
-use App\Models\NewMenuHighlight;
 use App\Models\Page;
 use App\Models\Product;
 use App\Services\StoreService;
@@ -52,12 +51,6 @@ class HomeController extends Controller
             'lunchMenu' => LunchMenu::query()
                 ->where('is_active', true)
                 ->with(['items' => fn ($query) => $query->where('is_active', true)])
-                ->orderBy('sort_order')
-                ->first(),
-            'newMenuHighlight' => NewMenuHighlight::query()
-                ->where('is_active', true)
-                ->whereHas('products', fn ($query) => $query->where('products.is_active', true))
-                ->with(['products' => fn ($query) => $query->where('products.is_active', true)->with('variants')])
                 ->orderBy('sort_order')
                 ->first(),
             'homeInfoPage' => Page::query()->where('slug', 'home-info')->where('is_active', true)->first(),

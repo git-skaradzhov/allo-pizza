@@ -13,7 +13,33 @@ class NewMenuHighlightTest extends TestCase
     use CreatesStoreData;
     use RefreshDatabase;
 
-    public function test_home_page_shows_new_menu_section_when_active_with_products(): void
+    public function test_new_menu_page_shows_products_when_active(): void
+    {
+        $this->createOpenStore();
+
+        $product = Product::factory()->create([
+            'name' => 'Крудо',
+            'is_new' => true,
+        ]);
+
+        $highlight = NewMenuHighlight::query()->create([
+            'title' => 'Ново в менюто',
+            'message' => 'Свежи предложения',
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $highlight->products()->attach($product->id, ['sort_order' => 1]);
+
+        $this->get(route('new-menu.index'))
+            ->assertOk()
+            ->assertSee('Ново в менюто')
+            ->assertSee('Свежи предложения')
+            ->assertSee('Крудо')
+            ->assertSee('Добави');
+    }
+
+    public function test_home_page_does_not_show_new_menu_section(): void
     {
         $this->createOpenStore();
 
@@ -33,12 +59,10 @@ class NewMenuHighlightTest extends TestCase
 
         $this->get(route('home'))
             ->assertOk()
-            ->assertSee('Ново в менюто')
-            ->assertSee('Свежи предложения')
-            ->assertSee('Крудо');
+            ->assertDontSee('Свежи предложения');
     }
 
-    public function test_home_page_hides_new_menu_section_when_inactive(): void
+    public function test_new_menu_page_shows_empty_state_when_inactive(): void
     {
         $this->createOpenStore();
 
@@ -56,8 +80,8 @@ class NewMenuHighlightTest extends TestCase
 
         $highlight->products()->attach($product->id, ['sort_order' => 1]);
 
-        $this->get(route('home'))
+        $this->get(route('new-menu.index'))
             ->assertOk()
-            ->assertDontSee('Свежи предложения');
+            ->assertSee('В момента няма нови предложения');
     }
 }

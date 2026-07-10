@@ -119,7 +119,7 @@ class ProductResource extends Resource
                                 titleAttribute: 'title',
                                 modifyQueryUsing: fn ($query) => $query->orderBy('sort_order'),
                             )
-                            ->helperText('Включва продукта в маркетинг секцията на началната страница.')
+                            ->helperText('Включва продукта в страницата /novo-v-menuto.')
                             ->columns(1)
                             ->columnSpanFull(),
                         Forms\Components\Toggle::make('is_spicy')

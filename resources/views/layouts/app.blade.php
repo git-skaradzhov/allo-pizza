@@ -18,7 +18,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
 </head>
-<body class="min-h-screen bg-stone-50 font-sans text-stone-900 antialiased">
+<body class="min-h-screen bg-stone-50 font-sans text-stone-900 antialiased @yield('bodyClass')">
     <a href="#main-content"
        class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-brand-500 focus:px-4 focus:py-2 focus:text-white">
         Към съдържанието
@@ -54,7 +54,7 @@
                     </a>
 
                     @if ($showNewMenuNav)
-                        <a href="{{ route('home') }}#novo-v-menuto"
+                        <a href="{{ route('new-menu.index') }}"
                            class="inline-flex items-center gap-1.5 rounded-full border-2 border-brand-500 bg-white px-2.5 py-1.5 font-bold text-brand-700 shadow-sm transition hover:border-brand-600 hover:bg-brand-50 sm:px-3">
                             <img src="{{ asset('images/icons/new.png') }}" alt="" class="h-6 w-6 shrink-0 object-contain" width="24" height="24" aria-hidden="true">
                             <span>Нови</span>
@@ -185,6 +185,9 @@
                     <a href="{{ route('menu') }}" class="text-stone-600 hover:text-brand-600">Меню</a>
                     @if ($showLunchMenuNav)
                         <a href="{{ route('lunch.index') }}" class="text-stone-600 hover:text-brand-600">Обедно меню</a>
+                    @endif
+                    @if ($showNewMenuNav)
+                        <a href="{{ route('new-menu.index') }}" class="text-stone-600 hover:text-brand-600">Ново в менюто</a>
                     @endif
                 </div>
             </div>

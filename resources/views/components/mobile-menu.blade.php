@@ -86,7 +86,7 @@
                 Меню
             </a>
             @if ($showNewMenuNav ?? false)
-                <a href="{{ route('home') }}#novo-v-menuto" class="mx-1 flex items-center gap-3 rounded-xl border-2 border-brand-500 bg-white/10 px-3 py-3 text-base font-bold text-white transition hover:bg-white/15" data-mobile-menu-close>
+                <a href="{{ route('new-menu.index') }}" class="mx-1 flex items-center gap-3 rounded-xl border-2 border-brand-500 bg-white/10 px-3 py-3 text-base font-bold text-white transition hover:bg-white/15" data-mobile-menu-close>
                     <img src="{{ asset('images/icons/new.png') }}" alt="" class="h-6 w-6 shrink-0 object-contain" width="24" height="24" aria-hidden="true">
                     Нови
                 </a>

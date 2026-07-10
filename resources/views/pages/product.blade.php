@@ -75,7 +75,7 @@
         <div>
             <div class="flex flex-wrap gap-2">
                 @if ($product->is_new)
-                    <span class="rounded-full bg-gold-500 px-2.5 py-0.5 text-xs font-bold text-brand-900">Ново</span>
+                    <x-product-new-icon aria-hidden="true" />
                 @endif
                 @if ($product->is_promo)
                     <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-xs font-bold text-white">Промо</span>

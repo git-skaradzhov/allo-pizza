@@ -43,7 +43,7 @@ class PageResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true)
-                            ->helperText('Публичен адрес: /pages/{slug}. За обедното меню използвайте slug obedno-menyu.'),
+                            ->helperText('Публичен адрес: /pages/{slug}. За обедното меню: obedno-menyu. За ново в менюто: novo-v-menuto.'),
                         Forms\Components\RichEditor::make('content')
                             ->label('Съдържание')
                             ->columnSpanFull()
@@ -108,9 +108,11 @@ class PageResource extends Resource
                 Tables\Actions\Action::make('view')
                     ->label('Виж на сайта')
                     ->icon('heroicon-o-arrow-top-right-on-square')
-                    ->url(fn (Page $record): string => $record->slug === 'obedno-menyu'
-                        ? route('lunch.index')
-                        : route('pages.show', $record->slug))
+                    ->url(fn (Page $record): string => match ($record->slug) {
+                        'obedno-menyu' => route('lunch.index'),
+                        'novo-v-menuto' => route('new-menu.index'),
+                        default => route('pages.show', $record->slug),
+                    })
                     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),

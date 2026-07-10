@@ -9,6 +9,7 @@ use App\Http\Controllers\Web\CheckoutController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\LunchMenuController;
 use App\Http\Controllers\Web\MenuController;
+use App\Http\Controllers\Web\NewMenuHighlightController;
 use App\Http\Controllers\Web\PageController;
 use App\Http\Controllers\Web\ProductController;
 use Illuminate\Support\Facades\Storage;
@@ -24,6 +25,7 @@ Route::get('/media/{path}', function (string $path) {
 })->where('path', '.*')->name('media.public');
 Route::get('/menu', [MenuController::class, 'index'])->name('menu');
 Route::get('/obedno-menyu', [LunchMenuController::class, 'index'])->name('lunch.index');
+Route::get('/novo-v-menuto', [NewMenuHighlightController::class, 'index'])->name('new-menu.index');
 Route::post('/obedno-menyu/add-selected', [LunchMenuController::class, 'addSelected'])->name('lunch.add-selected');
 Route::post('/obedno-menyu/items/{item}/add', [LunchMenuController::class, 'addItem'])->name('lunch.items.add');
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');

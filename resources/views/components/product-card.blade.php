@@ -31,7 +31,7 @@
         <div class="relative w-full">
             <div class="absolute left-2 top-2 z-10 flex max-w-full flex-wrap gap-1">
                 @if ($product->is_new)
-                    <span class="rounded-full bg-gold-500 px-1.5 py-0.5 text-[10px] font-bold text-brand-900 sm:px-2 sm:text-xs">Ново</span>
+                    <x-product-new-icon aria-hidden="true" />
                 @endif
                 @if ($product->is_promo)
                     <span class="rounded-full bg-brand-500 px-1.5 py-0.5 text-[10px] font-bold text-white sm:px-2 sm:text-xs">Промо</span>

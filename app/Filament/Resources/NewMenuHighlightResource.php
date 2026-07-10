@@ -37,9 +37,11 @@ class NewMenuHighlightResource extends Resource
                         Forms\Components\Placeholder::make('usage_hint')
                             ->label('Управление')
                             ->content(new HtmlString(
-                                'Изберете кои продукти да се показват в секцията на началната страница. '
+                                'Изберете кои продукти да се показват на отделната страница <strong>/novo-v-menuto</strong>. '
                                 .'Можете да ги отбелязвате и от <strong>Каталог → Продукти</strong> с опцията '
-                                .'<strong>„Ново в менюто“</strong>. Продуктите с етикет <strong>Нов</strong> се показват най-отгоре в списъка.'
+                                .'<strong>„Ново в менюто“</strong>. Продуктите с етикет <strong>Нов</strong> се показват най-отгоре в списъка. '
+                                .'Текстът и SEO се редактират от <strong>Съдържание → Страници → novo-v-menuto</strong>. '
+                                .'<a href="'.route('new-menu.index').'" target="_blank" class="text-primary-600 underline">Виж на сайта</a>'
                             ))
                             ->columnSpanFull(),
                     ])
@@ -60,7 +62,7 @@ class NewMenuHighlightResource extends Resource
                             ->columnSpanFull(),
                         Forms\Components\Toggle::make('is_active')
                             ->label('Активно')
-                            ->helperText('Показва секцията на началната страница, когато има избрани активни продукти.')
+                            ->helperText('Показва страницата /novo-v-menuto и линка в навигацията, когато има избрани активни продукти.')
                             ->default(true),
                         Forms\Components\TextInput::make('sort_order')
                             ->label('Подредба')
@@ -123,7 +125,7 @@ class NewMenuHighlightResource extends Resource
                 Tables\Actions\Action::make('view')
                     ->label('Виж на сайта')
                     ->icon('heroicon-o-arrow-top-right-on-square')
-                    ->url(fn (): string => route('home').'#novo-v-menuto')
+                    ->url(fn (): string => route('new-menu.index'))
                     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
