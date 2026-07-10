@@ -96,4 +96,178 @@
             </div>
         </section>
     @endif
+
+    @if ($page->slug === 'dostavka')
+        @php
+            $googleMapsKey = config('services.google_maps.key');
+        @endphp
+
+        @push('scripts')
+            <script>
+                (function () {
+                    const hasGoogleMapsKey = @json(filled($googleMapsKey));
+
+                    function pointInPolygon(lat, lng, points) {
+                        let inside = false;
+                        for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+                            const yi = parseFloat(points[i].lat);
+                            const xi = parseFloat(points[i].lng);
+                            const yj = parseFloat(points[j].lat);
+                            const xj = parseFloat(points[j].lng);
+                            const intersects = ((yi > lat) !== (yj > lat))
+                                && (lng < (xj - xi) * (lat - yi) / ((yj - yi) || 1e-12) + xi);
+                            if (intersects) inside = !inside;
+                        }
+                        return inside;
+                    }
+
+                    function formatMoney(amount) {
+                        return new Intl.NumberFormat('bg-BG', {
+                            style: 'currency',
+                            currency: 'EUR',
+                            minimumFractionDigits: 2,
+                        }).format(amount);
+                    }
+
+                    function showMapMessage(message, isError = true) {
+                        const mapEl = document.getElementById('delivery-zone-page-map');
+                        if (!mapEl) return;
+
+                        mapEl.innerHTML = `
+                            <div class="flex h-full items-center justify-center px-5 text-center text-sm font-semibold ${isError ? 'text-brand-600' : 'text-stone-500'}">
+                                ${message}
+                            </div>
+                        `;
+                    }
+
+                    function initDeliveryZonePageMap() {
+                        const mapEl = document.getElementById('delivery-zone-page-map');
+                        if (!mapEl || mapEl.dataset.initialized === '1') {
+                            return;
+                        }
+
+                        mapEl.dataset.initialized = '1';
+
+                        const storeLat = parseFloat(mapEl.dataset.storeLat);
+                        const storeLng = parseFloat(mapEl.dataset.storeLng);
+                        const storeLogoUrl = mapEl.dataset.storeLogo;
+                        const insidePrice = parseFloat(mapEl.dataset.insidePrice);
+                        const outsidePrice = parseFloat(mapEl.dataset.outsidePrice);
+                        const polygon = JSON.parse(mapEl.dataset.polygon || '[]');
+                        const statusEl = document.getElementById('delivery-zone-page-status');
+
+                        if (typeof google === 'undefined' || !google.maps) {
+                            showMapMessage('Google Maps не се зареди. Проверете GOOGLE_MAPS_API_KEY и ограниченията за домейна.');
+                            return;
+                        }
+
+                        const mapInstance = new google.maps.Map(mapEl, {
+                            center: { lat: storeLat, lng: storeLng },
+                            zoom: 13,
+                            mapTypeControl: false,
+                            streetViewControl: false,
+                            fullscreenControl: true,
+                        });
+
+                        new google.maps.Marker({
+                            map: mapInstance,
+                            position: { lat: storeLat, lng: storeLng },
+                            title: 'Allo! Pizza',
+                            icon: {
+                                url: storeLogoUrl,
+                                scaledSize: new google.maps.Size(58, 58),
+                                anchor: new google.maps.Point(11, 56),
+                            },
+                            zIndex: 1000,
+                        });
+
+                        if (polygon.length >= 3) {
+                            new google.maps.Polygon({
+                                paths: polygon.map((point) => ({
+                                    lat: parseFloat(point.lat),
+                                    lng: parseFloat(point.lng),
+                                })),
+                                strokeColor: '#EB1C22',
+                                strokeOpacity: 1,
+                                strokeWeight: 3,
+                                fillColor: '#EB1C22',
+                                fillOpacity: 0.22,
+                                clickable: false,
+                                map: mapInstance,
+                            });
+
+                            const bounds = new google.maps.LatLngBounds();
+                            polygon.forEach((point) => bounds.extend({
+                                lat: parseFloat(point.lat),
+                                lng: parseFloat(point.lng),
+                            }));
+                            bounds.extend({ lat: storeLat, lng: storeLng });
+                            mapInstance.fitBounds(bounds, 40);
+                        }
+
+                        function updateStatus(lat, lng) {
+                            if (!statusEl) return;
+
+                            statusEl.classList.remove('hidden');
+
+                            if (polygon.length < 3) {
+                                statusEl.className = 'text-sm text-green-700';
+                                statusEl.textContent = 'Доставка — ' + formatMoney(insidePrice);
+                                return;
+                            }
+
+                            const inside = pointInPolygon(lat, lng, polygon);
+                            statusEl.className = 'text-sm ' + (inside ? 'text-green-700' : 'text-brand-600');
+                            statusEl.textContent = inside
+                                ? 'Избраната точка е в района — ' + formatMoney(insidePrice)
+                                : 'Избраната точка е извън района — ' + formatMoney(outsidePrice);
+                        }
+
+                        let checkMarker = null;
+
+                        mapInstance.addListener('click', (event) => {
+                            const lat = event.latLng.lat();
+                            const lng = event.latLng.lng();
+
+                            if (!checkMarker) {
+                                checkMarker = new google.maps.Marker({
+                                    map: mapInstance,
+                                    draggable: true,
+                                });
+
+                                checkMarker.addListener('dragend', () => {
+                                    const pos = checkMarker.getPosition();
+                                    updateStatus(pos.lat(), pos.lng());
+                                });
+                            }
+
+                            checkMarker.setPosition({ lat, lng });
+                            updateStatus(lat, lng);
+                        });
+                    }
+
+                    window.initDeliveryZonePageMap = initDeliveryZonePageMap;
+
+                    window.handleDeliveryZonePageMapError = function () {
+                        showMapMessage('Google Maps не се зареди. Проверете API ключа и разрешените домейни в Google Cloud.');
+                    };
+
+                    window.gm_authFailure = function () {
+                        showMapMessage('Google Maps API ключът не е разрешен за този домейн или API услугата не е активирана.');
+                    };
+
+                    if (!hasGoogleMapsKey) {
+                        showMapMessage('Липсва GOOGLE_MAPS_API_KEY в конфигурацията.');
+                    }
+                })();
+            </script>
+            @if ($googleMapsKey)
+                <script
+                    src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsKey }}&language=bg&region=BG&callback=initDeliveryZonePageMap&loading=async&auth_referrer_policy=origin"
+                    async
+                    defer
+                    onerror="window.handleDeliveryZonePageMapError && window.handleDeliveryZonePageMapError()"></script>
+            @endif
+        @endpush
+    @endif
 @endsection
