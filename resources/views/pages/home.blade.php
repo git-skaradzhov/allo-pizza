@@ -18,8 +18,14 @@
             $isHeroCarousel = $heroBanners->count() > 1;
         @endphp
         @if ($heroBanners->isNotEmpty())
-            <section class="hero-banner relative mb-5 w-full overflow-hidden rounded-[1.5rem] shadow-soft sm:rounded-[2rem]"
-                     @if ($isHeroCarousel) data-hero-carousel data-hero-interval="5000" @endif>
+            @if ($isHeroCarousel)
+                <div class="hero-carousel mb-5" data-hero-carousel data-hero-interval="5000">
+            @endif
+
+            <section @class([
+                'hero-banner relative overflow-hidden rounded-[1.5rem] shadow-soft sm:rounded-[2rem]',
+                'mb-5' => ! $isHeroCarousel,
+            ])>
                     @foreach ($heroBanners as $index => $hero)
                         @php
                             $heroImage = public_media_url($hero->image);
@@ -65,18 +71,6 @@
                     @endforeach
 
                 @if ($isHeroCarousel)
-                    @php
-                        $nextPeekImage = public_media_url($heroBanners->get(1)?->image);
-                    @endphp
-                    <div class="hero-peek absolute inset-y-0 right-0 z-[15] hidden w-7 overflow-hidden sm:block {{ $nextPeekImage ? '' : 'hidden' }}"
-                         data-hero-peek
-                         aria-hidden="true">
-                        <img src="{{ $nextPeekImage ?: '' }}"
-                             alt=""
-                             class="hero-peek-image h-full w-full object-cover"
-                             draggable="false">
-                    </div>
-
                     <button type="button"
                             class="absolute left-3 top-1/2 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/50 sm:flex sm:left-4"
                             data-hero-prev
@@ -93,26 +87,29 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
                         </svg>
                     </button>
-
-                    <div class="hero-carousel-dots absolute bottom-3 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full bg-black/45 px-3 py-2 backdrop-blur-sm sm:gap-3 sm:px-4 sm:py-2.5"
-                         data-hero-dots
-                         role="tablist"
-                         aria-label="Hero банери">
-                        <div class="flex items-center gap-2">
-                            @foreach ($heroBanners as $index => $hero)
-                                <button type="button"
-                                        role="tab"
-                                        aria-label="Банер {{ $index + 1 }}: {{ $hero->title }}"
-                                        aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
-                                        data-hero-dot="{{ $index }}"
-                                        @if ($index === 0) class="is-active" @endif>
-                                </button>
-                            @endforeach
-                        </div>
-                        <span class="text-xs font-bold tabular-nums text-white/90" data-hero-counter>1 / {{ $heroBanners->count() }}</span>
-                    </div>
                 @endif
             </section>
+
+            @if ($isHeroCarousel)
+                <div class="hero-carousel-dots"
+                     data-hero-dots
+                     role="tablist"
+                     aria-label="Hero банери">
+                    <div class="hero-carousel-dots__track">
+                        @foreach ($heroBanners as $index => $hero)
+                            <button type="button"
+                                    role="tab"
+                                    aria-label="Банер {{ $index + 1 }}: {{ $hero->title }}"
+                                    aria-selected="{{ $index === 0 ? 'true' : 'false' }}"
+                                    data-hero-dot="{{ $index }}"
+                                    @if ($index === 0) class="is-active" @endif>
+                            </button>
+                        @endforeach
+                    </div>
+                    <span class="hero-carousel-dots__counter" data-hero-counter>1 / {{ $heroBanners->count() }}</span>
+                </div>
+                </div>
+            @endif
 
             @if ($heroBanners->isNotEmpty())
                 @push('styles')

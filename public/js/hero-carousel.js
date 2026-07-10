@@ -4,8 +4,6 @@
     document.querySelectorAll('[data-hero-carousel]').forEach((carousel) => {
         const slides = Array.from(carousel.querySelectorAll('[data-hero-slide]'));
         const dots = Array.from(carousel.querySelectorAll('[data-hero-dot]'));
-        const peek = carousel.querySelector('[data-hero-peek]');
-        const peekImage = peek?.querySelector('.hero-peek-image');
         const counter = carousel.querySelector('[data-hero-counter]');
         const previousButton = carousel.querySelector('[data-hero-prev]');
         const nextButton = carousel.querySelector('[data-hero-next]');
@@ -23,48 +21,16 @@
 
         let timer = null;
         let isPaused = false;
-        let isInitialRender = true;
-
-        const getSlideImage = (slide) => slide.querySelector('.hero-slide-image')?.getAttribute('src') ?? '';
-
-        const updatePeek = () => {
-            if (!peekImage) {
-                return;
-            }
-
-            const nextIndex = (currentIndex + 1) % slides.length;
-            const nextImage = getSlideImage(slides[nextIndex]);
-
-            if (nextImage) {
-                peekImage.src = nextImage;
-                peek.classList.remove('hidden');
-            } else {
-                peekImage.removeAttribute('src');
-                peek.classList.add('hidden');
-            }
-        };
 
         const updateSlide = (nextIndex) => {
-            const previousIndex = currentIndex;
             currentIndex = (nextIndex + slides.length) % slides.length;
-
-            const stepsForward = (currentIndex - previousIndex + slides.length) % slides.length;
-            const goingForward = stepsForward !== 0 && stepsForward <= slides.length / 2;
 
             slides.forEach((slide, index) => {
                 const isActive = index === currentIndex;
 
-                slide.classList.remove('is-entering-forward', 'is-entering-backward');
                 slide.classList.toggle('is-active', isActive);
-
-                if (isActive && !isInitialRender) {
-                    slide.classList.add(goingForward ? 'is-entering-forward' : 'is-entering-backward');
-                }
-
                 slide.setAttribute('aria-hidden', isActive ? 'false' : 'true');
             });
-
-            isInitialRender = false;
 
             dots.forEach((dot, index) => {
                 const isActive = index === currentIndex;
@@ -76,8 +42,6 @@
             if (counter) {
                 counter.textContent = `${currentIndex + 1} / ${slides.length}`;
             }
-
-            updatePeek();
         };
 
         const stopTimer = () => {
