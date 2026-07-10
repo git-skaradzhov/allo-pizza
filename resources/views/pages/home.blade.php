@@ -166,6 +166,9 @@
                 <div class="min-w-0">
                     <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Доставка</p>
                     <p class="truncate text-xs font-extrabold text-stone-900 sm:text-sm" title="{{ $storeSetting->store_address ?? 'гр. Русе' }}">{{ $storeSetting->store_address ?? 'гр. Русе' }}</p>
+                    @if ($storeSetting->free_delivery_over)
+                        <p class="text-xs font-semibold text-green-700">Безплатна над {{ money((float) $storeSetting->free_delivery_over) }}</p>
+                    @endif
                 </div>
             </div>
             <div class="flex items-center gap-2.5 sm:gap-3">

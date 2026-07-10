@@ -22,7 +22,7 @@ class DeliveryServiceTest extends TestCase
             'delivery_price' => 3.00,
             'delivery_inside_price' => 2.00,
             'delivery_outside_price' => 3.00,
-            'free_delivery_over' => 50.00,
+            'free_delivery_over' => 30.00,
             'minimum_order_amount' => 0,
             'is_store_open' => true,
         ], $overrides));
@@ -62,7 +62,7 @@ class DeliveryServiceTest extends TestCase
 
         $service = app(DeliveryService::class);
 
-        $this->assertSame(0.0, $service->deliveryPrice(50, 43.9000, 26.1000));
+        $this->assertSame(0.0, $service->deliveryPrice(30, 43.9000, 26.1000));
     }
 
     public function test_default_polygon_is_used_when_database_value_missing(): void

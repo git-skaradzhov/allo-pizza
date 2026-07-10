@@ -40,6 +40,43 @@
                     title="Allo! Pizza на карта"></iframe>
             </div>
         </div>
+    @elseif ($page->slug === 'dostavka')
+        <div class="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-8">
+            <div class="prose max-w-none rounded-2xl border border-stone-200 bg-white p-6">
+                {!! $page->content !!}
+
+                <ul class="not-prose mt-6 space-y-2 text-sm text-stone-700">
+                    <li class="flex items-start gap-2">
+                        <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-500"></span>
+                        <span><strong>{{ money((float) ($storeSetting->delivery_inside_price ?? 2)) }}</strong> — доставка в района (очертан на картата)</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-stone-400"></span>
+                        <span><strong>{{ money((float) ($storeSetting->delivery_outside_price ?? 3)) }}</strong> — доставка извън района</span>
+                    </li>
+                    @if ($storeSetting->free_delivery_over)
+                        <li class="flex items-start gap-2">
+                            <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-green-500"></span>
+                            <span>Безплатна доставка при поръчка над {{ money((float) $storeSetting->free_delivery_over) }}</span>
+                        </li>
+                    @endif
+                    <li class="flex items-start gap-2">
+                        <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-gold-500"></span>
+                        <span>Средно време за доставка: до {{ $storeSetting->average_delivery_time ?? 30 }} мин.</span>
+                    </li>
+                </ul>
+
+                <p class="not-prose mt-4 text-sm text-stone-500">
+                    {{ \App\Support\DeliveryZone::boundaryDescription() }}
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-stone-200 bg-white p-4 shadow-soft sm:p-6">
+                <h2 class="mb-4 text-lg font-extrabold text-stone-900">Зона за доставка</h2>
+                <p class="mb-4 text-sm text-stone-500">Кликнете на картата, за да проверите дали адресът ви попада в района.</p>
+                <x-delivery-zone-map />
+            </div>
+        </div>
     @else
         <div class="prose max-w-none rounded-2xl border border-stone-200 bg-white p-6">
             {!! $page->content !!}

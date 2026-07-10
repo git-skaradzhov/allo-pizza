@@ -26,7 +26,7 @@ class StoreSettingSeeder extends Seeder
             'delivery_price' => Money::fromBgn(3.50),
             'delivery_inside_price' => 2.00,
             'delivery_outside_price' => 3.00,
-            'free_delivery_over' => Money::fromBgn(50.00),
+            'free_delivery_over' => 30.00,
             'minimum_order_amount' => Money::fromBgn(15.00),
             'average_delivery_time' => 30,
             'is_store_open' => true,

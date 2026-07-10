@@ -27,7 +27,7 @@ trait CreatesStoreData
             'delivery_price' => 3,
             'delivery_inside_price' => 2,
             'delivery_outside_price' => 3,
-            'free_delivery_over' => 40,
+            'free_delivery_over' => 30,
             'minimum_order_amount' => 0,
             'is_store_open' => true,
         ]);

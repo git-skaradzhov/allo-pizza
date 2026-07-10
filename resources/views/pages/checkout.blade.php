@@ -186,6 +186,9 @@
                 <p class="text-xs text-stone-400">
                     {{ money($deliveryInsidePrice) }} в района · {{ money($deliveryOutsidePrice) }} извън района
                 </p>
+                @if ($settings->free_delivery_over)
+                    <p class="text-xs text-stone-400">Безплатна доставка над {{ money($settings->free_delivery_over) }}</p>
+                @endif
             </div>
             <div class="mt-3 flex justify-between border-t border-stone-200 pt-3 text-lg font-extrabold">
                 <span>Общо</span>
