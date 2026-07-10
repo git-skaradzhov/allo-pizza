@@ -29,6 +29,7 @@
                     @foreach ($heroBanners as $index => $hero)
                         @php
                             $heroImage = public_media_url($hero->image);
+                            $heroLink = $hero->button_url ?: ($hero->button_text ? route('menu') : null);
                         @endphp
                         <div @if ($isHeroCarousel)
                                  data-hero-slide
@@ -37,6 +38,13 @@
                              @else
                                  class="absolute inset-0 overflow-hidden"
                              @endif>
+                            @if ($heroLink)
+                                <a href="{{ $heroLink }}"
+                                   class="hero-slide-link absolute inset-0"
+                                   aria-label="{{ $hero->button_text ?: $hero->title }}">
+                                    <span class="sr-only">{{ $hero->button_text ?: $hero->title }}</span>
+                                </a>
+                            @endif
                             @if ($heroImage)
                                 <img src="{{ $heroImage }}" alt="{{ $hero->title }}"
                                      class="hero-slide-image"
@@ -59,10 +67,9 @@
                                             <p class="mt-2 max-w-lg text-sm text-white/90 sm:text-base">{{ $hero->subtitle }}</p>
                                         @endif
                                         @if ($hero->button_text)
-                                            <a href="{{ $hero->button_url ?: route('menu') }}"
-                                               class="mt-4 inline-flex w-fit rounded-full bg-white px-5 py-2.5 text-sm font-bold text-brand-700 shadow-soft transition hover:bg-gold-500 hover:text-brand-900">
+                                            <span class="mt-4 inline-flex w-fit rounded-full bg-white px-5 py-2.5 text-sm font-bold text-brand-700 shadow-soft">
                                                 {{ $hero->button_text }}
-                                            </a>
+                                            </span>
                                         @endif
                                     </div>
                                 </div>
