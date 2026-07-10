@@ -18,10 +18,7 @@
             $isHeroCarousel = $heroBanners->count() > 1;
         @endphp
         @if ($heroBanners->isNotEmpty())
-            <section @class([
-                'relative mb-5 w-full overflow-hidden rounded-[1.5rem] shadow-soft sm:rounded-[2rem]',
-                'aspect-[21/8]' => true,
-            ])
+            <section class="hero-banner relative mb-5 w-full overflow-hidden rounded-[1.5rem] shadow-soft sm:rounded-[2rem]"
                      @if ($isHeroCarousel) data-hero-carousel data-hero-interval="5000" @endif>
                     @foreach ($heroBanners as $index => $hero)
                         @php
@@ -39,7 +36,7 @@
                                      class="hero-slide-image"
                                      loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
                                      decoding="async">
-                                @unless ($hero->image_only)
+                                @unless ($hero->image_only ?? false)
                                     <span class="absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-black/15 to-transparent"></span>
                                     <span class="absolute inset-x-0 bottom-0 z-10 h-2/5 bg-gradient-to-t from-black/45 to-transparent"></span>
                                 @endunless
@@ -47,7 +44,7 @@
                                 <span class="absolute inset-0 z-0 bg-gradient-to-br from-brand-600 via-brand-500 to-gold-500"></span>
                             @endif
 
-                            @unless ($hero->image_only)
+                            @unless ($hero->image_only ?? false)
                                 <div class="hero-slide-overlay absolute inset-0 z-20 flex flex-col justify-end p-5 sm:p-8">
                                     <div @if ($isHeroCarousel) class="hero-slide-content max-w-xl" @else class="max-w-xl" @endif>
                                         <p class="text-sm font-bold uppercase tracking-wide text-gold-300">Allo! Pizza · Русе</p>

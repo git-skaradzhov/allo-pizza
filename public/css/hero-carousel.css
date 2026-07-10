@@ -1,3 +1,9 @@
+.hero-banner {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 21 / 8;
+}
+
 [data-hero-slide] {
     opacity: 0;
     z-index: 0;
