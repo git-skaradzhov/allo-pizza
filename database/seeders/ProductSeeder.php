@@ -20,8 +20,8 @@ class ProductSeeder extends Seeder
         }
 
         $variants = [
-            ['name' => '30 см', 'size_label' => '30 см', 'weight' => '500 гр', 'diameter' => 30, 'sort_order' => 1],
-            ['name' => '45 см', 'size_label' => '45 см', 'weight' => '1000 гр', 'diameter' => 45, 'sort_order' => 2],
+            ['name' => '30 см', 'size_label' => '30 см', 'weight' => '500 гр', 'diameter' => 30, 'extra_price_multiplier' => 1.00, 'sort_order' => 1],
+            ['name' => '45 см', 'size_label' => '45 см', 'weight' => '1000 гр', 'diameter' => 45, 'extra_price_multiplier' => 1.50, 'sort_order' => 2],
         ];
 
         $pizzas = [
@@ -151,6 +151,7 @@ class ProductSeeder extends Seeder
                     ],
                     [
                         'price' => $price,
+                        'extra_price_multiplier' => $variant['extra_price_multiplier'] ?? 1.00,
                         'weight' => $variant['weight'],
                         'diameter' => $variant['diameter'],
                         'is_active' => true,
@@ -387,6 +388,7 @@ class ProductSeeder extends Seeder
                 ['name' => 'Стандартен', 'size_label' => $data['size_label'] ?? '1 бр.'],
                 [
                     'price' => $data['base_price'],
+                    'extra_price_multiplier' => 1.00,
                     'weight' => $data['size_label'] ?? null,
                     'diameter' => null,
                     'is_active' => true,

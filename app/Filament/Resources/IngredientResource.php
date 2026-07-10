@@ -35,10 +35,14 @@ class IngredientResource extends Resource
                             ->required()
                             ->maxLength(255),
                         Forms\Components\TextInput::make('price')
-                            ->label('Цена')
+                            ->label('Базова цена (най-малък размер)')
                             ->numeric()
                             ->prefix('€')
                             ->default(0),
+                        Forms\Components\TextInput::make('portion_weight')
+                            ->label('Грамаж')
+                            ->placeholder('50 гр')
+                            ->maxLength(255),
                         Forms\Components\Toggle::make('is_removable')
                             ->label('Може да се премахва')
                             ->default(false),
@@ -66,9 +70,12 @@ class IngredientResource extends Resource
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->label('Цена')
+                    ->label('Базова цена')
                     ->money('EUR')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('portion_weight')
+                    ->label('Грамаж')
+                    ->toggleable(),
                 Tables\Columns\IconColumn::make('is_removable')
                     ->label('Премахваема')
                     ->boolean(),

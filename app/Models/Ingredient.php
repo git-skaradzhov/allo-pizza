@@ -13,6 +13,7 @@ class Ingredient extends Model
     protected $fillable = [
         'name',
         'price',
+        'portion_weight',
         'is_removable',
         'is_extra',
         'is_active',
@@ -33,5 +34,10 @@ class Ingredient extends Model
     {
         return $this->belongsToMany(Product::class, 'product_ingredient')
             ->withPivot('is_default');
+    }
+
+    public function priceForVariant(ProductVariant $variant): float
+    {
+        return \App\Support\ExtraPricing::priceFor($this, $variant);
     }
 }

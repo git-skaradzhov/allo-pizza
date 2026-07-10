@@ -45,16 +45,16 @@ class IngredientSeeder extends Seeder
             ['name' => 'Босилково песто', 'price' => 0, 'is_removable' => true, 'is_extra' => false, 'sort_order' => 33],
 
             // Допълнителни добавки (50 гр)
-            ['name' => 'Моцарела (добавка)', 'price' => 0.60, 'is_removable' => false, 'is_extra' => true, 'sort_order' => 101],
-            ['name' => 'Топено сирене (добавка)', 'price' => 0.60, 'is_removable' => false, 'is_extra' => true, 'sort_order' => 102],
-            ['name' => 'Маслини рязани', 'price' => 0.60, 'is_removable' => false, 'is_extra' => true, 'sort_order' => 103],
-            ['name' => 'Синьо сирене (добавка)', 'price' => 1.00, 'is_removable' => false, 'is_extra' => true, 'sort_order' => 104],
-            ['name' => 'Пармезан (добавка)', 'price' => 1.00, 'is_removable' => false, 'is_extra' => true, 'sort_order' => 105],
-            ['name' => 'Чедър (добавка)', 'price' => 1.00, 'is_removable' => false, 'is_extra' => true, 'sort_order' => 106],
-            ['name' => 'Пилешко филе (добавка)', 'price' => 1.00, 'is_removable' => false, 'is_extra' => true, 'sort_order' => 107],
-            ['name' => 'Пеперони (добавка)', 'price' => 1.00, 'is_removable' => false, 'is_extra' => true, 'sort_order' => 108],
-            ['name' => 'Еленски бут (добавка)', 'price' => 1.00, 'is_removable' => false, 'is_extra' => true, 'sort_order' => 109],
-            ['name' => 'Шунка (добавка)', 'price' => 1.00, 'is_removable' => false, 'is_extra' => true, 'sort_order' => 110],
+            ['name' => 'Моцарела (добавка)', 'price' => 0.60, 'portion_weight' => '50 гр', 'is_removable' => false, 'is_extra' => true, 'sort_order' => 101],
+            ['name' => 'Топено сирене (добавка)', 'price' => 0.60, 'portion_weight' => '50 гр', 'is_removable' => false, 'is_extra' => true, 'sort_order' => 102],
+            ['name' => 'Маслини рязани', 'price' => 0.60, 'portion_weight' => '50 гр', 'is_removable' => false, 'is_extra' => true, 'sort_order' => 103],
+            ['name' => 'Синьо сирене (добавка)', 'price' => 1.00, 'portion_weight' => '50 гр', 'is_removable' => false, 'is_extra' => true, 'sort_order' => 104],
+            ['name' => 'Пармезан (добавка)', 'price' => 1.00, 'portion_weight' => '50 гр', 'is_removable' => false, 'is_extra' => true, 'sort_order' => 105],
+            ['name' => 'Чедър (добавка)', 'price' => 1.00, 'portion_weight' => '50 гр', 'is_removable' => false, 'is_extra' => true, 'sort_order' => 106],
+            ['name' => 'Пилешко филе (добавка)', 'price' => 1.00, 'portion_weight' => '50 гр', 'is_removable' => false, 'is_extra' => true, 'sort_order' => 107],
+            ['name' => 'Пеперони (добавка)', 'price' => 1.00, 'portion_weight' => '50 гр', 'is_removable' => false, 'is_extra' => true, 'sort_order' => 108],
+            ['name' => 'Еленски бут (добавка)', 'price' => 1.00, 'portion_weight' => '50 гр', 'is_removable' => false, 'is_extra' => true, 'sort_order' => 109],
+            ['name' => 'Шунка (добавка)', 'price' => 1.00, 'portion_weight' => '50 гр', 'is_removable' => false, 'is_extra' => true, 'sort_order' => 110],
         ];
 
         foreach ($ingredients as $ingredient) {

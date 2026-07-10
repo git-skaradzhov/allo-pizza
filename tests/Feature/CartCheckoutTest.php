@@ -187,7 +187,7 @@ class CartCheckoutTest extends TestCase
             'product_id' => $product->id,
             'product_variant_id' => $variant->id,
             'quantity' => 1,
-            'extras' => [$extra->id],
+            'extras' => [$extra->id => 1],
         ]);
 
         $this->post('/checkout', [
@@ -205,5 +205,64 @@ class CartCheckoutTest extends TestCase
             'name' => 'Пеперони (добавка)',
             'option_type' => 'extra_added',
         ]);
+    }
+
+    public function test_extra_price_uses_variant_multiplier(): void
+    {
+        $product = $this->makeProduct();
+        $variant = ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'name' => 'Голяма',
+            'size_label' => '45 см',
+            'price' => 18.00,
+            'extra_price_multiplier' => 1.50,
+            'is_active' => true,
+            'sort_order' => 2,
+        ]);
+        $extra = Ingredient::query()->create([
+            'name' => 'Моцарела (добавка)',
+            'price' => 1.00,
+            'is_removable' => false,
+            'is_extra' => true,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $this->post('/cart/add', [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+            'extras' => [$extra->id => 1],
+        ]);
+
+        $cartItem = \App\Models\CartItem::query()->first();
+
+        $this->assertEqualsWithDelta(19.50, (float) $cartItem->unit_price, 0.001);
+    }
+
+    public function test_extra_quantity_multiplies_unit_price(): void
+    {
+        $product = $this->makeProduct();
+        $variant = $product->variants->first();
+        $extra = Ingredient::query()->create([
+            'name' => 'Пеперони (добавка)',
+            'price' => 1.00,
+            'is_removable' => false,
+            'is_extra' => true,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $this->post('/cart/add', [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+            'extras' => [$extra->id => 2],
+        ]);
+
+        $cartItem = \App\Models\CartItem::query()->first();
+
+        $this->assertEqualsWithDelta((float) $variant->price + 2.00, (float) $cartItem->unit_price, 0.001);
+        $this->assertEquals(2, $cartItem->options[0]['quantity'] ?? 0);
     }
 }

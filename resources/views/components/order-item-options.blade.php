@@ -11,19 +11,25 @@
                 if ($option instanceof \App\Models\OrderItemOption) {
                     $type = $option->option_type->value;
                     $name = $option->name;
-                    $price = (float) $option->price;
+                    $lineTotal = (float) $option->price;
+                    $quantity = 1;
                 } else {
                     $type = $option['type'] ?? '';
                     $name = $option['name'] ?? '';
-                    $price = (float) ($option['price'] ?? 0);
+                    $unitPrice = (float) ($option['price'] ?? 0);
+                    $quantity = (int) ($option['quantity'] ?? 1);
+                    $lineTotal = $unitPrice * $quantity;
                 }
                 $isRemoved = $type === 'ingredient_removed';
                 $isExtra = $type === 'extra_added';
             @endphp
             <p class="text-xs {{ $isRemoved ? 'text-stone-400 line-through' : 'text-stone-500' }}">
                 {{ $isExtra ? '+ ' : ($isRemoved ? '− ' : '') }}{{ $name }}
-                @if ($isExtra && $price > 0)
-                    <span class="text-stone-400">({{ money($price) }})</span>
+                @if ($isExtra && $quantity > 1 && ! ($option instanceof \App\Models\OrderItemOption))
+                    <span class="text-stone-400">×{{ $quantity }}</span>
+                @endif
+                @if ($isExtra && $lineTotal > 0)
+                    <span class="text-stone-400">({{ money($lineTotal) }})</span>
                 @endif
             </p>
         @endforeach

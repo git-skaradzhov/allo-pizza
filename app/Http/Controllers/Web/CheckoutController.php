@@ -135,10 +135,20 @@ class CheckoutController extends Controller
             ]);
 
             foreach ($item->options ?? [] as $option) {
+                $quantity = (int) ($option['quantity'] ?? 1);
+                $unitPrice = (float) ($option['price'] ?? 0);
+                $name = $option['name'] ?? '';
+
+                if (($option['type'] ?? '') === 'extra_added' && $quantity > 1) {
+                    $name .= ' ×'.$quantity;
+                }
+
                 $orderItem->options()->create([
                     'option_type' => $option['type'] ?? 'extra_added',
-                    'name' => $option['name'] ?? '',
-                    'price' => $option['price'] ?? 0,
+                    'name' => $name,
+                    'price' => ($option['type'] ?? '') === 'extra_added'
+                        ? $unitPrice * $quantity
+                        : $unitPrice,
                 ]);
             }
         }

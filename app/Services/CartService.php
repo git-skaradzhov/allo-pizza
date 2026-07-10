@@ -38,7 +38,7 @@ class CartService
 
         $extrasTotal = collect($options)
             ->where('type', 'extra_added')
-            ->sum(fn ($option) => (float) ($option['price'] ?? 0));
+            ->sum(fn ($option) => (float) ($option['price'] ?? 0) * (int) ($option['quantity'] ?? 1));
 
         $unitPrice = (float) $variant->price + (float) $extrasTotal;
         $totalPrice = $unitPrice * $quantity;

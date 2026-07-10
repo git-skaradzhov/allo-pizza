@@ -45,6 +45,14 @@ class ProductVariantResource extends Resource
                             ->required()
                             ->numeric()
                             ->prefix('€'),
+                        Forms\Components\TextInput::make('extra_price_multiplier')
+                            ->label('Множител за добавки')
+                            ->helperText('Множител за цената на добавките при този размер')
+                            ->numeric()
+                            ->default(1.00)
+                            ->minValue(0.01)
+                            ->step(0.01)
+                            ->required(),
                         Forms\Components\TextInput::make('size_label')
                             ->label('Размер')
                             ->maxLength(255),
@@ -81,6 +89,9 @@ class ProductVariantResource extends Resource
                 Tables\Columns\TextColumn::make('price')
                     ->label('Цена')
                     ->money('EUR')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('extra_price_multiplier')
+                    ->label('Множ. добавки')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('size_label')
                     ->label('Размер'),

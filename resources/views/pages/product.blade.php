@@ -103,6 +103,7 @@
                             <label class="cursor-pointer">
                                 <input type="radio" name="product_variant_id" value="{{ $variant->id }}"
                                        data-price="{{ (float) $variant->price }}"
+                                       data-extra-multiplier="{{ (float) ($variant->extra_price_multiplier ?? 1) }}"
                                        class="peer sr-only variant-radio" {{ $i === 0 ? 'checked' : '' }}>
                                 <span class="block rounded-xl px-2 py-2.5 text-center text-xs font-semibold text-stone-600 transition peer-checked:bg-white peer-checked:text-brand-600 peer-checked:shadow-soft sm:px-3 sm:text-sm">
                                     <span class="block">{{ $variant->name }}</span>
@@ -132,18 +133,38 @@
 
             @if ($extraIngredients->isNotEmpty())
                 <div class="mt-6">
-                    <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-stone-400">Допълнителни добавки</h2>
-                    <div class="flex flex-wrap gap-2">
+                    <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-stone-400">Добави съставки</h2>
+                    <div class="max-h-80 divide-y divide-stone-100 overflow-y-auto overscroll-contain rounded-2xl border border-stone-200 bg-white">
                         @foreach ($extraIngredients as $ingredient)
-                            <label class="cursor-pointer">
-                                <input type="checkbox" name="extras[]" value="{{ $ingredient->id }}"
-                                       data-price="{{ (float) $ingredient->price }}"
-                                       class="peer sr-only extra-checkbox">
-                                <span class="inline-flex items-center gap-1 rounded-full border border-stone-300 px-3 py-1.5 text-sm text-stone-600 transition peer-checked:border-gold-500 peer-checked:bg-gold-500/10 peer-checked:text-brand-700">
-                                    {{ $ingredient->name }}
-                                    <span class="text-xs text-stone-400">+{{ money($ingredient->price) }}</span>
-                                </span>
-                            </label>
+                            <div class="extra-row flex items-center justify-between gap-3 px-4 py-3"
+                                 data-base-price="{{ (float) $ingredient->price }}">
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-sm font-semibold text-stone-800">{{ $ingredient->name }}</p>
+                                    @if ($ingredient->portion_weight)
+                                        <p class="text-xs text-stone-400">{{ $ingredient->portion_weight }}</p>
+                                    @endif
+                                </div>
+                                <div class="flex shrink-0 items-center gap-3">
+                                    <span class="extra-price-label w-16 text-right text-sm font-semibold text-stone-600">
+                                        {{ money($ingredient->price) }}
+                                    </span>
+                                    <div class="flex items-center rounded-xl border border-stone-200">
+                                        <button type="button"
+                                                class="extra-qty-minus px-3 py-1.5 text-lg font-bold text-stone-400 hover:text-brand-600"
+                                                aria-label="Намали {{ $ingredient->name }}">−</button>
+                                        <input type="number"
+                                               name="extras[{{ $ingredient->id }}]"
+                                               value="0"
+                                               min="0"
+                                               max="5"
+                                               readonly
+                                               class="extra-qty-input w-8 border-0 p-0 text-center text-sm font-bold focus:ring-0">
+                                        <button type="button"
+                                                class="extra-qty-plus px-3 py-1.5 text-lg font-bold text-stone-400 hover:text-brand-600"
+                                                aria-label="Увеличи {{ $ingredient->name }}">+</button>
+                                    </div>
+                                </div>
+                            </div>
                         @endforeach
                     </div>
                 </div>
@@ -179,18 +200,64 @@
                 const priceEl = document.getElementById('product-price');
                 const qtyInput = document.getElementById('quantity');
 
+                function formatMoney(amount) {
+                    const parts = amount.toFixed(2).split('.');
+                    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+                    return parts.join('.') + ' €';
+                }
+
+                function getMultiplier() {
+                    const variant = form.querySelector('.variant-radio:checked');
+                    return variant ? parseFloat(variant.dataset.extraMultiplier || '1') : 1;
+                }
+
+                function updateExtraPrices() {
+                    const multiplier = getMultiplier();
+                    form.querySelectorAll('.extra-row').forEach((row) => {
+                        const basePrice = parseFloat(row.dataset.basePrice || '0');
+                        const price = Math.round(basePrice * multiplier * 100) / 100;
+                        const label = row.querySelector('.extra-price-label');
+                        if (label) {
+                            label.textContent = formatMoney(price);
+                        }
+                    });
+                }
+
                 function recalc() {
                     const variant = form.querySelector('.variant-radio:checked');
                     let unit = variant ? parseFloat(variant.dataset.price) : {{ (float) $firstPrice }};
-                    form.querySelectorAll('.extra-checkbox:checked').forEach((c) => {
-                        unit += parseFloat(c.dataset.price || 0);
+                    const multiplier = getMultiplier();
+
+                    form.querySelectorAll('.extra-row').forEach((row) => {
+                        const basePrice = parseFloat(row.dataset.basePrice || '0');
+                        const qty = parseInt(row.querySelector('.extra-qty-input')?.value || '0', 10);
+                        unit += Math.round(basePrice * multiplier * 100) / 100 * qty;
                     });
+
                     const qty = parseInt(qtyInput.value || '1', 10);
-                    priceEl.textContent = (unit * qty).toFixed(2) + ' €';
+                    priceEl.textContent = formatMoney(unit * qty);
                 }
 
-                form.querySelectorAll('.variant-radio, .extra-checkbox').forEach((el) => {
-                    el.addEventListener('change', recalc);
+                form.querySelectorAll('.variant-radio').forEach((el) => {
+                    el.addEventListener('change', () => {
+                        updateExtraPrices();
+                        recalc();
+                    });
+                });
+
+                form.querySelectorAll('.extra-row').forEach((row) => {
+                    const input = row.querySelector('.extra-qty-input');
+                    const minus = row.querySelector('.extra-qty-minus');
+                    const plus = row.querySelector('.extra-qty-plus');
+
+                    minus.addEventListener('click', () => {
+                        input.value = Math.max(0, parseInt(input.value || '0', 10) - 1);
+                        recalc();
+                    });
+                    plus.addEventListener('click', () => {
+                        input.value = Math.min(5, parseInt(input.value || '0', 10) + 1);
+                        recalc();
+                    });
                 });
 
                 document.getElementById('qty-minus').addEventListener('click', () => {
@@ -202,6 +269,7 @@
                     recalc();
                 });
 
+                updateExtraPrices();
                 recalc();
             })();
         </script>

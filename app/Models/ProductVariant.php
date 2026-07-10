@@ -14,6 +14,7 @@ class ProductVariant extends Model
         'product_id',
         'name',
         'price',
+        'extra_price_multiplier',
         'size_label',
         'weight',
         'diameter',
@@ -25,6 +26,7 @@ class ProductVariant extends Model
     {
         return [
             'price' => 'decimal:2',
+            'extra_price_multiplier' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }

@@ -66,7 +66,7 @@ class CartController extends Controller
             'product_variant_id' => ['required', 'integer', 'exists:product_variants,id'],
             'quantity' => ['nullable', 'integer', 'min:1', 'max:20'],
             'extras' => ['nullable', 'array'],
-            'extras.*' => ['integer', 'exists:ingredients,id'],
+            'extras.*' => ['integer', 'min:0', 'max:5'],
             'removed' => ['nullable', 'array'],
             'removed.*' => ['integer', 'exists:ingredients,id'],
             'note' => ['nullable', 'string', 'max:500'],
@@ -83,12 +83,32 @@ class CartController extends Controller
         $options = [];
 
         if (! empty($validated['extras'])) {
-            foreach (Ingredient::query()->whereIn('id', $validated['extras'])->get() as $ingredient) {
-                $options[] = [
-                    'type' => 'extra_added',
-                    'name' => $ingredient->name,
-                    'price' => (float) $ingredient->price,
-                ];
+            $extraQuantities = collect($validated['extras'])
+                ->map(fn ($qty) => (int) $qty)
+                ->filter(fn ($qty) => $qty > 0);
+
+            if ($extraQuantities->isNotEmpty()) {
+                $ingredients = Ingredient::query()
+                    ->where('is_extra', true)
+                    ->where('is_active', true)
+                    ->whereIn('id', $extraQuantities->keys())
+                    ->get()
+                    ->keyBy('id');
+
+                foreach ($extraQuantities as $ingredientId => $quantity) {
+                    $ingredient = $ingredients->get((int) $ingredientId);
+
+                    if (! $ingredient) {
+                        continue;
+                    }
+
+                    $options[] = [
+                        'type' => 'extra_added',
+                        'name' => $ingredient->name,
+                        'price' => $ingredient->priceForVariant($variant),
+                        'quantity' => $quantity,
+                    ];
+                }
             }
         }
 
