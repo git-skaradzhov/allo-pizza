@@ -4,8 +4,9 @@
 
 /* Google Maps tiles break when Tailwind preflight constrains img width */
 .gm-style img,
-.gm-style svg {
-    max-width: none;
+.gm-style svg,
+.gm-style-cc img {
+    max-width: none !important;
 }
 
 @layer utilities {

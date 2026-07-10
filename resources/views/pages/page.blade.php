@@ -8,16 +8,57 @@
 
 @section('content')
     @php
+        use App\Services\DeliveryService;
         use Illuminate\Support\Facades\Storage;
 
-        $featuredImage = $page->featured_image ? Storage::url($page->featured_image) : null;
+        $featuredImage = ($page->slug !== 'dostavka' && $page->featured_image)
+            ? Storage::url($page->featured_image)
+            : null;
+
+        $zonePolygon = [];
+        $insidePrice = (float) ($storeSetting->delivery_inside_price ?? 2);
+        $outsidePrice = (float) ($storeSetting->delivery_outside_price ?? 3);
+        $storeLat = (float) ($storeSetting->store_lat ?? 43.8407475);
+        $storeLng = (float) ($storeSetting->store_lng ?? 25.9549665);
+        $googleMapsKey = config('services.google_maps.key');
+
+        if ($page->slug === 'dostavka') {
+            $zonePolygon = app(DeliveryService::class)->zonePolygon();
+        }
     @endphp
     <x-breadcrumbs :items="[
         ['label' => 'Начало', 'url' => route('home')],
         ['label' => $page->title],
     ]" />
 
-    @if ($featuredImage)
+    @if ($page->slug === 'dostavka')
+        <div class="mb-6 space-y-4 overflow-hidden rounded-[1.5rem] border border-stone-200 bg-white p-4 shadow-soft sm:rounded-[2rem] sm:p-5">
+            <div
+                id="delivery-zone-page-map"
+                class="h-[280px] w-full overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 sm:h-[360px] lg:h-[420px]"
+                data-store-lat="{{ $storeLat }}"
+                data-store-lng="{{ $storeLng }}"
+                data-store-logo="{{ asset('images/logo-map.png') }}"
+                data-inside-price="{{ $insidePrice }}"
+                data-outside-price="{{ $outsidePrice }}"
+                data-polygon='@json($zonePolygon)'
+            ></div>
+
+            <div class="flex flex-wrap gap-3 text-sm">
+                <div class="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 shadow-soft">
+                    <span class="h-3 w-3 rounded-sm bg-brand-500/30 ring-2 ring-brand-500"></span>
+                    <span><strong>{{ money($insidePrice) }}</strong> в района</span>
+                </div>
+                <div class="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 shadow-soft">
+                    <span class="h-3 w-3 rounded-sm bg-stone-300 ring-2 ring-stone-400"></span>
+                    <span><strong>{{ money($outsidePrice) }}</strong> извън района</span>
+                </div>
+            </div>
+
+            <p id="delivery-zone-page-status" class="hidden text-sm text-stone-600"></p>
+            <p class="text-sm text-stone-500">Кликнете на картата, за да проверите дали адресът ви попада в района.</p>
+        </div>
+    @elseif ($featuredImage)
         <div class="mb-6 overflow-hidden rounded-[1.5rem] shadow-soft sm:rounded-[2rem]">
             <img src="{{ $featuredImage }}" alt="{{ $page->title }}" class="aspect-[21/9] w-full object-cover">
         </div>
@@ -41,41 +82,33 @@
             </div>
         </div>
     @elseif ($page->slug === 'dostavka')
-        <div class="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-8">
-            <div class="prose max-w-none rounded-2xl border border-stone-200 bg-white p-6">
-                {!! $page->content !!}
+        <div class="prose max-w-none rounded-2xl border border-stone-200 bg-white p-6">
+            {!! $page->content !!}
 
-                <ul class="not-prose mt-6 space-y-2 text-sm text-stone-700">
+            <ul class="not-prose mt-6 space-y-2 text-sm text-stone-700">
+                <li class="flex items-start gap-2">
+                    <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-500"></span>
+                    <span><strong>{{ money((float) ($storeSetting->delivery_inside_price ?? 2)) }}</strong> — доставка в района (очертан на картата)</span>
+                </li>
+                <li class="flex items-start gap-2">
+                    <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-stone-400"></span>
+                    <span><strong>{{ money((float) ($storeSetting->delivery_outside_price ?? 3)) }}</strong> — доставка извън района</span>
+                </li>
+                @if ($storeSetting->free_delivery_over)
                     <li class="flex items-start gap-2">
-                        <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-brand-500"></span>
-                        <span><strong>{{ money((float) ($storeSetting->delivery_inside_price ?? 2)) }}</strong> — доставка в района (очертан на картата)</span>
+                        <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-green-500"></span>
+                        <span>Безплатна доставка при поръчка над {{ money((float) $storeSetting->free_delivery_over) }}</span>
                     </li>
-                    <li class="flex items-start gap-2">
-                        <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-stone-400"></span>
-                        <span><strong>{{ money((float) ($storeSetting->delivery_outside_price ?? 3)) }}</strong> — доставка извън района</span>
-                    </li>
-                    @if ($storeSetting->free_delivery_over)
-                        <li class="flex items-start gap-2">
-                            <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-green-500"></span>
-                            <span>Безплатна доставка при поръчка над {{ money((float) $storeSetting->free_delivery_over) }}</span>
-                        </li>
-                    @endif
-                    <li class="flex items-start gap-2">
-                        <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-gold-500"></span>
-                        <span>Средно време за доставка: до {{ $storeSetting->average_delivery_time ?? 30 }} мин.</span>
-                    </li>
-                </ul>
+                @endif
+                <li class="flex items-start gap-2">
+                    <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-gold-500"></span>
+                    <span>Средно време за доставка: до {{ $storeSetting->average_delivery_time ?? 30 }} мин.</span>
+                </li>
+            </ul>
 
-                <p class="not-prose mt-4 text-sm text-stone-500">
-                    {{ \App\Support\DeliveryZone::boundaryDescription() }}
-                </p>
-            </div>
-
-            <div class="rounded-2xl border border-stone-200 bg-white p-4 shadow-soft sm:p-6">
-                <h2 class="mb-4 text-lg font-extrabold text-stone-900">Зона за доставка</h2>
-                <p class="mb-4 text-sm text-stone-500">Кликнете на картата, за да проверите дали адресът ви попада в района.</p>
-                <x-delivery-zone-map />
-            </div>
+            <p class="not-prose mt-4 text-sm text-stone-500">
+                {{ \App\Support\DeliveryZone::boundaryDescription() }}
+            </p>
         </div>
     @else
         <div class="prose max-w-none rounded-2xl border border-stone-200 bg-white p-6">
@@ -98,16 +131,13 @@
     @endif
 
     @if ($page->slug === 'dostavka')
-        @php
-            $googleMapsKey = config('services.google_maps.key');
-        @endphp
-
         @push('styles')
             <style>
-                /* Tailwind preflight breaks Google Maps tile images */
                 .gm-style img,
-                .gm-style svg {
-                    max-width: none;
+                .gm-style svg,
+                .gm-style-cc img,
+                #delivery-zone-page-map img {
+                    max-width: none !important;
                 }
             </style>
         @endpush
@@ -116,6 +146,7 @@
             <script>
                 (function () {
                     const hasGoogleMapsKey = @json(filled($googleMapsKey));
+                    let mapInitialized = false;
 
                     function pointInPolygon(lat, lng, points) {
                         let inside = false;
@@ -139,29 +170,30 @@
                         }).format(amount);
                     }
 
-                    function showMapMessage(message, isError = true) {
+                    function showMapMessage(message) {
                         const mapEl = document.getElementById('delivery-zone-page-map');
                         if (!mapEl) return;
 
-                        mapEl.innerHTML = `
-                            <div class="flex h-full items-center justify-center px-5 text-center text-sm font-semibold ${isError ? 'text-brand-600' : 'text-stone-500'}">
-                                ${message}
-                            </div>
-                        `;
+                        mapEl.innerHTML = '<div class="flex h-full items-center justify-center px-5 text-center text-sm font-semibold text-brand-600">' + message + '</div>';
                     }
 
                     function initDeliveryZonePageMap() {
+                        if (mapInitialized) return;
+
                         const mapEl = document.getElementById('delivery-zone-page-map');
-                        if (!mapEl || mapEl.dataset.initialized === '1') {
+                        if (!mapEl) return;
+
+                        if (!hasGoogleMapsKey) {
+                            showMapMessage('Липсва GOOGLE_MAPS_API_KEY в конфигурацията.');
                             return;
                         }
 
-                        mapEl.dataset.initialized = '1';
-
-                        const placeholder = document.getElementById('delivery-zone-page-map-placeholder');
-                        if (placeholder) {
-                            placeholder.remove();
+                        if (typeof google === 'undefined' || !google.maps) {
+                            showMapMessage('Google Maps не се зареди. Проверете GOOGLE_MAPS_API_KEY и ограниченията за домейна.');
+                            return;
                         }
+
+                        mapInitialized = true;
 
                         const storeLat = parseFloat(mapEl.dataset.storeLat);
                         const storeLng = parseFloat(mapEl.dataset.storeLng);
@@ -171,15 +203,9 @@
                         const polygon = JSON.parse(mapEl.dataset.polygon || '[]');
                         const statusEl = document.getElementById('delivery-zone-page-status');
 
-                        if (typeof google === 'undefined' || !google.maps) {
-                            showMapMessage('Google Maps не се зареди. Проверете GOOGLE_MAPS_API_KEY и ограниченията за домейна.');
-                            return;
-                        }
-
                         const mapInstance = new google.maps.Map(mapEl, {
                             center: { lat: storeLat, lng: storeLng },
-                            zoom: 13,
-                            mapTypeId: google.maps.MapTypeId.ROADMAP,
+                            zoom: 14,
                             mapTypeControl: false,
                             streetViewControl: false,
                             fullscreenControl: true,
@@ -218,7 +244,7 @@
                                 lng: parseFloat(point.lng),
                             }));
                             bounds.extend({ lat: storeLat, lng: storeLng });
-                            mapInstance.fitBounds(bounds, 40);
+                            mapInstance.fitBounds(bounds, 48);
                         }
 
                         function refreshMapLayout() {
@@ -231,33 +257,12 @@
                                     lng: parseFloat(point.lng),
                                 }));
                                 bounds.extend({ lat: storeLat, lng: storeLng });
-                                mapInstance.fitBounds(bounds, 40);
-                            } else {
-                                mapInstance.setCenter({ lat: storeLat, lng: storeLng });
-                                mapInstance.setZoom(13);
+                                mapInstance.fitBounds(bounds, 48);
                             }
                         }
 
                         google.maps.event.addListenerOnce(mapInstance, 'idle', refreshMapLayout);
                         window.addEventListener('resize', refreshMapLayout);
-
-                        function updateStatus(lat, lng) {
-                            if (!statusEl) return;
-
-                            statusEl.classList.remove('hidden');
-
-                            if (polygon.length < 3) {
-                                statusEl.className = 'text-sm text-green-700';
-                                statusEl.textContent = 'Доставка — ' + formatMoney(insidePrice);
-                                return;
-                            }
-
-                            const inside = pointInPolygon(lat, lng, polygon);
-                            statusEl.className = 'text-sm ' + (inside ? 'text-green-700' : 'text-brand-600');
-                            statusEl.textContent = inside
-                                ? 'Избраната точка е в района — ' + formatMoney(insidePrice)
-                                : 'Избраната точка е извън района — ' + formatMoney(outsidePrice);
-                        }
 
                         let checkMarker = null;
 
@@ -280,6 +285,24 @@
                             checkMarker.setPosition({ lat, lng });
                             updateStatus(lat, lng);
                         });
+
+                        function updateStatus(lat, lng) {
+                            if (!statusEl) return;
+
+                            statusEl.classList.remove('hidden');
+
+                            if (polygon.length < 3) {
+                                statusEl.className = 'text-sm text-green-700';
+                                statusEl.textContent = 'Доставка — ' + formatMoney(insidePrice);
+                                return;
+                            }
+
+                            const inside = pointInPolygon(lat, lng, polygon);
+                            statusEl.className = 'text-sm ' + (inside ? 'text-green-700' : 'text-brand-600');
+                            statusEl.textContent = inside
+                                ? 'Избраната точка е в района — ' + formatMoney(insidePrice)
+                                : 'Избраната точка е извън района — ' + formatMoney(outsidePrice);
+                        }
                     }
 
                     window.initDeliveryZonePageMap = initDeliveryZonePageMap;
@@ -289,7 +312,7 @@
                     };
 
                     window.gm_authFailure = function () {
-                        showMapMessage('Google Maps API ключът не е разрешен за този домейн или API услугата не е активирана.');
+                        showMapMessage('Google Maps API ключът не е разрешен за този домейн.');
                     };
 
                     if (!hasGoogleMapsKey) {
@@ -299,7 +322,7 @@
             </script>
             @if ($googleMapsKey)
                 <script
-                    src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsKey }}&language=bg&region=BG&callback=initDeliveryZonePageMap&loading=async&auth_referrer_policy=origin"
+                    src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsKey }}&language=bg&region=BG&callback=initDeliveryZonePageMap&loading=async"
                     async
                     defer
                     onerror="window.handleDeliveryZonePageMapError && window.handleDeliveryZonePageMapError()"></script>

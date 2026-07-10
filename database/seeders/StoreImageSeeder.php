@@ -33,7 +33,6 @@ class StoreImageSeeder extends Seeder
 
         $pageImages = [
             'za-nas' => 'store/interior-about.png',
-            'dostavka' => 'store/exterior-side.png',
         ];
 
         foreach ($pageImages as $slug => $image) {
@@ -43,7 +42,7 @@ class StoreImageSeeder extends Seeder
         }
 
         Page::query()
-            ->where('slug', 'kontakti')
+            ->whereIn('slug', ['kontakti', 'dostavka'])
             ->update(['featured_image' => null]);
 
         Banner::query()
