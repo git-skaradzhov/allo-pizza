@@ -14,6 +14,25 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/new-menu-dark.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+    <style>
+        .nm-feature-icon {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 1.375rem;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
 @endpush
 
 @section('full')
@@ -47,19 +66,19 @@
                     <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-4 pt-1">
                         <div class="flex items-center gap-3">
                             <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-500/60 text-brand-500 shadow-[0_0_16px_rgba(235,28,34,0.25)]">
-                                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 23c-3.9 0-7-2.4-8.5-6C2.5 14.2 4 10.5 7 8.5 6.5 11 8 13.5 10.5 15c-.5-3 1.5-6 4.5-7.5C13 4.5 11.5 2 9 2c5 0 8 4.5 8 10 0 2.2-.7 4.2-2 5.8 1.5-.5 2.5-2 2.5-3.8 0-2.5-2-4.5-4.5-4.5.5 2-1 4-3 5 2.5-1 4-3.5 4-6 0-4-3.5-7-7.5-7C3.5 1 0 5 0 10c0 6.1 5.4 11 12 13z"/></svg>
+                                <span class="nm-feature-icon" aria-hidden="true">menu_book</span>
                             </span>
                             <span class="text-xs font-bold uppercase leading-tight tracking-wide text-stone-200">Нови<br>рецепти</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-500/60 text-brand-500 shadow-[0_0_16px_rgba(235,28,34,0.25)]">
-                                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.26L20 9.27l-5 4.87 1.18 6.88L12 17.77l-4.18 3.25L9 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                                <span class="nm-feature-icon" aria-hidden="true">eco</span>
                             </span>
                             <span class="text-xs font-bold uppercase leading-tight tracking-wide text-stone-200">Пресни<br>съставки</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-500/60 text-brand-500 shadow-[0_0_16px_rgba(235,28,34,0.25)]">
-                                <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                <span class="nm-feature-icon" aria-hidden="true">favorite</span>
                             </span>
                             <span class="text-xs font-bold uppercase leading-tight tracking-wide text-stone-200">Създадени<br>с любов</span>
                         </div>
@@ -80,19 +99,19 @@
                     <div class="grid flex-1 gap-5 sm:grid-cols-3 sm:gap-8">
                         <div class="flex items-center gap-3">
                             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-500/40 text-brand-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span class="nm-feature-icon text-[1.125rem]" aria-hidden="true">calendar_month</span>
                             </span>
                             <p class="text-sm leading-snug text-stone-300">Всеки месец<br><span class="font-bold text-white">нови предложения</span></p>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-500/40 text-brand-500">
-                                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.9 6.26L20 9.27l-5 4.87 1.18 6.88L12 17.77l-4.18 3.25L9 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
+                                <span class="nm-feature-icon text-[1.125rem]" aria-hidden="true">stars</span>
                             </span>
                             <p class="text-sm leading-snug text-stone-300">Специално<br><span class="font-bold text-white">селектирани вкусове</span></p>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-500/40 text-brand-500">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                <span class="nm-feature-icon text-[1.125rem]" aria-hidden="true">verified</span>
                             </span>
                             <p class="text-sm leading-snug text-stone-300">Пресни и<br><span class="font-bold text-white">качествени съставки</span></p>
                         </div>
