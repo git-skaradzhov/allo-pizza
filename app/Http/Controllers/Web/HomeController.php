@@ -29,8 +29,15 @@ class HomeController extends Controller
             ->orderBy('sort_order')
             ->get();
 
+        $showWorkingHoursCard = Banner::query()
+            ->active()
+            ->where('position', BannerPosition::HomeSmallCards)
+            ->where('title', 'Работно време')
+            ->exists();
+
         return view('pages.home', [
             'heroBanners' => Banner::query()->active()->where('position', BannerPosition::HomeHero)->orderBy('sort_order')->get(),
+            'showWorkingHoursCard' => $showWorkingHoursCard,
             'smallBanners' => Banner::query()
                 ->active()
                 ->where('position', BannerPosition::HomeSmallCards)

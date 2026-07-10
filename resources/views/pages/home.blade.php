@@ -203,7 +203,9 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex cursor-grab snap-x snap-mandatory gap-3 overflow-x-auto pb-2 scroll-smooth [scrollbar-width:none] sm:gap-4 [&::-webkit-scrollbar]:hidden"
                              data-slider-track>
-                            <x-working-hours-summary />
+                            @if ($showWorkingHoursCard)
+                                <x-working-hours-summary />
+                            @endif
                             @foreach ($smallBanners as $index => $banner)
                                 @php
                                     $bannerImage = public_media_url($banner->image);

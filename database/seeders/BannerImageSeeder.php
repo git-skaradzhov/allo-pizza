@@ -29,10 +29,20 @@ class BannerImageSeeder extends Seeder
             $destination = "banners/{$filename}";
             Storage::disk('public')->put($destination, file_get_contents($source));
 
-            Banner::query()
-                ->where('position', BannerPosition::HomeSmallCards)
-                ->where('sort_order', $sortOrder)
-                ->update(['image' => $destination]);
+            $banner = Banner::query()->firstOrCreate(
+                [
+                    'position' => BannerPosition::HomeSmallCards,
+                    'sort_order' => $sortOrder,
+                ],
+                [
+                    'title' => 'Банер '.$sortOrder,
+                    'is_active' => true,
+                    'starts_at' => now()->subDay(),
+                    'ends_at' => now()->addMonths(3),
+                ]
+            );
+
+            $banner->update(['image' => $destination]);
         }
     }
 }

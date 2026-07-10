@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
             IngredientSeeder::class,
             ProductSeeder::class,
             ProductImageSeeder::class,
-            BannerSeeder::class,
             BannerImageSeeder::class,
             LunchMenuItemSeeder::class,
             LunchMenuSeeder::class,
