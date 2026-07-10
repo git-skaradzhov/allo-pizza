@@ -18,24 +18,27 @@
             $isHeroCarousel = $heroBanners->count() > 1;
         @endphp
         @if ($heroBanners->isNotEmpty())
-            <section class="relative mb-5 overflow-hidden rounded-[1.5rem] shadow-soft sm:rounded-[2rem]"
+            <section @class([
+                'relative mb-5 w-full overflow-hidden rounded-[1.5rem] shadow-soft sm:rounded-[2rem]',
+                'aspect-[21/8]' => true,
+            ])
                      @if ($isHeroCarousel) data-hero-carousel data-hero-interval="5000" @endif>
-                <div class="relative aspect-square w-full sm:aspect-[21/8]">
                     @foreach ($heroBanners as $index => $hero)
                         @php
                             $heroImage = public_media_url($hero->image);
                         @endphp
                         <div @if ($isHeroCarousel)
                                  data-hero-slide
-                                 class="absolute inset-0 {{ $index === 0 ? 'is-active' : '' }}"
+                                 class="absolute inset-0 overflow-hidden {{ $index === 0 ? 'is-active' : '' }}"
                                  aria-hidden="{{ $index === 0 ? 'false' : 'true' }}"
                              @else
-                                 class="relative h-full w-full"
+                                 class="absolute inset-0 overflow-hidden"
                              @endif>
                             @if ($heroImage)
                                 <img src="{{ $heroImage }}" alt="{{ $hero->title }}"
-                                     class="hero-slide-image absolute inset-0 z-0 h-full w-full object-cover"
-                                     loading="{{ $index === 0 ? 'eager' : 'lazy' }}">
+                                     class="hero-slide-image"
+                                     loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                     decoding="async">
                                 @unless ($hero->image_only)
                                     <span class="absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-black/15 to-transparent"></span>
                                     <span class="absolute inset-x-0 bottom-0 z-10 h-2/5 bg-gradient-to-t from-black/45 to-transparent"></span>
@@ -63,7 +66,6 @@
                             @endunless
                         </div>
                     @endforeach
-                </div>
 
                 @if ($isHeroCarousel)
                     @php

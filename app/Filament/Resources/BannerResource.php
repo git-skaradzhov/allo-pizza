@@ -43,7 +43,9 @@ class BannerResource extends Resource
                             ->image()
                             ->disk('public')
                             ->directory('banners')
-                            ->helperText('По желание. Ако липсва, началната страница показва цветна промо карта.')
+                            ->helperText(fn (Forms\Get $get): string => $get('position') === BannerPosition::HomeHero->value
+                                ? 'Препоръчителен размер: 2100×800 px (21:8). Изображението запълва целия банер без празно пространство.'
+                                : 'По желание. Ако липсва, началната страница показва цветна промо карта.')
                             ->visibility('public'),
                         Forms\Components\Toggle::make('image_only')
                             ->label('Само изображение')
