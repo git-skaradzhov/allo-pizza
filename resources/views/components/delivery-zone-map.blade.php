@@ -23,7 +23,7 @@
 
     <div
         id="delivery-zone-page-map"
-        class="h-72 w-full overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 sm:h-80 lg:h-[360px]"
+        class="delivery-zone-map h-72 w-full min-h-[288px] overflow-hidden rounded-2xl border border-stone-200 bg-stone-100 sm:h-80 lg:h-[360px]"
         data-store-lat="{{ $storeLat }}"
         data-store-lng="{{ $storeLng }}"
         data-store-logo="{{ asset('images/logo-map.png') }}"
@@ -31,7 +31,7 @@
         data-outside-price="{{ $outsidePrice }}"
         data-polygon='@json($zonePolygon)'
     >
-        <div class="flex h-full items-center justify-center px-4 text-center text-sm font-semibold text-stone-500">
+        <div id="delivery-zone-page-map-placeholder" class="flex h-full items-center justify-center px-4 text-center text-sm font-semibold text-stone-500">
             Зареждане на картата...
         </div>
     </div>

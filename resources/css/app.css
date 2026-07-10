@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Google Maps tiles break when Tailwind preflight constrains img width */
+.gm-style img,
+.gm-style svg {
+    max-width: none;
+}
+
 @layer utilities {
     .sr-only {
         position: absolute;

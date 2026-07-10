@@ -148,6 +148,11 @@
 
                         mapEl.dataset.initialized = '1';
 
+                        const placeholder = document.getElementById('delivery-zone-page-map-placeholder');
+                        if (placeholder) {
+                            placeholder.remove();
+                        }
+
                         const storeLat = parseFloat(mapEl.dataset.storeLat);
                         const storeLng = parseFloat(mapEl.dataset.storeLng);
                         const storeLogoUrl = mapEl.dataset.storeLogo;
@@ -164,6 +169,7 @@
                         const mapInstance = new google.maps.Map(mapEl, {
                             center: { lat: storeLat, lng: storeLng },
                             zoom: 13,
+                            mapTypeId: google.maps.MapTypeId.ROADMAP,
                             mapTypeControl: false,
                             streetViewControl: false,
                             fullscreenControl: true,
@@ -204,6 +210,26 @@
                             bounds.extend({ lat: storeLat, lng: storeLng });
                             mapInstance.fitBounds(bounds, 40);
                         }
+
+                        function refreshMapLayout() {
+                            google.maps.event.trigger(mapInstance, 'resize');
+
+                            if (polygon.length >= 3) {
+                                const bounds = new google.maps.LatLngBounds();
+                                polygon.forEach((point) => bounds.extend({
+                                    lat: parseFloat(point.lat),
+                                    lng: parseFloat(point.lng),
+                                }));
+                                bounds.extend({ lat: storeLat, lng: storeLng });
+                                mapInstance.fitBounds(bounds, 40);
+                            } else {
+                                mapInstance.setCenter({ lat: storeLat, lng: storeLng });
+                                mapInstance.setZoom(13);
+                            }
+                        }
+
+                        google.maps.event.addListenerOnce(mapInstance, 'idle', refreshMapLayout);
+                        window.addEventListener('resize', refreshMapLayout);
 
                         function updateStatus(lat, lng) {
                             if (!statusEl) return;
