@@ -27,10 +27,6 @@ class ProductImageSeeder extends Seeder
             'parlenka-s-kashkaval' => 'parlenka-sas-sirene.png',
             'chesnova-parlenka' => 'parlenka-sas-sirene.png',
             'parlenka-kombinirana' => 'parlenka-kombinirana.png',
-            'koka-kola-500' => 'koka-kola-500.png',
-            'mineralna-voda-500' => 'mineralna-voda-500.png',
-            'ayryan-500' => 'ayryan-500.png',
-            'domashna-limonada' => 'domashna-limonada.png',
         ];
 
         $processor = app(ProductImageProcessor::class);

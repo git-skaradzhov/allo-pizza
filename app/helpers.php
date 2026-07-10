@@ -153,6 +153,10 @@ if (! function_exists('product_image_url')) {
             return null;
         }
 
+        if (str_starts_with($path, 'http')) {
+            return $url;
+        }
+
         $modifiedAt = Storage::disk('public')->lastModified($path);
 
         return $url.'?v='.$modifiedAt;

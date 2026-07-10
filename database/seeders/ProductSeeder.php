@@ -239,37 +239,116 @@ class ProductSeeder extends Seeder
             ],
         ]);
 
-        $this->seedSimpleProducts($drinksCategory, [
+        $drinks = [
             [
-                'name' => 'Кока-Кола 500 мл',
-                'slug' => 'koka-kola-500',
-                'short_description' => 'Студена газирана напитка.',
-                'description' => 'Кока-Кола 500 мл.',
-                'base_price' => 2.90,
+                'name' => 'Пепси 0,5 л',
+                'slug' => 'pepsi-500',
+                'short_description' => 'Газирана напитка Pepsi, 0,5 л.',
+                'description' => 'Пепси 0,5 л.',
+                'base_price' => 1.30,
+                'size_label' => '0,5 л',
+                'image' => 'https://qbb.bg/wp-content/uploads/2018/05/Pepsi0.5l.png',
             ],
             [
-                'name' => 'Минерална вода 500 мл',
-                'slug' => 'mineralna-voda-500',
-                'short_description' => 'Минерална вода 500 мл.',
-                'description' => 'Освежаваща минерална вода.',
-                'base_price' => 1.90,
+                'name' => 'Пепси Zero 0,5 л',
+                'slug' => 'pepsi-zero-500',
+                'short_description' => 'Газирана напитка Pepsi Zero, 0,5 л.',
+                'description' => 'Пепси Zero 0,5 л.',
+                'base_price' => 1.30,
+                'size_label' => '0,5 л',
+                'image' => 'https://qbb.bg/wp-content/uploads/2018/05/500.pz_.png',
             ],
             [
-                'name' => 'Айрян 500 мл',
-                'slug' => 'ayryan-500',
-                'short_description' => 'Студен айрян 500 мл.',
-                'description' => 'Освежаващ айрян, подходящ за обедно меню.',
-                'base_price' => 2.40,
+                'name' => 'Mirinda портокал 0,5 л',
+                'slug' => 'mirinda-portokal-500',
+                'short_description' => 'Газирана напитка Mirinda с вкус на портокал, 0,5 л.',
+                'description' => 'Mirinda портокал 0,5 л.',
+                'base_price' => 1.30,
+                'size_label' => '0,5 л',
+                'image' => 'https://qbb.bg/wp-content/uploads/2018/06/500mO.png',
             ],
             [
-                'name' => 'Домашна лимонада',
-                'slug' => 'domashna-limonada',
-                'short_description' => 'Лимон, мента и свеж вкус.',
-                'description' => 'Домашна лимонада с лимон и мента.',
-                'base_price' => 3.90,
-                'is_new' => true,
+                'name' => 'Mirinda лимон 0,5 л',
+                'slug' => 'mirinda-limon-500',
+                'short_description' => 'Газирана напитка Mirinda с вкус на лимон, 0,5 л.',
+                'description' => 'Mirinda лимон 0,5 л.',
+                'base_price' => 1.30,
+                'size_label' => '0,5 л',
+                'image' => 'https://qbb.bg/wp-content/uploads/2024/05/500ml.png',
             ],
-        ]);
+            [
+                'name' => 'Mirinda ананас 0,5 л',
+                'slug' => 'mirinda-ananas-500',
+                'short_description' => 'Газирана напитка Mirinda с вкус на ананас, 0,5 л.',
+                'description' => 'Mirinda ананас 0,5 л.',
+                'base_price' => 1.30,
+                'size_label' => '0,5 л',
+                'image' => 'https://qbb.bg/wp-content/uploads/2026/05/Mirinda_05L_Pineapple.png',
+            ],
+            [
+                'name' => 'Evervess тоник 0,5 л',
+                'slug' => 'evervess-tonik-500',
+                'short_description' => 'Газиран тоник Evervess, 0,5 л.',
+                'description' => 'Evervess тоник 0,5 л.',
+                'base_price' => 1.30,
+                'size_label' => '0,5 л',
+                'image' => 'https://qbb.bg/wp-content/uploads/2018/05/500evt.png',
+            ],
+            [
+                'name' => 'Prisun горски плодове 0,5 л',
+                'slug' => 'prisun-gorski-plodove-500',
+                'short_description' => 'Негазирана напитка Prisun с вкус на горски плодове, 0,5 л.',
+                'description' => 'Prisun горски плодове 0,5 л.',
+                'base_price' => 1.30,
+                'size_label' => '0,5 л',
+                'image' => 'https://qbb.bg/wp-content/uploads/2024/05/500pff.png',
+            ],
+            [
+                'name' => 'Prisun ябълка 0,5 л',
+                'slug' => 'prisun-yabalka-500',
+                'short_description' => 'Негазирана напитка Prisun с вкус на ябълка, 0,5 л.',
+                'description' => 'Prisun ябълка 0,5 л.',
+                'base_price' => 1.30,
+                'size_label' => '0,5 л',
+                'image' => 'https://qbb.bg/wp-content/uploads/2024/05/500pa.png',
+            ],
+            [
+                'name' => 'Газирана вода Велинград 0,5 л',
+                'slug' => 'velingrad-gazirana-500',
+                'short_description' => 'Газирана минерална вода Велинград, 0,5 л.',
+                'description' => 'Газирана вода Велинград 0,5 л.',
+                'base_price' => 1.00,
+                'size_label' => '0,5 л',
+                'image' => 'https://www.velingradvoda.bg/assets/upload/files/3d-model-vgcarbonated-05l-bg-bubbles.jpg',
+            ],
+            [
+                'name' => 'Изворна вода Rilana 0,5 л',
+                'slug' => 'rilana-izvorna-500',
+                'short_description' => 'Изворна вода Rilana, 0,5 л.',
+                'description' => 'Изворна вода Rilana 0,5 л.',
+                'base_price' => 0.80,
+                'size_label' => '0,5 л',
+                'image' => 'https://qbb.bg/wp-content/uploads/2022/09/rilanas500.png',
+            ],
+            [
+                'name' => 'Пепси 1 л',
+                'slug' => 'pepsi-1000',
+                'short_description' => 'Газирана напитка Pepsi, 1 л.',
+                'description' => 'Пепси 1 л.',
+                'base_price' => 1.70,
+                'size_label' => '1 л',
+                'image' => 'https://qbb.bg/wp-content/uploads/2024/05/Pepsi1l.png',
+            ],
+        ];
+
+        $this->seedSimpleProducts($drinksCategory, $drinks);
+
+        if ($drinksCategory) {
+            Product::query()
+                ->where('category_id', $drinksCategory->id)
+                ->whereNotIn('slug', collect($drinks)->pluck('slug'))
+                ->each(fn (Product $product) => $product->delete());
+        }
     }
 
     protected function seedSimpleProducts(?Category $category, array $products): void
@@ -279,23 +358,29 @@ class ProductSeeder extends Seeder
         }
 
         foreach ($products as $index => $data) {
+            $attributes = [
+                'category_id' => $category->id,
+                'name' => $data['name'],
+                'short_description' => $data['short_description'],
+                'description' => $data['description'],
+                'base_price' => $data['base_price'],
+                'is_active' => true,
+                'is_featured' => $data['is_featured'] ?? false,
+                'is_promo' => $data['is_promo'] ?? false,
+                'is_new' => $data['is_new'] ?? false,
+                'is_spicy' => false,
+                'sort_order' => $index + 1,
+                'seo_title' => $data['name'].' | Allo! Pizza',
+                'seo_description' => $data['short_description'],
+            ];
+
+            if (isset($data['image'])) {
+                $attributes['image'] = $data['image'];
+            }
+
             $product = Product::query()->updateOrCreate(
                 ['slug' => $data['slug']],
-                [
-                    'category_id' => $category->id,
-                    'name' => $data['name'],
-                    'short_description' => $data['short_description'],
-                    'description' => $data['description'],
-                    'base_price' => $data['base_price'],
-                    'is_active' => true,
-                    'is_featured' => $data['is_featured'] ?? false,
-                    'is_promo' => $data['is_promo'] ?? false,
-                    'is_new' => $data['is_new'] ?? false,
-                    'is_spicy' => false,
-                    'sort_order' => $index + 1,
-                    'seo_title' => $data['name'].' | Allo! Pizza',
-                    'seo_description' => $data['short_description'],
-                ]
+                $attributes
             );
 
             $product->variants()->updateOrCreate(
