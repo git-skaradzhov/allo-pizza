@@ -137,31 +137,53 @@
             @endif
         @endif
 
+        @push('styles')
+            <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+            <style>
+                .info-strip-icon {
+                    font-family: 'Material Symbols Outlined';
+                    font-weight: normal;
+                    font-style: normal;
+                    font-size: 1.75rem;
+                    line-height: 1;
+                    letter-spacing: normal;
+                    text-transform: none;
+                    display: inline-block;
+                    white-space: nowrap;
+                    word-wrap: normal;
+                    direction: ltr;
+                    -webkit-font-feature-settings: 'liga';
+                    -webkit-font-smoothing: antialiased;
+                    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+                }
+            </style>
+        @endpush
+
         {{-- Delivery information strip --}}
         <section class="mb-5 grid grid-cols-2 gap-2 rounded-[1.5rem] bg-white p-3 shadow-soft sm:gap-3 sm:rounded-[2rem] sm:p-4 md:grid-cols-4">
-            <div class="flex items-center gap-3">
-                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-gold-500/20 text-lg sm:h-11 sm:w-11 sm:text-xl">🚚</span>
+            <div class="col-span-2 flex items-center gap-2.5 sm:gap-3 md:col-span-1">
+                <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">local_shipping</span>
                 <div class="min-w-0">
                     <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Доставка</p>
-                    <p class="text-sm font-extrabold text-stone-900 sm:text-base">{{ $storeSetting->store_address ?? 'гр. Русе' }}</p>
+                    <p class="truncate text-xs font-extrabold text-stone-900 sm:text-sm" title="{{ $storeSetting->store_address ?? 'гр. Русе' }}">{{ $storeSetting->store_address ?? 'гр. Русе' }}</p>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-brand-50 text-lg sm:h-11 sm:w-11 sm:text-xl">⏱</span>
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">schedule</span>
                 <div class="min-w-0">
                     <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Време</p>
                     <p class="text-sm font-extrabold text-stone-900 sm:text-base">до {{ $storeSetting->average_delivery_time ?? 30 }} мин.</p>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-stone-100 text-lg sm:h-11 sm:w-11 sm:text-xl">🧾</span>
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">receipt_long</span>
                 <div class="min-w-0">
                     <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Минимум</p>
                     <p class="text-sm font-extrabold text-stone-900 sm:text-base">{{ money((float) ($storeSetting->minimum_order_amount ?? 0)) }}</p>
                 </div>
             </div>
-            <div class="flex items-center gap-3">
-                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl {{ $isOpen ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-700' }} text-lg sm:h-11 sm:w-11 sm:text-xl">●</span>
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">storefront</span>
                 <div class="min-w-0">
                     <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Статус</p>
                     <p class="text-sm font-extrabold leading-tight {{ $isOpen ? 'text-green-700' : 'text-stone-600' }} sm:text-base">{{ $workingHoursMessage }}</p>
