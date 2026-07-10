@@ -14,6 +14,7 @@ class Banner extends Model
         'title',
         'subtitle',
         'image',
+        'image_only',
         'button_text',
         'button_url',
         'position',
@@ -27,6 +28,7 @@ class Banner extends Model
     {
         return [
             'position' => BannerPosition::class,
+            'image_only' => 'boolean',
             'is_active' => 'boolean',
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',

@@ -36,27 +36,31 @@
                                 <img src="{{ $heroImage }}" alt="{{ $hero->title }}"
                                      class="hero-slide-image absolute inset-0 z-0 h-full w-full object-cover"
                                      loading="{{ $index === 0 ? 'eager' : 'lazy' }}">
-                                <span class="absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-black/15 to-transparent"></span>
-                                <span class="absolute inset-x-0 bottom-0 z-10 h-2/5 bg-gradient-to-t from-black/45 to-transparent"></span>
+                                @unless ($hero->image_only)
+                                    <span class="absolute inset-0 z-10 bg-gradient-to-r from-black/40 via-black/15 to-transparent"></span>
+                                    <span class="absolute inset-x-0 bottom-0 z-10 h-2/5 bg-gradient-to-t from-black/45 to-transparent"></span>
+                                @endunless
                             @else
                                 <span class="absolute inset-0 z-0 bg-gradient-to-br from-brand-600 via-brand-500 to-gold-500"></span>
                             @endif
 
-                            <div class="hero-slide-overlay absolute inset-0 z-20 flex flex-col justify-end p-5 sm:p-8">
-                                <div @if ($isHeroCarousel) class="hero-slide-content max-w-xl" @else class="max-w-xl" @endif>
-                                    <p class="text-sm font-bold uppercase tracking-wide text-gold-300">Allo! Pizza · Русе</p>
-                                    <p class="mt-1 text-2xl font-black tracking-tight text-white sm:text-4xl">{{ $hero->title }}</p>
-                                    @if ($hero->subtitle)
-                                        <p class="mt-2 max-w-lg text-sm text-white/90 sm:text-base">{{ $hero->subtitle }}</p>
-                                    @endif
-                                    @if ($hero->button_text)
-                                        <a href="{{ $hero->button_url ?: route('menu') }}"
-                                           class="mt-4 inline-flex w-fit rounded-full bg-white px-5 py-2.5 text-sm font-bold text-brand-700 shadow-soft transition hover:bg-gold-500 hover:text-brand-900">
-                                            {{ $hero->button_text }}
-                                        </a>
-                                    @endif
+                            @unless ($hero->image_only)
+                                <div class="hero-slide-overlay absolute inset-0 z-20 flex flex-col justify-end p-5 sm:p-8">
+                                    <div @if ($isHeroCarousel) class="hero-slide-content max-w-xl" @else class="max-w-xl" @endif>
+                                        <p class="text-sm font-bold uppercase tracking-wide text-gold-300">Allo! Pizza · Русе</p>
+                                        <p class="mt-1 text-2xl font-black tracking-tight text-white sm:text-4xl">{{ $hero->title }}</p>
+                                        @if ($hero->subtitle)
+                                            <p class="mt-2 max-w-lg text-sm text-white/90 sm:text-base">{{ $hero->subtitle }}</p>
+                                        @endif
+                                        @if ($hero->button_text)
+                                            <a href="{{ $hero->button_url ?: route('menu') }}"
+                                               class="mt-4 inline-flex w-fit rounded-full bg-white px-5 py-2.5 text-sm font-bold text-brand-700 shadow-soft transition hover:bg-gold-500 hover:text-brand-900">
+                                                {{ $hero->button_text }}
+                                            </a>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
+                            @endunless
                         </div>
                     @endforeach
                 </div>

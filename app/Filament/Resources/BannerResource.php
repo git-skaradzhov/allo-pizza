@@ -45,6 +45,11 @@ class BannerResource extends Resource
                             ->directory('banners')
                             ->helperText('По желание. Ако липсва, началната страница показва цветна промо карта.')
                             ->visibility('public'),
+                        Forms\Components\Toggle::make('image_only')
+                            ->label('Само изображение')
+                            ->helperText('Скрива текста и градиента върху hero банера. Използвай, когато текстът е вграден в самото изображение.')
+                            ->default(false)
+                            ->visible(fn (Forms\Get $get): bool => $get('position') === BannerPosition::HomeHero->value),
                         Forms\Components\TextInput::make('button_text')
                             ->label('Текст на бутона')
                             ->maxLength(255),
@@ -58,6 +63,7 @@ class BannerResource extends Resource
                                 fn (BannerPosition $position) => [$position->value => $position->label()]
                             ))
                             ->required()
+                            ->live()
                             ->native(false),
                         Forms\Components\Toggle::make('is_active')
                             ->label('Активен')
