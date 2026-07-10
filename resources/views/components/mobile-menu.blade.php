@@ -81,13 +81,29 @@
 
         <nav class="flex-1 overflow-y-auto px-4 py-2">
             <p class="px-2 py-2 text-xs font-semibold uppercase tracking-wider text-white/40">Поръчка</p>
-            <a href="{{ route('menu') }}" class="block rounded-xl px-3 py-3 text-base font-medium text-white transition hover:bg-white/10" data-mobile-menu-close>
+            <a href="{{ route('menu') }}" class="flex items-center gap-3 rounded-xl px-3 py-3 text-base font-medium text-white transition hover:bg-white/10" data-mobile-menu-close>
+                <img src="{{ asset('images/icons/menu.png') }}" alt="" class="h-5 w-5 shrink-0 object-contain" width="20" height="20" aria-hidden="true">
                 Меню
             </a>
-            <a href="{{ route('lunch.index') }}" class="block rounded-xl px-3 py-3 text-base font-medium text-white transition hover:bg-white/10" data-mobile-menu-close>
-                Обедно меню
-            </a>
-            <a href="{{ route('cart') }}" class="block rounded-xl px-3 py-3 text-base font-medium text-white transition hover:bg-white/10" data-mobile-menu-close>
+            @if ($showNewMenuNav ?? false)
+                <a href="{{ route('home') }}#novo-v-menuto" class="mx-1 flex items-center gap-3 rounded-xl border-2 border-brand-500 bg-white/10 px-3 py-3 text-base font-bold text-white transition hover:bg-white/15" data-mobile-menu-close>
+                    <img src="{{ asset('images/icons/new.png') }}" alt="" class="h-6 w-6 shrink-0 object-contain" width="24" height="24" aria-hidden="true">
+                    Нови
+                </a>
+            @endif
+            @if ($showLunchMenuNav ?? false)
+                <a href="{{ route('lunch.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-3 text-base font-medium text-white transition hover:bg-white/10" data-mobile-menu-close>
+                    <svg class="h-5 w-5 shrink-0 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Обедно меню
+                </a>
+            @endif
+            <a href="{{ route('cart') }}" class="flex items-center gap-3 rounded-xl px-3 py-3 text-base font-medium text-white transition hover:bg-white/10" data-mobile-menu-close>
+                <svg class="h-5 w-5 shrink-0 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z"/>
+                </svg>
                 Количка
                 @if (($cartCount ?? 0) > 0)
                     <span class="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gold-500 px-1.5 text-xs font-bold text-brand-900">

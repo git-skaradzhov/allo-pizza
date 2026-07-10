@@ -106,4 +106,9 @@ class LunchMenu extends Model
 
         return $currentTime >= $this->start_time && $currentTime <= $this->end_time;
     }
+
+    public static function isPublished(): bool
+    {
+        return static::query()->where('is_active', true)->exists();
+    }
 }

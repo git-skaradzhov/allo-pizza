@@ -83,6 +83,13 @@ class Product extends Model implements SeoMeta
         return $this->belongsToMany(LunchMenu::class, 'lunch_menu_product');
     }
 
+    public function newMenuHighlights(): BelongsToMany
+    {
+        return $this->belongsToMany(NewMenuHighlight::class, 'new_menu_highlight_product')
+            ->withPivot('sort_order')
+            ->orderByPivot('sort_order');
+    }
+
     public function imageUrl(int $size = 650): ?string
     {
         return product_image_url($this->image, $size);

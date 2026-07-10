@@ -281,6 +281,54 @@
             </nav>
         @endif
 
+        {{-- New in menu --}}
+        @if ($newMenuHighlight && $newMenuHighlight->products->isNotEmpty())
+            <section id="novo-v-menuto" class="mb-10 scroll-mt-36">
+                <div class="mb-5 flex items-end justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-bold text-brand-600">Актуално</p>
+                        <h2 class="text-2xl font-black tracking-tight text-stone-950 sm:text-3xl">{{ $newMenuHighlight->title }}</h2>
+                        @if ($newMenuHighlight->message)
+                            <p class="mt-2 max-w-2xl text-stone-600">{{ $newMenuHighlight->message }}</p>
+                        @endif
+                    </div>
+                    <a href="{{ route('menu') }}" class="hidden rounded-full bg-white px-4 py-2 text-sm font-bold text-stone-700 shadow-soft transition hover:text-brand-600 sm:inline-flex">
+                        Цялото меню
+                    </a>
+                </div>
+                <div data-horizontal-slider>
+                    <div class="flex items-center sm:gap-3">
+                        <button type="button"
+                                class="hidden h-12 w-7 shrink-0 items-center justify-center text-brand-500 transition hover:text-brand-600 disabled:pointer-events-none disabled:opacity-0 sm:flex"
+                                aria-label="Предишни нови продукти"
+                                data-slider-prev>
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
+
+                        <div class="min-w-0 flex-1">
+                            <div class="flex cursor-grab snap-x snap-mandatory gap-3 overflow-x-auto pb-2 scroll-smooth [scrollbar-width:none] sm:gap-5 [&::-webkit-scrollbar]:hidden"
+                                 data-slider-track>
+                                @foreach ($newMenuHighlight->products as $product)
+                                    <x-product-card :product="$product" class="w-[168px] shrink-0 snap-start sm:w-[260px]" />
+                                @endforeach
+                            </div>
+                        </div>
+
+                        <button type="button"
+                                class="hidden h-12 w-7 shrink-0 items-center justify-center text-brand-500 transition hover:text-brand-600 disabled:pointer-events-none disabled:opacity-0 sm:flex"
+                                aria-label="Следващи нови продукти"
+                                data-slider-next>
+                            <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        @endif
+
         {{-- Featured products --}}
         @if ($featuredProducts->isNotEmpty())
             <section class="mb-10">

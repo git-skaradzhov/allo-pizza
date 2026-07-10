@@ -22,7 +22,7 @@ class PromoCodeResource extends Resource
 
     protected static ?string $pluralModelLabel = 'промо кодове';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {

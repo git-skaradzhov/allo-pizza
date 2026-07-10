@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\LunchMenu;
+use App\Models\NewMenuHighlight;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductImage;
@@ -37,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer([
             'layouts.app',
+            'components.mobile-menu',
             'pages.*',
             'errors.*',
             'auth.*',
@@ -53,6 +56,8 @@ class AppServiceProvider extends ServiceProvider
                 'workingHoursMessage' => $storeService->workingHoursMessage(),
                 'weeklyWorkingHoursSummary' => $storeService->weeklyScheduleSummary(),
                 'cartCount' => app(CartService::class)->itemCount(),
+                'showLunchMenuNav' => LunchMenu::isPublished(),
+                'showNewMenuNav' => NewMenuHighlight::isPublished(),
             ];
 
             if ($view->name() === 'layouts.app') {

@@ -86,6 +86,7 @@ class LunchMenuResource extends Resource
                             ->columnSpanFull(),
                         Forms\Components\Toggle::make('is_active')
                             ->label('Активно')
+                            ->helperText('Показва обедното меню в навигацията, във футъра и на началната страница.')
                             ->default(true),
                         Forms\Components\TextInput::make('sort_order')
                             ->label('Подредба')

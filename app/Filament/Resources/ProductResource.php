@@ -112,6 +112,16 @@ class ProductResource extends Resource
                             ->label('Промо'),
                         Forms\Components\Toggle::make('is_new')
                             ->label('Нов'),
+                        Forms\Components\CheckboxList::make('newMenuHighlights')
+                            ->label('Ново в менюто')
+                            ->relationship(
+                                name: 'newMenuHighlights',
+                                titleAttribute: 'title',
+                                modifyQueryUsing: fn ($query) => $query->orderBy('sort_order'),
+                            )
+                            ->helperText('Включва продукта в маркетинг секцията на началната страница.')
+                            ->columns(1)
+                            ->columnSpanFull(),
                         Forms\Components\Toggle::make('is_spicy')
                             ->label('Лют'),
                         Forms\Components\TextInput::make('sort_order')
@@ -162,6 +172,13 @@ class ProductResource extends Resource
                 Tables\Columns\IconColumn::make('is_promo')
                     ->label('Промо')
                     ->boolean(),
+                Tables\Columns\IconColumn::make('is_new')
+                    ->label('Нов')
+                    ->boolean(),
+                Tables\Columns\TextColumn::make('newMenuHighlights.title')
+                    ->label('Ново в менюто')
+                    ->badge()
+                    ->limitList(1),
                 Tables\Columns\TextColumn::make('variants_count')
                     ->label('Варианти')
                     ->counts('variants')
@@ -180,6 +197,11 @@ class ProductResource extends Resource
                     ->label('Видим на сайта'),
                 Tables\Filters\TernaryFilter::make('is_featured')
                     ->label('Препоръчан'),
+                Tables\Filters\TernaryFilter::make('is_new')
+                    ->label('Нов'),
+                Tables\Filters\Filter::make('in_new_menu')
+                    ->label('В секция Ново в менюто')
+                    ->query(fn ($query) => $query->whereHas('newMenuHighlights')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
