@@ -117,10 +117,13 @@
                 @endif
             </section>
 
-            @if ($isHeroCarousel)
+            @if ($heroBanners->isNotEmpty())
                 @push('styles')
                     <link rel="stylesheet" href="{{ asset('css/hero-carousel.css') }}">
                 @endpush
+            @endif
+
+            @if ($isHeroCarousel)
                 @push('scripts')
                     <script src="{{ asset('js/hero-carousel.js') }}" defer></script>
                 @endpush
