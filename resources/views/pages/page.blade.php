@@ -102,6 +102,16 @@
             $googleMapsKey = config('services.google_maps.key');
         @endphp
 
+        @push('styles')
+            <style>
+                /* Tailwind preflight breaks Google Maps tile images */
+                .gm-style img,
+                .gm-style svg {
+                    max-width: none;
+                }
+            </style>
+        @endpush
+
         @push('scripts')
             <script>
                 (function () {
