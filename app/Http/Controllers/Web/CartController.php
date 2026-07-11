@@ -7,8 +7,10 @@ use App\Models\CartItem;
 use App\Models\Ingredient;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\CartPricingService;
 use App\Services\CartService;
 use App\Services\DeliveryService;
+use App\Services\PizzaBundlePromotionService;
 use App\Services\PromoService;
 use App\Services\StoreService;
 use Illuminate\Http\RedirectResponse;
@@ -19,25 +21,31 @@ class CartController extends Controller
 {
     public function __construct(
         protected CartService $cartService,
+        protected CartPricingService $cartPricingService,
         protected DeliveryService $deliveryService,
         protected StoreService $storeService,
         protected PromoService $promoService,
+        protected PizzaBundlePromotionService $pizzaBundlePromotionService,
     ) {}
 
     public function index(): View
     {
-        $cart = $this->cartService->getCart()->load(['items.product', 'items.variant']);
-        $subtotal = $this->cartService->subtotal();
+        $cart = $this->cartService->getCart()->load(['items.product.category', 'items.variant']);
+        $pricing = $this->cartPricingService->summarize($cart);
         $settings = $this->storeService->settings();
-        $discount = $this->promoService->discount($subtotal);
 
         return view('pages.cart', [
             'cart' => $cart,
-            'subtotal' => $subtotal,
+            'pricing' => $pricing,
+            'subtotal' => $pricing['subtotal'],
             'settings' => $settings,
-            'deliveryPrice' => $this->deliveryService->deliveryPrice($subtotal),
-            'discount' => $discount,
-            'appliedPromo' => $this->promoService->applied(),
+            'deliveryPrice' => $this->deliveryService->deliveryPrice($pricing['subtotal']),
+            'discount' => $pricing['totalDiscount'],
+            'bundleDiscount' => $pricing['bundleDiscount'],
+            'promoDiscount' => $pricing['promoDiscount'],
+            'bundle' => $pricing['bundle'],
+            'promoIgnored' => $pricing['promoIgnored'],
+            'appliedPromo' => $pricing['appliedPromo'],
         ]);
     }
 
@@ -46,6 +54,13 @@ class CartController extends Controller
         $validated = $request->validate([
             'code' => ['required', 'string', 'max:50'],
         ]);
+
+        $cart = $this->cartService->getCart()->load(['items.product.category', 'items.variant']);
+        $bundle = $this->pizzaBundlePromotionService->evaluate($cart);
+
+        if ($bundle->isActive()) {
+            return back()->with('error', '4+1 промоцията не се комбинира с промо код.');
+        }
 
         $result = $this->promoService->apply($validated['code'], $this->cartService->subtotal());
 

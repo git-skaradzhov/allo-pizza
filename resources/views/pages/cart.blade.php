@@ -23,6 +23,25 @@
             <a href="{{ route('menu') }}" class="mt-4 inline-block rounded-xl bg-brand-500 px-6 py-3 font-bold text-white hover:bg-brand-600">Към менюто</a>
         </div>
     @else
+        @if ($settings->isBundlePromotionEnabled() && ($bundle->eligibleQuantity ?? 0) > 0)
+            <div class="mb-6 rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm text-brand-800">
+                @if ($bundle->isActive())
+                    <p class="font-semibold">
+                        🎁 {{ $settings->bundlePromotionLabel() }}:
+                        {{ $bundle->freeCount }} {{ $bundle->freeCount === 1 ? 'безплатен' : 'безплатни' }}
+                        {{ $bundle->freeCount === 1 ? 'продукт' : 'продукти' }}
+                        (−{{ money($bundleDiscount) }})
+                    </p>
+                @else
+                    <p class="font-semibold">
+                        🎁 {{ $settings->bundlePromotionLabel() }}:
+                        добавете още <strong>{{ $bundle->remainingUntilFree }}</strong>
+                        {{ $bundle->remainingUntilFree === 1 ? 'продукт' : 'продукти' }} за 1 безплатен
+                    </p>
+                @endif
+            </div>
+        @endif
+
         <div class="grid gap-8 lg:grid-cols-3">
             <div class="space-y-4 lg:col-span-2">
                 @foreach ($cart->items as $item)
@@ -52,7 +71,12 @@
                                         @endif
                                     @else
                                         @if ($item->variant)
-                                            <p class="text-sm text-stone-500">{{ $item->variant->name }} ({{ $item->variant->size_label }})</p>
+                                            <p class="text-sm text-stone-500">
+                                                {{ $item->variant->name }} ({{ $item->variant->size_label }})
+                                                @if ($item->isPizzaBundleEligible())
+                                                    <span class="text-brand-600">· 4+1</span>
+                                                @endif
+                                            </p>
                                         @endif
                                     @endif
                                     <x-order-item-options :options="$item->options ?? []" />
@@ -90,7 +114,11 @@
                 <h2 class="mb-4 text-lg font-bold">Обобщение</h2>
 
                 <div class="mb-4">
-                    @if ($appliedPromo)
+                    @if ($promoIgnored ?? false)
+                        <div class="rounded-xl bg-gold-500/10 px-3 py-2 text-sm text-brand-700">
+                            Промо кодът не се комбинира с 4+1 промоцията.
+                        </div>
+                    @elseif ($appliedPromo)
                         <div class="flex items-center justify-between rounded-xl bg-green-50 px-3 py-2 text-sm">
                             <span class="font-semibold text-green-800">Код „{{ $appliedPromo->code }}" приложен</span>
                             <form method="POST" action="{{ route('cart.promo.remove') }}">
@@ -99,6 +127,8 @@
                                 <button type="submit" class="text-xs text-green-700 underline hover:text-green-900">премахни</button>
                             </form>
                         </div>
+                    @elseif ($settings->isBundlePromotionEnabled() && $bundle->isActive())
+                        <p class="text-sm text-stone-500">Промо кодът не е наличен при активна 4+1 промоция.</p>
                     @else
                         <form method="POST" action="{{ route('cart.promo.apply') }}" class="flex gap-2">
                             @csrf
@@ -113,10 +143,16 @@
                         <span class="text-stone-500">Междинна сума</span>
                         <span class="font-semibold">{{ money($subtotal) }}</span>
                     </div>
-                    @if ($discount > 0)
+                    @if ($settings->isBundlePromotionEnabled() && $bundleDiscount > 0)
                         <div class="flex justify-between text-green-700">
-                            <span>Отстъпка</span>
-                            <span class="font-semibold">−{{ money($discount) }}</span>
+                            <span>{{ $settings->bundlePromotionLabel() }}</span>
+                            <span class="font-semibold">−{{ money($bundleDiscount) }}</span>
+                        </div>
+                    @endif
+                    @if ($promoDiscount > 0)
+                        <div class="flex justify-between text-green-700">
+                            <span>Промо код</span>
+                            <span class="font-semibold">−{{ money($promoDiscount) }}</span>
                         </div>
                     @endif
                     <div class="flex justify-between">

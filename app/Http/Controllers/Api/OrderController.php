@@ -11,9 +11,9 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Services\ApiOrderPricingService;
 use App\Services\DeliveryService;
 use App\Services\OrderNotificationService;
-use App\Services\PromoService;
 use App\Services\StoreService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,7 +24,7 @@ class OrderController extends Controller
     public function __construct(
         protected DeliveryService $deliveryService,
         protected StoreService $storeService,
-        protected PromoService $promoService,
+        protected ApiOrderPricingService $apiOrderPricingService,
         protected OrderNotificationService $orderNotificationService,
     ) {}
 
@@ -54,24 +54,49 @@ class OrderController extends Controller
 
         $subtotal = 0;
         $orderItems = [];
+        $pricingLines = [];
 
         foreach ($validated['items'] as $itemData) {
-            $product = Product::query()->findOrFail($itemData['product_id']);
+            $product = Product::query()
+                ->with('category')
+                ->findOrFail($itemData['product_id']);
             $variant = ProductVariant::query()
                 ->where('product_id', $product->id)
                 ->findOrFail($itemData['product_variant_id']);
 
-            $lineTotal = (float) $variant->price * $itemData['quantity'];
+            $unitPrice = (float) $variant->price;
+            $lineTotal = $unitPrice * $itemData['quantity'];
             $subtotal += $lineTotal;
+
+            $pricingLines[] = [
+                'category_id' => $product->category_id,
+                'category_slug' => $product->category?->slug,
+                'diameter' => (int) ($variant->diameter ?? 0),
+                'unit_price' => $unitPrice,
+                'quantity' => $itemData['quantity'],
+                'product_name' => $product->name,
+                'options' => [],
+                'is_product' => true,
+            ];
 
             $orderItems[] = [
                 'product' => $product,
                 'variant' => $variant,
                 'quantity' => $itemData['quantity'],
-                'unit_price' => $variant->price,
+                'unit_price' => $unitPrice,
                 'total_price' => $lineTotal,
                 'note' => $itemData['note'] ?? null,
             ];
+        }
+
+        $pricing = $this->apiOrderPricingService->summarize(
+            $subtotal,
+            $pricingLines,
+            $validated['promo_code'] ?? null,
+        );
+
+        if ($pricing['promoInvalid']) {
+            return response()->json(['message' => 'Невалиден промо код.'], 422);
         }
 
         $deliveryType = DeliveryType::from($validated['delivery_type']);
@@ -82,15 +107,8 @@ class OrderController extends Controller
             ? $this->deliveryService->deliveryPrice($subtotal, $deliveryLat, $deliveryLng)
             : 0;
 
-        if (! empty($validated['promo_code'])) {
-            $promo = $this->promoService->resolve($validated['promo_code']);
-
-            if (! $promo || ! $promo->isCurrentlyValid() || ! $promo->meetsMinimum($subtotal)) {
-                return response()->json(['message' => 'Невалиден промо код.'], 422);
-            }
-
-            $discount = $promo->discountFor($subtotal);
-        }
+        $appliedPromo = $pricing['appliedPromo'];
+        $discount = $pricing['totalDiscount'];
 
         $order = Order::query()->create([
             'order_number' => Order::generateOrderNumber(),
@@ -105,15 +123,15 @@ class OrderController extends Controller
             'delivery_price' => $deliveryPrice,
             'subtotal' => $subtotal,
             'discount' => $discount,
-            'promo_code' => $promo?->code,
+            'promo_code' => $appliedPromo?->code,
             'total' => max(0, $subtotal - $discount) + $deliveryPrice,
             'payment_method' => PaymentMethod::from($validated['payment_method']),
             'status' => OrderStatus::New,
             'customer_note' => $validated['customer_note'] ?? null,
         ]);
 
-        if ($promo) {
-            $promo->increment('used_count');
+        if ($appliedPromo) {
+            $appliedPromo->increment('used_count');
         }
 
         foreach ($orderItems as $item) {

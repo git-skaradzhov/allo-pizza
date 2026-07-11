@@ -151,6 +151,23 @@
 
         <div class="h-fit rounded-3xl border border-stone-200 bg-white p-6">
             <h2 class="mb-4 text-lg font-bold">Обобщение</h2>
+
+            @if ($settings->isBundlePromotionEnabled() && ($bundle->eligibleQuantity ?? 0) > 0)
+                <div class="mb-4 rounded-xl border border-brand-200 bg-brand-50 px-3 py-2 text-sm text-brand-800">
+                    @if ($bundle->isActive())
+                        🎁 {{ $settings->bundlePromotionLabel() }}:
+                        {{ $bundle->freeCount }} {{ $bundle->freeCount === 1 ? 'безплатен' : 'безплатни' }}
+                        {{ $bundle->freeCount === 1 ? 'продукт' : 'продукти' }}
+                    @else
+                        🎁 Добавете още {{ $bundle->remainingUntilFree }} {{ $bundle->remainingUntilFree === 1 ? 'продукт' : 'продукти' }} за 1 безплатен
+                    @endif
+                </div>
+            @endif
+
+            @if ($promoIgnored ?? false)
+                <p class="mb-4 text-sm text-brand-700">Промо кодът не се комбинира с 4+1 промоцията.</p>
+            @endif
+
             <div class="space-y-3 text-sm">
                 @foreach ($cart->items as $item)
                     <div class="flex justify-between gap-4 border-b border-stone-100 pb-3 last:border-0 last:pb-0">
@@ -173,10 +190,16 @@
                     <span class="text-stone-500">Междинна сума</span>
                     <span class="font-semibold">{{ money($subtotal) }}</span>
                 </div>
-                @if ($discount > 0)
+                @if ($settings->isBundlePromotionEnabled() && $bundleDiscount > 0)
                     <div class="flex justify-between text-green-700">
-                        <span>Отстъпка{{ $appliedPromo ? ' ('.$appliedPromo->code.')' : '' }}</span>
-                        <span class="font-semibold">−{{ money($discount) }}</span>
+                        <span>{{ $settings->bundlePromotionLabel() }}</span>
+                        <span class="font-semibold">−{{ money($bundleDiscount) }}</span>
+                    </div>
+                @endif
+                @if ($promoDiscount > 0)
+                    <div class="flex justify-between text-green-700">
+                        <span>Промо код{{ $appliedPromo ? ' ('.$appliedPromo->code.')' : '' }}</span>
+                        <span class="font-semibold">−{{ money($promoDiscount) }}</span>
                     </div>
                 @endif
                 <div class="flex justify-between">

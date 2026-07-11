@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\StoreSettingResource\Pages;
+use App\Models\Category;
 use App\Models\StoreSetting;
 use App\Support\DeliveryZone;
 use Filament\Forms;
@@ -117,6 +118,24 @@ class StoreSettingResource extends Resource
                             ->label('Съобщение при затворен магазин')
                             ->helperText('Оставете празно за автоматично съобщение с динамично работно време от настройките.')
                             ->rows(3)
+                            ->columnSpanFull(),
+                    ]),
+                Forms\Components\Section::make('4+1 промоция')
+                    ->description('При активна промоция на всеки 5-ти продукт от избраните категории най-евтиният става безплатен. Не се комбинира с промо код.')
+                    ->schema([
+                        Forms\Components\Toggle::make('bundle_promotion_enabled')
+                            ->label('Промоцията е активна')
+                            ->default(true),
+                        Forms\Components\Select::make('bundle_promotion_category_ids')
+                            ->label('Категории')
+                            ->multiple()
+                            ->searchable()
+                            ->options(fn (): array => Category::query()
+                                ->where('is_active', true)
+                                ->orderBy('name')
+                                ->pluck('name', 'id')
+                                ->all())
+                            ->helperText('За категория Пици важи само размер 30 см. За останалите избрани категории — всички варианти. Празен избор = само категория Пици.')
                             ->columnSpanFull(),
                     ]),
                 Forms\Components\Section::make('SEO и аналитика')

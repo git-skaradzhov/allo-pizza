@@ -79,4 +79,9 @@ class CartItem extends Model
     {
         return $this->item_type === CartItemType::LunchItem;
     }
+
+    public function isPizzaBundleEligible(): bool
+    {
+        return app(\App\Services\PizzaBundlePromotionService::class)->isCartItemEligible($this);
+    }
 }

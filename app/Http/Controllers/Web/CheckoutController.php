@@ -8,6 +8,7 @@ use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\CartPricingService;
 use App\Services\CartService;
 use App\Services\DeliveryService;
 use App\Services\OrderNotificationService;
@@ -21,6 +22,7 @@ class CheckoutController extends Controller
 {
     public function __construct(
         protected CartService $cartService,
+        protected CartPricingService $cartPricingService,
         protected DeliveryService $deliveryService,
         protected StoreService $storeService,
         protected PromoService $promoService,
@@ -29,34 +31,39 @@ class CheckoutController extends Controller
 
     public function index(): View|RedirectResponse
     {
-        $cart = $this->cartService->getCart()->load(['items.product', 'items.variant']);
+        $cart = $this->cartService->getCart()->load(['items.product.category', 'items.variant']);
 
         if ($cart->items->isEmpty()) {
             return redirect()->route('cart')->with('error', 'Количката е празна.');
         }
 
         $settings = $this->storeService->settings();
-        $subtotal = $this->cartService->subtotal();
+        $pricing = $this->cartPricingService->summarize($cart);
 
         return view('pages.checkout', [
             'cart' => $cart,
-            'subtotal' => $subtotal,
+            'pricing' => $pricing,
+            'subtotal' => $pricing['subtotal'],
             'settings' => $settings,
             'isOpen' => $this->storeService->isOpen(),
-            'deliveryPrice' => $this->deliveryService->deliveryPrice($subtotal),
+            'deliveryPrice' => $this->deliveryService->deliveryPrice($pricing['subtotal']),
             'deliveryInsidePrice' => (float) $settings->delivery_inside_price,
             'deliveryOutsidePrice' => (float) $settings->delivery_outside_price,
             'zonePolygon' => $this->deliveryService->zonePolygon(),
             'freeDeliveryOver' => $settings->free_delivery_over ? (float) $settings->free_delivery_over : null,
             'googleMapsKey' => config('services.google_maps.key'),
-            'discount' => $this->promoService->discount($subtotal),
-            'appliedPromo' => $this->promoService->applied(),
+            'discount' => $pricing['totalDiscount'],
+            'bundleDiscount' => $pricing['bundleDiscount'],
+            'promoDiscount' => $pricing['promoDiscount'],
+            'bundle' => $pricing['bundle'],
+            'promoIgnored' => $pricing['promoIgnored'],
+            'appliedPromo' => $pricing['appliedPromo'],
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $cart = $this->cartService->getCart()->load(['items.product', 'items.variant']);
+        $cart = $this->cartService->getCart()->load(['items.product.category', 'items.variant']);
 
         if ($cart->items->isEmpty()) {
             return redirect()->route('cart')->with('error', 'Количката е празна.');
@@ -77,7 +84,8 @@ class CheckoutController extends Controller
             'customer_note' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $subtotal = $this->cartService->subtotal();
+        $pricing = $this->cartPricingService->summarize($cart);
+        $subtotal = $pricing['subtotal'];
         $deliveryType = DeliveryType::from($validated['delivery_type']);
         $paymentMethod = $deliveryType === DeliveryType::Delivery
             ? PaymentMethod::CashOnDelivery
@@ -90,8 +98,8 @@ class CheckoutController extends Controller
             ? $this->deliveryService->deliveryPrice($subtotal, $deliveryLat, $deliveryLng)
             : 0;
 
-        $appliedPromo = $this->promoService->applied();
-        $discount = $this->promoService->discount($subtotal);
+        $appliedPromo = $pricing['appliedPromo'];
+        $discount = $pricing['totalDiscount'];
 
         $order = Order::query()->create([
             'order_number' => Order::generateOrderNumber(),

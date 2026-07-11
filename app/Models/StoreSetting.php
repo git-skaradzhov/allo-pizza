@@ -26,6 +26,8 @@ class StoreSetting extends Model
         'minimum_order_amount',
         'average_delivery_time',
         'is_store_open',
+        'bundle_promotion_enabled',
+        'bundle_promotion_category_ids',
         'closed_message',
         'seo_title_suffix',
         'seo_default_description',
@@ -52,6 +54,8 @@ class StoreSetting extends Model
             'free_delivery_over' => 'decimal:2',
             'minimum_order_amount' => 'decimal:2',
             'is_store_open' => 'boolean',
+            'bundle_promotion_enabled' => 'boolean',
+            'bundle_promotion_category_ids' => 'array',
         ];
     }
 
@@ -72,7 +76,53 @@ class StoreSetting extends Model
             'delivery_outside_price' => 3.00,
             'minimum_order_amount' => 7.67,
             'is_store_open' => true,
+            'bundle_promotion_enabled' => true,
+            'bundle_promotion_category_ids' => static::defaultBundlePromotionCategoryIds(),
         ]);
+    }
+
+    /**
+     * @return array<int, int>|null
+     */
+    protected static function defaultBundlePromotionCategoryIds(): ?array
+    {
+        $pizzaCategoryId = Category::query()
+            ->where('slug', config('promotions.pizza_bundle.eligible_category_slug', 'pizza'))
+            ->value('id');
+
+        return $pizzaCategoryId ? [(int) $pizzaCategoryId] : null;
+    }
+
+    public function isBundlePromotionEnabled(): bool
+    {
+        return (bool) ($this->bundle_promotion_enabled ?? true);
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public function bundlePromotionCategoryIds(): array
+    {
+        $ids = collect($this->bundle_promotion_category_ids ?? [])
+            ->filter(fn ($id) => is_numeric($id))
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+
+        if ($ids !== []) {
+            return $ids;
+        }
+
+        $pizzaCategoryId = Category::query()
+            ->where('slug', config('promotions.pizza_bundle.eligible_category_slug', 'pizza'))
+            ->value('id');
+
+        return $pizzaCategoryId ? [(int) $pizzaCategoryId] : [];
+    }
+
+    public function bundlePromotionLabel(): string
+    {
+        return (string) config('promotions.pizza_bundle.label', '4+1 промо');
     }
 
     public function phoneNumbers(): array
