@@ -130,6 +130,8 @@ php artisan key:generate
 bash scripts/cpanel-deploy.sh
 ```
 
+`artisan` автоматично пренасочва към PHP 8.2+ на cPanel, така че `php artisan migrate` работи дори когато default `php` е стара версия.
+
 5. Насочете domain document root към папката `public` на проекта. Ако cPanel не позволява document root извън `public_html`, използвайте поддомейн/addon domain с root към:
 
 ```bash

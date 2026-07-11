@@ -3,29 +3,10 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-PHP_BIN="${PHP:-}"
+# shellcheck source=scripts/find-php.sh
+source "$(dirname "$0")/find-php.sh"
 
-if [ -z "$PHP_BIN" ]; then
-    for candidate in \
-        /opt/cpanel/ea-php83/root/usr/bin/php \
-        /opt/cpanel/ea-php82/root/usr/bin/php \
-        "$(command -v php || true)"
-    do
-        if [ -n "$candidate" ] && [ -x "$candidate" ]; then
-            version_id="$("$candidate" -r 'echo PHP_VERSION_ID;' 2>/dev/null || echo 0)"
-
-            if [ "$version_id" -ge 80200 ]; then
-                PHP_BIN="$candidate"
-                break
-            fi
-        fi
-    done
-fi
-
-if [ -z "$PHP_BIN" ]; then
-    echo "Could not find PHP 8.2 or newer. Set PHP=/path/to/php and run again." >&2
-    exit 1
-fi
+require_php_bin
 
 echo "==> Using PHP: $("$PHP_BIN" -v | awk 'NR == 1 { print $1, $2 }')"
 
@@ -75,12 +56,12 @@ else
 fi
 
 echo "==> Running database migrations"
-"$PHP_BIN" artisan migrate --force
+bash scripts/run-artisan.sh migrate --force
 
 echo "==> Linking storage"
-"$PHP_BIN" artisan storage:link || true
+bash scripts/run-artisan.sh storage:link || true
 
 echo "==> Caching Laravel bootstrap files"
-"$PHP_BIN" artisan optimize
+bash scripts/run-artisan.sh optimize
 
 echo "==> Deployment complete"

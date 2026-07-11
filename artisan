@@ -1,23 +1,53 @@
 #!/usr/bin/env php
 <?php
 
-use Illuminate\Foundation\Application;
-use Symfony\Component\Console\Input\ArgvInput;
+if (PHP_VERSION_ID < 80200) {
+    $root = __DIR__;
+    $arguments = array_slice(isset($argv) ? $argv : array(), 1);
+    $candidates = array();
 
-define('LARAVEL_START', microtime(true));
+    if (($php = getenv('PHP')) !== false && $php !== '') {
+        $candidates[] = $php;
+    }
 
-require __DIR__.'/vendor/autoload.php';
+    if (($phpBin = getenv('PHP_BIN')) !== false && $phpBin !== '') {
+        $candidates[] = $phpBin;
+    }
 
-/** @var Application $app */
-$app = require_once __DIR__.'/bootstrap/app.php';
+    $candidates = array_merge($candidates, array(
+        '/opt/cpanel/ea-php83/root/usr/bin/php',
+        '/opt/cpanel/ea-php82/root/usr/bin/php',
+        '/usr/local/bin/php83',
+        '/usr/local/bin/php82',
+        '/opt/homebrew/bin/php',
+        '/usr/local/bin/php',
+    ));
 
-$kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
+    foreach ($candidates as $candidate) {
+        if (! is_string($candidate) || $candidate === '' || ! is_executable($candidate)) {
+            continue;
+        }
 
-$status = $kernel->handle(
-    $input = new ArgvInput,
-    new Symfony\Component\Console\Output\ConsoleOutput
-);
+        $versionId = (int) trim((string) shell_exec(escapeshellarg($candidate).' -r "echo PHP_VERSION_ID;" 2>/dev/null'));
 
-$kernel->terminate($input, $status);
+        if ($versionId < 80200) {
+            continue;
+        }
 
-exit($status);
+        $command = escapeshellarg($candidate).' '.escapeshellarg($root.'/artisan');
+
+        foreach ($arguments as $argument) {
+            $command .= ' '.escapeshellarg($argument);
+        }
+
+        passthru($command, $exitCode);
+        exit($exitCode);
+    }
+
+    fwrite(STDERR, "PHP 8.2+ is required.\n");
+    fwrite(STDERR, "On cPanel try: /opt/cpanel/ea-php83/root/usr/bin/php artisan migrate --force\n");
+    fwrite(STDERR, "Or set PHP=/path/to/php82 before running artisan.\n");
+    exit(1);
+}
+
+require __DIR__.'/artisan-kernel.php';
