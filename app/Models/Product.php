@@ -98,4 +98,9 @@ class Product extends Model implements SeoMeta
     {
         return (bool) $this->category?->allows_extras;
     }
+
+    public function allowsNotes(): bool
+    {
+        return $this->allowsExtras();
+    }
 }

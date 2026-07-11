@@ -299,15 +299,18 @@ class CartCheckoutTest extends TestCase
             'product_variant_id' => $variant->id,
             'quantity' => 1,
             'extras' => [$extra->id => 2],
+            'note' => 'Без лед',
         ]);
 
         $cartItem = \App\Models\CartItem::query()->first();
 
         $this->assertEqualsWithDelta((float) $variant->price, (float) $cartItem->unit_price, 0.001);
         $this->assertEmpty($cartItem->options);
+        $this->assertNull($cartItem->note);
 
         $this->get(route('product.show', $product->slug))
             ->assertOk()
-            ->assertDontSee('Добави съставки');
+            ->assertDontSee('Добави съставки')
+            ->assertDontSee('Бележка');
     }
 }

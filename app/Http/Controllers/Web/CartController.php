@@ -127,7 +127,7 @@ class CartController extends Controller
             $product,
             $variant,
             $validated['quantity'] ?? 1,
-            $validated['note'] ?? null,
+            $product->allowsNotes() ? ($validated['note'] ?? null) : null,
             $options
         );
 

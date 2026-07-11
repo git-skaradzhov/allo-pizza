@@ -170,11 +170,13 @@
                 </div>
             @endif
 
-            <div class="mt-6">
-                <label for="note" class="mb-2 block text-sm font-bold uppercase tracking-wide text-stone-400">Бележка</label>
-                <input type="text" id="note" name="note" maxlength="500" placeholder="напр. без лук, разрязана..."
-                       class="w-full rounded-xl border-stone-300 text-sm focus:border-brand-400 focus:ring-brand-400">
-            </div>
+            @if ($product->allowsNotes())
+                <div class="mt-6">
+                    <label for="note" class="mb-2 block text-sm font-bold uppercase tracking-wide text-stone-400">Бележка</label>
+                    <input type="text" id="note" name="note" maxlength="500" placeholder="напр. без лук, разрязана..."
+                           class="w-full rounded-xl border-stone-300 text-sm focus:border-brand-400 focus:ring-brand-400">
+                </div>
+            @endif
 
             <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <div class="flex items-center rounded-xl border border-stone-300">
