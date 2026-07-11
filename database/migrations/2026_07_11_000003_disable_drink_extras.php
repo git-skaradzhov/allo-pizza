@@ -9,9 +9,11 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
-            $table->boolean('allows_extras')->default(true)->after('is_active');
-        });
+        if (! Schema::hasColumn('categories', 'allows_extras')) {
+            Schema::table('categories', function (Blueprint $table) {
+                $table->boolean('allows_extras')->default(true)->after('is_active');
+            });
+        }
 
         DB::table('categories')
             ->where('slug', 'drinks')
@@ -55,8 +57,10 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::table('categories', function (Blueprint $table) {
-            $table->dropColumn('allows_extras');
-        });
+        if (Schema::hasColumn('categories', 'allows_extras')) {
+            Schema::table('categories', function (Blueprint $table) {
+                $table->dropColumn('allows_extras');
+            });
+        }
     }
 };

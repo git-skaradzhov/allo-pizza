@@ -8,15 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('banners', function (Blueprint $table) {
-            $table->string('mobile_image')->nullable()->after('image');
-        });
+        if (! Schema::hasColumn('banners', 'mobile_image')) {
+            Schema::table('banners', function (Blueprint $table) {
+                $table->string('mobile_image')->nullable()->after('image');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('banners', function (Blueprint $table) {
-            $table->dropColumn('mobile_image');
-        });
+        if (Schema::hasColumn('banners', 'mobile_image')) {
+            Schema::table('banners', function (Blueprint $table) {
+                $table->dropColumn('mobile_image');
+            });
+        }
     }
 };
