@@ -24,13 +24,6 @@
         Към съдържанието
     </a>
 
-    @if (! empty($storeSetting->google_tag_manager_id))
-        <noscript>
-            <iframe src="https://www.googletagmanager.com/ns.html?id={{ $storeSetting->google_tag_manager_id }}"
-                    height="0" width="0" style="display:none;visibility:hidden" title="Google Tag Manager"></iframe>
-        </noscript>
-    @endif
-
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">
         <div class="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3">
             <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2">
@@ -164,40 +157,10 @@
         </main>
     @endif
 
-    <footer class="mt-16 border-t border-stone-200 bg-white">
-        <div class="mx-auto max-w-7xl px-3 py-8 sm:px-4 sm:py-10">
-            <div class="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
-                <div class="max-w-sm">
-                    <img src="{{ asset('images/logo-wide.png') }}" alt="{{ $storeSetting->store_name ?? 'Allo! Pizza' }}" class="h-14 w-auto max-w-[220px] object-contain">
-                    <p class="mt-4 text-sm font-semibold text-stone-900">{{ $storeSetting->store_name ?? 'Allo! Pizza' }}</p>
-                    <p class="mt-1 text-sm text-stone-500">
-                        {{ $storeSetting->store_address ?? 'гр. Русе, ул. „Мария Луиза“, 22' }}
-                    </p>
-                    <x-store-contact-links class="mt-3" stacked link-class="text-base font-extrabold text-brand-600 hover:text-brand-700" />
-                </div>
-
-                <div class="grid grid-cols-2 gap-x-8 gap-y-2 text-sm sm:gap-x-10">
-                    <a href="{{ route('pages.show', 'za-nas') }}" class="text-stone-600 hover:text-brand-600">За нас</a>
-                    <a href="{{ route('pages.show', 'dostavka') }}" class="text-stone-600 hover:text-brand-600">Доставка</a>
-                    <a href="{{ route('pages.show', 'kontakti') }}" class="text-stone-600 hover:text-brand-600">Контакти</a>
-                    <a href="{{ route('pages.show', 'obshti-usloviya') }}" class="text-stone-600 hover:text-brand-600">Общи условия</a>
-                    <a href="{{ route('pages.show', 'politika-za-poveritelnost') }}" class="text-stone-600 hover:text-brand-600">Поверителност</a>
-                    <a href="{{ route('menu') }}" class="text-stone-600 hover:text-brand-600">Меню</a>
-                    @if ($showLunchMenuNav)
-                        <a href="{{ route('lunch.index') }}" class="text-stone-600 hover:text-brand-600">Обедно меню</a>
-                    @endif
-                    @if ($showNewMenuNav)
-                        <a href="{{ route('new-menu.index') }}" class="text-stone-600 hover:text-brand-600">Ново в менюто</a>
-                    @endif
-                </div>
-            </div>
-
-            <p class="mt-8 border-t border-stone-100 pt-6 text-xs text-stone-400">
-                &copy; {{ date('Y') }} {{ $storeSetting->store_name ?? 'Allo! Pizza' }}. Всички права запазени.
-            </p>
-        </div>
-    </footer>
+    <x-site-footer />
 
     @stack('scripts')
+
+    <x-cookie-consent />
 </body>
 </html>
