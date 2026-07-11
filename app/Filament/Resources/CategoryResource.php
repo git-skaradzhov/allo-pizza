@@ -55,6 +55,10 @@ class CategoryResource extends Resource
                         Forms\Components\Toggle::make('is_active')
                             ->label('Активна')
                             ->default(true),
+                        Forms\Components\Toggle::make('allows_extras')
+                            ->label('Позволява добавки')
+                            ->helperText('Изключете за категории без допълнителни съставки, напр. напитки.')
+                            ->default(true),
                         Forms\Components\TextInput::make('sort_order')
                             ->label('Подредба')
                             ->numeric()
@@ -81,6 +85,9 @@ class CategoryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Активна')
+                    ->boolean(),
+                Tables\Columns\IconColumn::make('allows_extras')
+                    ->label('Добавки')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('sort_order')
                     ->label('Подредба')

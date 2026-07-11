@@ -17,18 +17,21 @@ class CategorySeeder extends Seeder
                 'slug' => 'pizza',
                 'description' => 'Пици с пухкаво тесто, домашен доматен сос и пресни продукти.',
                 'sort_order' => 1,
+                'allows_extras' => true,
             ],
             [
                 'name' => 'Сандвичи и Пърленки',
                 'slug' => 'sandvici-i-pierlenki',
                 'description' => 'Сандвичи с пица хлебче и топли пърленки, изпечени на момента.',
                 'sort_order' => 2,
+                'allows_extras' => true,
             ],
             [
                 'name' => 'Напитки',
                 'slug' => 'drinks',
                 'description' => 'Студени напитки за всяка поръчка.',
                 'sort_order' => 3,
+                'allows_extras' => false,
             ],
             // Legacy categories – kept for records, hidden from menu
             [
@@ -66,6 +69,7 @@ class CategorySeeder extends Seeder
                 ['slug' => $category['slug']],
                 array_merge($category, [
                     'is_active' => $category['is_active'] ?? true,
+                    'allows_extras' => $category['allows_extras'] ?? false,
                     'seo_title' => $category['name'].' | Allo! Pizza',
                     'seo_description' => $category['description'],
                 ])

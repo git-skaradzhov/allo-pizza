@@ -265,4 +265,49 @@ class CartCheckoutTest extends TestCase
         $this->assertEqualsWithDelta((float) $variant->price + 2.00, (float) $cartItem->unit_price, 0.001);
         $this->assertEquals(2, $cartItem->options[0]['quantity'] ?? 0);
     }
+
+    public function test_drink_products_ignore_extras(): void
+    {
+        $category = Category::factory()->create([
+            'slug' => 'drinks',
+            'allows_extras' => false,
+        ]);
+        $product = Product::factory()->create([
+            'category_id' => $category->id,
+            'is_active' => true,
+            'base_price' => 1.30,
+        ]);
+        $variant = ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'name' => 'Стандартен',
+            'size_label' => '0,5 л',
+            'price' => 1.30,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+        $extra = Ingredient::query()->create([
+            'name' => 'Пеперони (добавка)',
+            'price' => 1.00,
+            'is_removable' => false,
+            'is_extra' => true,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $this->post('/cart/add', [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+            'extras' => [$extra->id => 2],
+        ]);
+
+        $cartItem = \App\Models\CartItem::query()->first();
+
+        $this->assertEqualsWithDelta((float) $variant->price, (float) $cartItem->unit_price, 0.001);
+        $this->assertEmpty($cartItem->options);
+
+        $this->get(route('product.show', $product->slug))
+            ->assertOk()
+            ->assertDontSee('Добави съставки');
+    }
 }

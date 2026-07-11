@@ -21,11 +21,13 @@ class ProductController extends Controller
             ->filter(fn ($ingredient) => (bool) $ingredient->pivot->is_default && $ingredient->is_removable)
             ->values();
 
-        $extraIngredients = Ingredient::query()
-            ->where('is_extra', true)
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
+        $extraIngredients = $product->allowsExtras()
+            ? Ingredient::query()
+                ->where('is_extra', true)
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get()
+            : collect();
 
         return view('pages.product', compact('product', 'removableIngredients', 'extraIngredients'));
     }

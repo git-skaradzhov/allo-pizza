@@ -19,6 +19,7 @@ class Category extends Model implements SeoMeta
         'description',
         'image',
         'is_active',
+        'allows_extras',
         'sort_order',
         'seo_title',
         'seo_description',
@@ -37,6 +38,7 @@ class Category extends Model implements SeoMeta
     {
         return [
             'is_active' => 'boolean',
+            'allows_extras' => 'boolean',
         ];
     }
 

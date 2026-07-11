@@ -93,4 +93,9 @@ class Product extends Model implements SeoMeta
     {
         return product_image_url($this->image, $size);
     }
+
+    public function allowsExtras(): bool
+    {
+        return (bool) $this->category?->allows_extras;
+    }
 }

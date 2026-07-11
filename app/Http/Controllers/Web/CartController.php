@@ -74,6 +74,7 @@ class CartController extends Controller
 
         $product = Product::query()
             ->where('is_active', true)
+            ->with('category')
             ->findOrFail($validated['product_id']);
         $variant = ProductVariant::query()
             ->where('product_id', $product->id)
@@ -82,7 +83,7 @@ class CartController extends Controller
 
         $options = [];
 
-        if (! empty($validated['extras'])) {
+        if ($product->allowsExtras() && ! empty($validated['extras'])) {
             $extraQuantities = collect($validated['extras'])
                 ->map(fn ($qty) => (int) $qty)
                 ->filter(fn ($qty) => $qty > 0);

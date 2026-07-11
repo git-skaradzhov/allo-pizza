@@ -23,6 +23,7 @@ class CategoryFactory extends Factory
             'description' => fake()->sentence(),
             'image' => null,
             'is_active' => true,
+            'allows_extras' => true,
             'sort_order' => fake()->numberBetween(1, 20),
             'seo_title' => null,
             'seo_description' => null,
