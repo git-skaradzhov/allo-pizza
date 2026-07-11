@@ -16,7 +16,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-Bw7OAkjq.css",
+    "file": "assets/app-AL5WgHkz.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -34,5 +34,11 @@
       "node_modules/photoswipe/dist/photoswipe-lightbox.esm.js",
       "node_modules/photoswipe/dist/photoswipe.esm.js"
     ]
+  },
+  "resources/js/cookie-consent.js": {
+    "file": "assets/cookie-consent-Cba0jk-s.js",
+    "name": "cookie-consent",
+    "src": "resources/js/cookie-consent.js",
+    "isEntry": true
   }
 }

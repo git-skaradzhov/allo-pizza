@@ -1,6 +1,5 @@
 import './bootstrap';
 import './product-gallery';
-import './cookie-consent';
 
 function enableDragScroll(track) {
     if (track.dataset.dragScrollInit === 'true') {

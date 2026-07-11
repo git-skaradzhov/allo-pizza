@@ -162,5 +162,7 @@
     @stack('scripts')
 
     <x-cookie-consent />
+
+    @vite(['resources/js/cookie-consent.js'])
 </body>
 </html>

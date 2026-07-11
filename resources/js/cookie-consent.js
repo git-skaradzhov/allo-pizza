@@ -274,12 +274,16 @@ function commitConsent(preferences) {
     notifyConsentReady(saved);
 }
 
-function initCookieConsent() {
-    const banner = document.getElementById('cookie-consent-banner');
+let cookieConsentInitialized = false;
 
-    if (!banner) {
+function initCookieConsent() {
+    if (cookieConsentInitialized) {
         return;
     }
+
+    cookieConsentInitialized = true;
+    const banner = document.getElementById('cookie-consent-banner');
+    const modal = document.getElementById('cookie-consent-settings');
 
     const acceptAllButton = document.getElementById('cookie-consent-accept-all');
     const rejectAllButton = document.getElementById('cookie-consent-reject-all');
@@ -287,33 +291,38 @@ function initCookieConsent() {
     const saveSettingsButton = document.getElementById('cookie-consent-save-settings');
     const closeSettingsButton = document.getElementById('cookie-consent-close-settings');
     const settingsBackdrop = document.getElementById('cookie-consent-settings-backdrop');
-    const footerSettingsLinks = document.querySelectorAll('[data-cookie-settings-open]');
 
-    const stored = readStoredConsent();
+    if (banner) {
+        const stored = readStoredConsent();
 
-    if (stored) {
-        applyTracking(stored);
-        hideBanner();
-        notifyConsentReady(stored);
-    } else {
-        showBanner();
+        if (stored) {
+            applyTracking(stored);
+            hideBanner();
+            notifyConsentReady(stored);
+        } else {
+            showBanner();
+        }
+
+        acceptAllButton?.addEventListener('click', () => {
+            commitConsent({ necessary: true, analytics: true, marketing: true });
+        });
+
+        rejectAllButton?.addEventListener('click', () => {
+            commitConsent({ necessary: true, analytics: false, marketing: false });
+        });
+
+        openSettingsButton?.addEventListener('click', openSettingsModal);
     }
 
-    acceptAllButton?.addEventListener('click', () => {
-        commitConsent({ necessary: true, analytics: true, marketing: true });
-    });
+    document.addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-cookie-settings-open]');
 
-    rejectAllButton?.addEventListener('click', () => {
-        commitConsent({ necessary: true, analytics: false, marketing: false });
-    });
+        if (!trigger || !modal) {
+            return;
+        }
 
-    openSettingsButton?.addEventListener('click', openSettingsModal);
-
-    footerSettingsLinks.forEach((link) => {
-        link.addEventListener('click', (event) => {
-            event.preventDefault();
-            openSettingsModal();
-        });
+        event.preventDefault();
+        openSettingsModal();
     });
 
     saveSettingsButton?.addEventListener('click', () => {
@@ -324,8 +333,6 @@ function initCookieConsent() {
     settingsBackdrop?.addEventListener('click', closeSettingsModal);
 
     document.addEventListener('keydown', (event) => {
-        const modal = document.getElementById('cookie-consent-settings');
-
         if (event.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
             closeSettingsModal();
         }
@@ -348,4 +355,8 @@ window.CookieConsent = {
     },
 };
 
-document.addEventListener('DOMContentLoaded', initCookieConsent);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCookieConsent);
+} else {
+    initCookieConsent();
+}
