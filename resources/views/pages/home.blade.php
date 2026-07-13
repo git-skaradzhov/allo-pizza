@@ -162,14 +162,12 @@
                     margin: 0;
                     padding: 0;
                     display: grid;
-                    gap: 0.5rem;
+                    gap: 0.75rem;
                 }
 
                 .home-info-content li {
-                    display: flex;
-                    align-items: flex-start;
-                    gap: 0.625rem;
-                    margin-bottom: 0.25rem;
+                    position: relative;
+                    padding-left: 1.875rem;
                 }
 
                 .home-info-content li::before {
@@ -181,15 +179,24 @@
                     line-height: 1.75rem;
                     letter-spacing: normal;
                     text-transform: none;
-                    display: inline-block;
+                    display: block;
                     white-space: nowrap;
                     word-wrap: normal;
                     direction: ltr;
-                    flex-shrink: 0;
+                    position: absolute;
+                    left: 0;
+                    top: 0.125rem;
                     color: #EB1C22;
                     -webkit-font-feature-settings: 'liga';
                     -webkit-font-smoothing: antialiased;
                     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+                }
+
+                .home-info-content li strong {
+                    display: block;
+                    margin-bottom: 0.125rem;
+                    font-weight: 800;
+                    color: #0c0a09;
                 }
             </style>
         @endpush
