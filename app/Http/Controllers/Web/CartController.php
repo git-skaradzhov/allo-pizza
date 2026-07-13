@@ -99,9 +99,13 @@ class CartController extends Controller
         $options = [];
 
         if ($product->allowsExtras() && ! empty($validated['extras'])) {
+            $removedIds = collect($validated['removed'] ?? [])
+                ->map(fn ($id) => (int) $id);
+
             $extraQuantities = collect($validated['extras'])
                 ->map(fn ($qty) => (int) $qty)
-                ->filter(fn ($qty) => $qty > 0);
+                ->filter(fn ($qty) => $qty > 0)
+                ->reject(fn ($qty, $ingredientId) => $removedIds->contains((int) $ingredientId));
 
             if ($extraQuantities->isNotEmpty()) {
                 $ingredients = Ingredient::query()

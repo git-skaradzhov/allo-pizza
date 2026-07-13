@@ -172,7 +172,7 @@ class CartCheckoutTest extends TestCase
         $product = $this->makeProduct();
         $variant = $product->variants->first();
         $extra = Ingredient::query()->create([
-            'name' => 'Пеперони (добавка)',
+            'name' => 'Пеперони',
             'price' => 1.00,
             'is_removable' => false,
             'is_extra' => true,
@@ -202,7 +202,7 @@ class CartCheckoutTest extends TestCase
 
         $this->assertDatabaseHas('order_item_options', [
             'order_item_id' => $orderItem->id,
-            'name' => 'Пеперони (добавка)',
+            'name' => 'Пеперони',
             'option_type' => 'extra_added',
         ]);
     }
@@ -220,7 +220,7 @@ class CartCheckoutTest extends TestCase
             'sort_order' => 2,
         ]);
         $extra = Ingredient::query()->create([
-            'name' => 'Моцарела (добавка)',
+            'name' => 'Моцарела',
             'price' => 1.00,
             'is_removable' => false,
             'is_extra' => true,
@@ -245,7 +245,7 @@ class CartCheckoutTest extends TestCase
         $product = $this->makeProduct();
         $variant = $product->variants->first();
         $extra = Ingredient::query()->create([
-            'name' => 'Пеперони (добавка)',
+            'name' => 'Пеперони',
             'price' => 1.00,
             'is_removable' => false,
             'is_extra' => true,
@@ -286,7 +286,7 @@ class CartCheckoutTest extends TestCase
             'sort_order' => 1,
         ]);
         $extra = Ingredient::query()->create([
-            'name' => 'Пеперони (добавка)',
+            'name' => 'Пеперони',
             'price' => 1.00,
             'is_removable' => false,
             'is_extra' => true,
@@ -312,5 +312,33 @@ class CartCheckoutTest extends TestCase
             ->assertOk()
             ->assertDontSee('Добави съставки')
             ->assertDontSee('Бележка');
+    }
+
+    public function test_removed_recipe_ingredient_ignores_matching_extra(): void
+    {
+        $product = $this->makeProduct();
+        $variant = $product->variants->first();
+        $extra = Ingredient::query()->create([
+            'name' => 'Пеперони',
+            'price' => 1.00,
+            'is_removable' => true,
+            'is_extra' => true,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $this->post('/cart/add', [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+            'extras' => [$extra->id => 2],
+            'removed' => [$extra->id],
+        ]);
+
+        $cartItem = \App\Models\CartItem::query()->first();
+
+        $this->assertEqualsWithDelta((float) $variant->price, (float) $cartItem->unit_price, 0.001);
+        $this->assertCount(1, $cartItem->options);
+        $this->assertSame('ingredient_removed', $cartItem->options[0]['type']);
     }
 }

@@ -151,7 +151,7 @@
                     <div class="flex flex-wrap gap-2">
                         @foreach ($removableIngredients as $ingredient)
                             <label class="cursor-pointer">
-                                <input type="checkbox" name="removed[]" value="{{ $ingredient->id }}" class="peer sr-only">
+                                <input type="checkbox" name="removed[]" value="{{ $ingredient->id }}" class="removed-ingredient peer sr-only">
                                 <span class="inline-flex items-center rounded-full border border-stone-300 px-3 py-1.5 text-sm text-stone-600 transition peer-checked:border-brand-400 peer-checked:bg-brand-50 peer-checked:text-brand-700 peer-checked:line-through">
                                     {{ $ingredient->name }}
                                 </span>
@@ -167,6 +167,8 @@
                     <div class="max-h-80 divide-y divide-stone-100 overflow-y-auto overscroll-contain rounded-2xl border border-stone-200 bg-white">
                         @foreach ($extraIngredients as $ingredient)
                             <div class="extra-row flex items-center justify-between gap-3 px-4 py-3"
+                                 data-ingredient-id="{{ $ingredient->id }}"
+                                 data-linked-to-recipe="{{ $recipeIngredientIds->contains($ingredient->id) ? '1' : '0' }}"
                                  data-base-price="{{ (float) $ingredient->price }}">
                                 <div class="min-w-0 flex-1">
                                     <p class="text-sm font-semibold text-stone-800">{{ $ingredient->name }}</p>
@@ -322,6 +324,27 @@
                     });
                 }
 
+                function syncRemovedExtrasVisibility() {
+                    const removedIds = new Set(
+                        [...form.querySelectorAll('.removed-ingredient:checked')].map((el) => el.value)
+                    );
+
+                    form.querySelectorAll('.extra-row').forEach((row) => {
+                        const ingredientId = row.dataset.ingredientId;
+                        const linkedToRecipe = row.dataset.linkedToRecipe === '1';
+                        const shouldHide = linkedToRecipe && removedIds.has(ingredientId);
+
+                        row.classList.toggle('hidden', shouldHide);
+
+                        if (shouldHide) {
+                            const input = row.querySelector('.extra-qty-input');
+                            if (input) {
+                                input.value = '0';
+                            }
+                        }
+                    });
+                }
+
                 function recalc() {
                     const variant = form.querySelector('.variant-radio:checked');
                     const variantPrice = variant ? parseFloat(variant.dataset.price) : {{ (float) $firstPrice }};
@@ -329,7 +352,7 @@
                     const multiplier = getMultiplier();
                     let extrasTotal = 0;
 
-                    form.querySelectorAll('.extra-row').forEach((row) => {
+                    form.querySelectorAll('.extra-row:not(.hidden)').forEach((row) => {
                         const basePrice = parseFloat(row.dataset.basePrice || '0');
                         const qty = parseInt(row.querySelector('.extra-qty-input')?.value || '0', 10);
                         extrasTotal += Math.round(basePrice * multiplier * 100) / 100 * qty;
@@ -345,6 +368,13 @@
                     renderPriceBlock(priceDisplay, total, totalOld, false);
                     updateButtonPrice(total, totalOld);
                 }
+
+                form.querySelectorAll('.removed-ingredient').forEach((el) => {
+                    el.addEventListener('change', () => {
+                        syncRemovedExtrasVisibility();
+                        recalc();
+                    });
+                });
 
                 form.querySelectorAll('.variant-radio').forEach((el) => {
                     el.addEventListener('change', () => {
@@ -378,6 +408,7 @@
                 });
 
                 updateExtraPrices();
+                syncRemovedExtrasVisibility();
                 recalc();
             })();
         </script>

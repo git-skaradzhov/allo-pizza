@@ -17,6 +17,8 @@ class ProductController extends Controller
             ->with(['category', 'variants' => fn ($q) => $q->where('is_active', true)->orderBy('sort_order'), 'ingredients', 'images'])
             ->firstOrFail();
 
+        $recipeIngredientIds = $product->ingredients->pluck('id');
+
         $removableIngredients = $product->ingredients
             ->filter(fn ($ingredient) => (bool) $ingredient->pivot->is_default && $ingredient->is_removable)
             ->values();
@@ -29,6 +31,6 @@ class ProductController extends Controller
                 ->get()
             : collect();
 
-        return view('pages.product', compact('product', 'removableIngredients', 'extraIngredients'));
+        return view('pages.product', compact('product', 'removableIngredients', 'extraIngredients', 'recipeIngredientIds'));
     }
 }

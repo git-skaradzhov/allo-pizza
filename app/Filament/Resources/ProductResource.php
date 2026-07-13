@@ -163,6 +163,21 @@ class ProductResource extends Resource
                             ->helperText('Оставете „От категорията“, за да се използва настройката на категорията.'),
                     ])
                     ->columns(3),
+                Forms\Components\Section::make('Съставки')
+                    ->schema([
+                        Forms\Components\Select::make('ingredients')
+                            ->label('Съставки в рецептата')
+                            ->relationship(
+                                name: 'ingredients',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn ($query) => $query->where('is_extra', false)->orderBy('sort_order'),
+                            )
+                            ->multiple()
+                            ->preload()
+                            ->searchable()
+                            ->helperText('Съставки за показване и премахване от поръчката. Платените добавки се управляват отделно в Съставки.')
+                            ->columnSpanFull(),
+                    ]),
                 SeoFormSection::make(),
             ]);
     }

@@ -401,7 +401,7 @@ class PizzaBundlePromotionTest extends TestCase
         $product = $this->makePizza30(10.00);
         $variant = $this->variant30($product);
         $extra = Ingredient::query()->create([
-            'name' => 'Моцарела (добавка)',
+            'name' => 'Моцарела',
             'price' => 2.00,
             'is_removable' => false,
             'is_extra' => true,

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Support\IngredientCatalogSync;
 use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
@@ -338,6 +339,8 @@ class ProductSeeder extends Seeder
                 ->whereNotIn('slug', collect($drinks)->pluck('slug'))
                 ->each(fn (Product $product) => $product->delete());
         }
+
+        IngredientCatalogSync::syncProductRecipes();
     }
 
     protected function seedSimpleProducts(?Category $category, array $products): void
