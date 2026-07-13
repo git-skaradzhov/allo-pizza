@@ -142,18 +142,27 @@ class ProductResource extends Resource
                             ->label('Подредба')
                             ->numeric()
                             ->default(0),
+                        Forms\Components\Select::make('allows_extras')
+                            ->label('Позволява добавки')
+                            ->options([
+                                'inherit' => 'От категорията',
+                                'yes' => 'Да',
+                                'no' => 'Не',
+                            ])
+                            ->default('inherit')
+                            ->formatStateUsing(fn ($state): string => match ($state) {
+                                true, 1, '1' => 'yes',
+                                false, 0, '0' => 'no',
+                                default => 'inherit',
+                            })
+                            ->dehydrateStateUsing(fn ($state) => match ($state) {
+                                'yes' => true,
+                                'no' => false,
+                                default => null,
+                            })
+                            ->helperText('Оставете „От категорията“, за да се използва настройката на категорията.'),
                     ])
                     ->columns(3),
-                Forms\Components\Section::make('Съставки')
-                    ->schema([
-                        Forms\Components\Select::make('ingredients')
-                            ->label('Съставки')
-                            ->relationship('ingredients', 'name')
-                            ->multiple()
-                            ->preload()
-                            ->searchable()
-                            ->columnSpanFull(),
-                    ]),
                 SeoFormSection::make(),
             ]);
     }

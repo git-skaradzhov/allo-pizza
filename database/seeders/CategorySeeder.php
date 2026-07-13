@@ -24,7 +24,7 @@ class CategorySeeder extends Seeder
                 'slug' => 'sandvici-i-pierlenki',
                 'description' => 'Сандвичи с пица хлебче и топли пърленки, изпечени на момента.',
                 'sort_order' => 2,
-                'allows_extras' => true,
+                'allows_extras' => false,
             ],
             [
                 'name' => 'Напитки',

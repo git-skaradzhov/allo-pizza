@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
-use App\Models\Ingredient;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
 
@@ -30,7 +29,6 @@ class ProductSeeder extends Seeder
                 'slug' => 'margarita',
                 'short_description' => 'Доматен сос, моцарела, босилек, пармезан и зехтин.',
                 'description' => 'Класическа пица с доматен сос, моцарела топка, босилек, пармезан и зехтин.',
-                'ingredients' => ['Доматен сос', 'Моцарела', 'Босилек', 'Пармезан', 'Зехтин'],
                 'prices' => ['30' => 6.9, '45' => 12.5],
                 'is_featured' => true,
             ],
@@ -39,7 +37,6 @@ class ProductSeeder extends Seeder
                 'slug' => 'peperoni',
                 'short_description' => 'Доматен сос, моцарела и пеперони.',
                 'description' => 'Пица с доматен сос, моцарела и пеперони.',
-                'ingredients' => ['Доматен сос', 'Моцарела', 'Пеперони'],
                 'prices' => ['30' => 8.4, '45' => 15.1],
                 'is_featured' => true,
                 'is_spicy' => true,
@@ -49,7 +46,6 @@ class ProductSeeder extends Seeder
                 'slug' => '4-sirena',
                 'short_description' => 'Сметана/доматен сос, моцарела, топено, синьо сирене и пармезан.',
                 'description' => 'Пица със сметана или доматен сос, моцарела, топено сирене, синьо сирене и пармезан.',
-                'ingredients' => ['Сметана', 'Доматен сос', 'Моцарела', 'Топено сирене', 'Синьо сирене', 'Пармезан'],
                 'prices' => ['30' => 8.4, '45' => 15.1],
                 'is_featured' => true,
             ],
@@ -58,7 +54,6 @@ class ProductSeeder extends Seeder
                 'slug' => 'kaprichoza',
                 'short_description' => 'Доматен сос, моцарела, шунка, гъби и чушка.',
                 'description' => 'Пица с доматен сос, моцарела, шунка, гъби и чушка.',
-                'ingredients' => ['Доматен сос', 'Моцарела', 'Шунка', 'Гъби', 'Чушка'],
                 'prices' => ['30' => 8.3, '45' => 14.9],
                 'is_featured' => true,
             ],
@@ -67,7 +62,6 @@ class ProductSeeder extends Seeder
                 'slug' => 'krudo',
                 'short_description' => 'Доматен сос, моцарела, прошуто крудо, рукола, домат чери, пармезан и балсамико.',
                 'description' => 'Пица с доматен сос, моцарела, прошуто крудо, рукола, домат чери, пармезан и балсамико.',
-                'ingredients' => ['Доматен сос', 'Моцарела', 'Прошуто крудо', 'Рукола', 'Домат чери', 'Пармезан', 'Балсамико'],
                 'prices' => ['30' => 8.6, '45' => 15.5],
                 'is_featured' => true,
             ],
@@ -76,7 +70,6 @@ class ProductSeeder extends Seeder
                 'slug' => 'chikan',
                 'short_description' => 'Доматен сос, моцарела, пилешко филе, чедър и пармезан.',
                 'description' => 'Пица с доматен сос, моцарела, пилешко филе, чедър и пармезан.',
-                'ingredients' => ['Доматен сос', 'Моцарела', 'Пилешко филе', 'Чедър', 'Пармезан'],
                 'prices' => ['30' => 8.4, '45' => 15.1],
                 'is_featured' => true,
             ],
@@ -85,7 +78,6 @@ class ProductSeeder extends Seeder
                 'slug' => 'elena',
                 'short_description' => 'Сметана, моцарела, еленски бут, манатарки, пармезан, мащерка, трюфел и салата микс.',
                 'description' => 'Пица със сметана, моцарела, еленски бут, манатарки, пармезан, мащерка, трюфел и свежа салата микс.',
-                'ingredients' => ['Сметана', 'Моцарела', 'Еленски бут', 'Манатарки', 'Пармезан', 'Мащерка', 'Трюфел', 'Салата микс'],
                 'prices' => ['30' => 8.9],
             ],
             [
@@ -93,7 +85,6 @@ class ProductSeeder extends Seeder
                 'slug' => 'redzhina',
                 'short_description' => 'Доматен сос, моцарела, шунка, топено сирене и маслини.',
                 'description' => 'Пица с доматен сос, моцарела, шунка, топено сирене и маслини.',
-                'ingredients' => ['Доматен сос', 'Моцарела', 'Шунка', 'Топено сирене', 'Маслини'],
                 'prices' => ['30' => 8.4, '45' => 15.1],
             ],
             [
@@ -101,12 +92,9 @@ class ProductSeeder extends Seeder
                 'slug' => 'barbekyu',
                 'short_description' => 'Доматен сос, моцарела, пилешко филе, пушен бекон, карамелизиран лук и сос барбекю.',
                 'description' => 'Пица с доматен сос, моцарела, пилешко филе, пушен бекон, карамелизиран лук и сос барбекю.',
-                'ingredients' => ['Доматен сос', 'Моцарела', 'Пилешко филе', 'Пушен бекон', 'Карамелизиран лук', 'Сос барбекю'],
                 'prices' => ['30' => 8.6, '45' => 15.5],
             ],
         ];
-
-        $ingredientMap = Ingredient::query()->pluck('id', 'name');
 
         foreach ($pizzas as $index => $pizzaData) {
             $basePrice = (float) reset($pizzaData['prices']);
@@ -127,6 +115,7 @@ class ProductSeeder extends Seeder
                     'sort_order' => $index + 1,
                     'seo_title' => $pizzaData['name'].' | Allo! Pizza',
                     'seo_description' => $pizzaData['short_description'],
+                    'allows_extras' => null,
                 ]
             );
 
@@ -160,13 +149,7 @@ class ProductSeeder extends Seeder
                 );
             }
 
-            $ingredientIds = collect($pizzaData['ingredients'])
-                ->map(fn (string $name) => $ingredientMap[$name] ?? null)
-                ->filter()
-                ->mapWithKeys(fn (int $id) => [$id => ['is_default' => true]])
-                ->all();
-
-            $product->ingredients()->sync($ingredientIds);
+            $product->ingredients()->sync([]);
 
             $activeSizeLabels = collect($variants)
                 ->filter(fn (array $variant) => isset($pizzaData['prices'][(string) $variant['diameter']]))
@@ -191,7 +174,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Сандвич 400 гр с пица хлебче, пилешко филе, прошуто котто, моцарела, чедър, пресен домат, салата микс, дресинг и сос айоли.',
                 'base_price' => 4.9,
                 'size_label' => '400 гр',
-                'ingredients' => ['Пица хлебче', 'Пилешко филе', 'Прошуто котто', 'Моцарела', 'Чедър', 'Пресен домат', 'Салата микс', 'Дресинг', 'Сос айоли'],
+                'allows_extras' => true,
             ],
             [
                 'name' => 'Капрезе',
@@ -200,7 +183,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Сандвич 400 гр с пица хлебче, моцарела, пресен домат, салата микс, дресинг, босилково песто и зехтин.',
                 'base_price' => 4.2,
                 'size_label' => '400 гр',
-                'ingredients' => ['Пица хлебче', 'Моцарела', 'Пресен домат', 'Салата микс', 'Дресинг', 'Босилково песто', 'Зехтин'],
+                'allows_extras' => true,
             ],
             [
                 'name' => 'Пърленка с масло',
@@ -208,6 +191,7 @@ class ProductSeeder extends Seeder
                 'short_description' => 'Топла пърленка с масло и шарена сол.',
                 'description' => 'Мека пърленка, изпечена на момента и намазана с масло.',
                 'base_price' => 3.90,
+                'allows_extras' => false,
             ],
             [
                 'name' => 'Пърленка с кашкавал',
@@ -215,6 +199,7 @@ class ProductSeeder extends Seeder
                 'short_description' => 'Пухкава пърленка с разтопен кашкавал.',
                 'description' => 'Любима добавка към всяка пица или салата.',
                 'base_price' => 4.90,
+                'allows_extras' => false,
             ],
             [
                 'name' => 'Чеснова пърленка',
@@ -222,6 +207,7 @@ class ProductSeeder extends Seeder
                 'short_description' => 'Пърленка с чесново масло и подправки.',
                 'description' => 'Ароматна чеснова пърленка, подходяща за споделяне.',
                 'base_price' => 4.50,
+                'allows_extras' => false,
             ],
             [
                 'name' => 'Пърленка със сирене',
@@ -229,6 +215,7 @@ class ProductSeeder extends Seeder
                 'short_description' => 'Пърленка с бяло сирене и масло.',
                 'description' => 'Топла пърленка с натрошено бяло сирене и масло.',
                 'base_price' => 4.70,
+                'allows_extras' => false,
             ],
             [
                 'name' => 'Пърленка комбинирана',
@@ -237,6 +224,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Богата пърленка с кашкавал, сирене и чесново масло.',
                 'base_price' => 5.90,
                 'is_promo' => true,
+                'allows_extras' => false,
             ],
         ]);
 
@@ -375,6 +363,10 @@ class ProductSeeder extends Seeder
                 'seo_description' => $data['short_description'],
             ];
 
+            if (array_key_exists('allows_extras', $data)) {
+                $attributes['allows_extras'] = $data['allows_extras'];
+            }
+
             if (isset($data['image'])) {
                 $attributes['image'] = $data['image'];
             }
@@ -396,18 +388,7 @@ class ProductSeeder extends Seeder
                 ]
             );
 
-            if (! empty($data['ingredients'])) {
-                $ingredientMap = Ingredient::query()->pluck('id', 'name');
-                $ingredientIds = collect($data['ingredients'])
-                    ->map(fn (string $name) => $ingredientMap[$name] ?? null)
-                    ->filter()
-                    ->mapWithKeys(fn (int $id) => [$id => ['is_default' => true]])
-                    ->all();
-
-                $product->ingredients()->sync($ingredientIds);
-            } else {
-                $product->ingredients()->sync([]);
-            }
+            $product->ingredients()->sync([]);
         }
     }
 }

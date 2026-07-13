@@ -30,6 +30,7 @@ class Product extends Model implements SeoMeta
         'is_promo',
         'is_new',
         'is_spicy',
+        'allows_extras',
         'sort_order',
         'seo_title',
         'seo_description',
@@ -115,6 +116,10 @@ class Product extends Model implements SeoMeta
 
     public function allowsExtras(): bool
     {
+        if (array_key_exists('allows_extras', $this->attributes) && $this->attributes['allows_extras'] !== null) {
+            return (bool) $this->attributes['allows_extras'];
+        }
+
         return (bool) $this->category?->allows_extras;
     }
 
