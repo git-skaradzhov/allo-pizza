@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Enums\CartItemType;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\StoreSetting;
 use App\Support\PizzaBundlePromotionResult;
 
@@ -49,6 +51,35 @@ class PizzaBundlePromotionService
         $item->loadMissing(['product.category', 'variant']);
 
         return $this->isLineEligible($this->lineFromCartItem($item), $settings);
+    }
+
+    public function isProductEligible(Product $product, ?StoreSetting $settings = null): bool
+    {
+        $product->loadMissing(['category', 'variants']);
+
+        foreach ($product->variants->where('is_active', true) as $variant) {
+            if ($this->isVariantEligible($product, $variant, $settings)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function isVariantEligible(Product $product, ProductVariant $variant, ?StoreSetting $settings = null): bool
+    {
+        $product->loadMissing('category');
+
+        return $this->isLineEligible([
+            'category_id' => $product->category_id,
+            'category_slug' => $product->category?->slug,
+            'diameter' => (int) ($variant->diameter ?? 0),
+            'unit_price' => (float) $variant->price,
+            'quantity' => 1,
+            'product_name' => $product->name,
+            'options' => [],
+            'is_product' => true,
+        ], $settings);
     }
 
     /**

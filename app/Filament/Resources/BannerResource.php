@@ -45,6 +45,7 @@ class BannerResource extends Resource
                             ->image()
                             ->disk('public')
                             ->directory('banners')
+                            ->getUploadedFileUsing(fn (string $file): ?array => admin_media_upload_metadata($file))
                             ->helperText(fn (Forms\Get $get): string => $get('position') === BannerPosition::HomeHero->value
                                 ? 'Препоръчителен размер: 2100×800 px (21:8).'
                                 : 'По желание. Ако липсва, началната страница показва цветна промо карта.')
@@ -54,6 +55,7 @@ class BannerResource extends Resource
                             ->image()
                             ->disk('public')
                             ->directory('banners')
+                            ->getUploadedFileUsing(fn (string $file): ?array => admin_media_upload_metadata($file))
                             ->helperText('650×650 px (1:1). По желание — ако липсва, се ползва десктопното.')
                             ->visibility('public')
                             ->visible(fn (Forms\Get $get): bool => $get('position') === BannerPosition::HomeHero->value),
@@ -101,7 +103,7 @@ class BannerResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('image')
                     ->label('Изображение')
-                    ->disk('public'),
+                    ->getStateUsing(fn (Banner $record): ?string => admin_media_url($record->image)),
                 Tables\Columns\TextColumn::make('title')
                     ->label('Заглавие')
                     ->searchable()

@@ -12,6 +12,12 @@
     $galleryDisplayUrls = $galleryPaths->map(fn ($path) => product_image_url($path, 650));
     $firstVariant = $product->variants->first();
     $firstPrice = $firstVariant->price ?? $product->base_price;
+    $firstOldPrice = $firstVariant
+        ? $product->variantOldPrice($firstVariant)
+        : ($product->isDiscounted() ? (float) $product->old_price : null);
+    $firstSavings = $firstOldPrice !== null
+        ? round((float) $firstOldPrice - (float) $firstPrice, 2)
+        : null;
 @endphp
 
 @section('content')
@@ -73,15 +79,22 @@
         </div>
 
         <div>
-            <div class="flex flex-wrap gap-2">
-                @if ($product->is_new)
-                    <x-product-new-icon aria-hidden="true" />
-                @endif
-                @if ($product->is_promo)
-                    <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-xs font-bold text-white">Промо</span>
-                @endif
-                @if ($product->is_spicy)
-                    <span class="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-bold text-brand-600">🌶 Люто</span>
+            <div class="flex items-start justify-between gap-3">
+                <div>
+                    @if ($product->is_new)
+                        <x-product-new-icon aria-hidden="true" />
+                    @endif
+                </div>
+
+                @if ($product->is_spicy || $product->isDiscounted())
+                    <div class="flex flex-col items-end gap-2">
+                        @if ($product->is_spicy)
+                            <span class="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-bold text-brand-600">🌶 Люто</span>
+                        @endif
+                        @if ($product->isDiscounted())
+                            <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-xs font-bold text-white">Промо</span>
+                        @endif
+                    </div>
                 @endif
             </div>
 
@@ -95,19 +108,36 @@
                 </p>
             @endif
 
+            <div class="mt-4" id="product-price-display">
+                <x-product-price
+                    :current-label="money((float) $firstPrice)"
+                    :old-label="$firstOldPrice ? money((float) $firstOldPrice) : null"
+                    :savings="$firstSavings"
+                />
+            </div>
+
             @if ($product->variants->isNotEmpty())
                 <div class="mt-6">
                     <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-stone-400">Размер</h2>
                     <div class="grid grid-cols-3 gap-1.5 rounded-2xl bg-stone-100 p-1.5 sm:gap-2">
                         @foreach ($product->variants as $i => $variant)
+                            @php
+                                $variantBundleEligible = app(\App\Services\PizzaBundlePromotionService::class)
+                                    ->isVariantEligible($product, $variant);
+                                $variantOldPrice = $product->variantOldPrice($variant);
+                            @endphp
                             <label class="cursor-pointer">
                                 <input type="radio" name="product_variant_id" value="{{ $variant->id }}"
                                        data-price="{{ (float) $variant->price }}"
+                                       data-old-price="{{ $variantOldPrice ?? '' }}"
                                        data-extra-multiplier="{{ (float) ($variant->extra_price_multiplier ?? 1) }}"
                                        class="peer sr-only variant-radio" {{ $i === 0 ? 'checked' : '' }}>
                                 <span class="block rounded-xl px-2 py-2.5 text-center text-xs font-semibold text-stone-600 transition peer-checked:bg-white peer-checked:text-brand-600 peer-checked:shadow-soft sm:px-3 sm:text-sm">
                                     <span class="block">{{ $variant->name }}</span>
                                     <span class="block text-xs font-normal text-stone-400">{{ $variant->size_label }}</span>
+                                    @if ($variantBundleEligible)
+                                        <x-product-bundle-badge class="mt-1" />
+                                    @endif
                                 </span>
                             </label>
                         @endforeach
@@ -189,7 +219,12 @@
                 <button type="submit"
                         class="flex w-full flex-1 items-center justify-between gap-2 rounded-2xl bg-brand-500 px-5 py-4 text-base font-bold text-white shadow-soft transition hover:bg-brand-600 sm:text-lg">
                     <span>Добави в количката</span>
-                    <span id="product-price">{{ money($firstPrice) }}</span>
+                    <span id="product-price" class="text-right leading-tight">
+                        @if ($firstOldPrice)
+                            <span data-price-old="true" class="block text-xs font-medium text-white/70 line-through">{{ money((float) $firstOldPrice) }}</span>
+                        @endif
+                        <span id="product-price-current">{{ money((float) $firstPrice) }}</span>
+                    </span>
                 </button>
             </div>
         </div>
@@ -199,13 +234,75 @@
         <script>
             (function () {
                 const form = document.getElementById('product-form');
-                const priceEl = document.getElementById('product-price');
+                const priceDisplay = document.getElementById('product-price-display');
+                const priceButton = document.getElementById('product-price');
+                const priceCurrentEl = document.getElementById('product-price-current');
                 const qtyInput = document.getElementById('quantity');
+                const productOldPrice = {{ $product->isDiscounted() && ! $firstVariant ? (float) $product->old_price : 'null' }};
 
                 function formatMoney(amount) {
                     const parts = amount.toFixed(2).split('.');
                     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
                     return parts.join('.') + ' €';
+                }
+
+                function getVariantOldPrice(variant) {
+                    if (!variant) {
+                        return productOldPrice;
+                    }
+
+                    const oldPrice = variant.dataset.oldPrice;
+
+                    return oldPrice !== '' ? parseFloat(oldPrice) : null;
+                }
+
+                function renderPriceBlock(container, current, oldPrice, compact) {
+                    if (!container) {
+                        return;
+                    }
+
+                    if (oldPrice !== null && oldPrice > current) {
+                        const savings = Math.round((oldPrice - current) * 100) / 100;
+                        container.innerHTML = `
+                            <div class="flex flex-col gap-0.5">
+                                <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
+                                    <span class="${compact ? 'text-[11px] font-medium text-stone-400 line-through sm:text-xs' : 'text-sm font-medium text-stone-400 line-through'}">${formatMoney(oldPrice)}</span>
+                                    <span class="${compact ? 'text-xs font-bold text-brand-600 sm:text-sm' : 'text-lg font-bold text-brand-600 sm:text-xl'}">${formatMoney(current)}</span>
+                                </div>
+                                <span class="${compact ? 'text-[10px] font-semibold text-green-700 sm:text-xs' : 'text-sm font-semibold text-green-700'}">Спестяваш ${formatMoney(savings)}</span>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    container.innerHTML = `
+                        <div class="flex flex-col gap-0.5">
+                            <span class="${compact ? 'text-xs font-bold leading-tight text-stone-900 sm:text-sm' : 'text-lg font-bold text-stone-900 sm:text-xl'}">${formatMoney(current)}</span>
+                        </div>
+                    `;
+                }
+
+                function updateButtonPrice(current, oldPrice) {
+                    if (!priceButton || !priceCurrentEl) {
+                        return;
+                    }
+
+                    priceCurrentEl.textContent = formatMoney(current);
+
+                    let oldEl = priceButton.querySelector('[data-price-old]');
+
+                    if (oldPrice !== null && oldPrice > current) {
+                        if (!oldEl) {
+                            oldEl = document.createElement('span');
+                            oldEl.dataset.priceOld = 'true';
+                            oldEl.className = 'block text-xs font-medium text-white/70 line-through';
+                            priceButton.insertBefore(oldEl, priceCurrentEl);
+                        }
+
+                        oldEl.textContent = formatMoney(oldPrice);
+                    } else if (oldEl) {
+                        oldEl.remove();
+                    }
                 }
 
                 function getMultiplier() {
@@ -227,17 +324,26 @@
 
                 function recalc() {
                     const variant = form.querySelector('.variant-radio:checked');
-                    let unit = variant ? parseFloat(variant.dataset.price) : {{ (float) $firstPrice }};
+                    const variantPrice = variant ? parseFloat(variant.dataset.price) : {{ (float) $firstPrice }};
+                    const unitOldPrice = getVariantOldPrice(variant);
                     const multiplier = getMultiplier();
+                    let extrasTotal = 0;
 
                     form.querySelectorAll('.extra-row').forEach((row) => {
                         const basePrice = parseFloat(row.dataset.basePrice || '0');
                         const qty = parseInt(row.querySelector('.extra-qty-input')?.value || '0', 10);
-                        unit += Math.round(basePrice * multiplier * 100) / 100 * qty;
+                        extrasTotal += Math.round(basePrice * multiplier * 100) / 100 * qty;
                     });
 
+                    const unit = variantPrice + extrasTotal;
                     const qty = parseInt(qtyInput.value || '1', 10);
-                    priceEl.textContent = formatMoney(unit * qty);
+                    const total = unit * qty;
+                    const totalOld = unitOldPrice !== null
+                        ? (unitOldPrice + extrasTotal) * qty
+                        : null;
+
+                    renderPriceBlock(priceDisplay, total, totalOld, false);
+                    updateButtonPrice(total, totalOld);
                 }
 
                 form.querySelectorAll('.variant-radio').forEach((el) => {

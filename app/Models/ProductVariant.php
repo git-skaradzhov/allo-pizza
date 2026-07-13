@@ -35,4 +35,18 @@ class ProductVariant extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    protected static function booted(): void
+    {
+        $syncPromo = function (ProductVariant $variant): void {
+            $product = $variant->relationLoaded('product')
+                ? $variant->product
+                : $variant->product()->first();
+
+            $product?->syncPromoFlag();
+        };
+
+        static::saved($syncPromo);
+        static::deleted($syncPromo);
+    }
 }

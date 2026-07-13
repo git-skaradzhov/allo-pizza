@@ -65,6 +65,35 @@ if (! function_exists('public_media_url')) {
     }
 }
 
+if (! function_exists('admin_media_url')) {
+    function admin_media_url(mixed $image): ?string
+    {
+        $url = public_media_url($image);
+
+        return $url !== null ? url($url) : null;
+    }
+}
+
+if (! function_exists('admin_media_upload_metadata')) {
+    function admin_media_upload_metadata(string $file): ?array
+    {
+        $url = admin_media_url($file);
+
+        if ($url === null) {
+            return null;
+        }
+
+        $disk = Storage::disk('public');
+
+        return [
+            'name' => basename($file),
+            'size' => $disk->exists($file) ? $disk->size($file) : 0,
+            'type' => $disk->exists($file) ? $disk->mimeType($file) : null,
+            'url' => $url,
+        ];
+    }
+}
+
 if (! function_exists('product_image_tier_size')) {
     function product_image_tier_size(string $tier): int
     {

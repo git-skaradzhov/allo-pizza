@@ -307,6 +307,54 @@ class PizzaBundlePromotionTest extends TestCase
         $this->assertEqualsWithDelta(24.0, $bundle->discount, 0.01);
     }
 
+    public function test_product_shows_bundle_eligibility_for_pizza_with_30cm_variant(): void
+    {
+        $this->createOpenStore();
+        $product = $this->makePizza30();
+        $service = app(PizzaBundlePromotionService::class);
+
+        $this->assertTrue($product->isBundlePromotionEligible());
+        $this->assertTrue($service->isVariantEligible($product, $this->variant30($product)));
+    }
+
+    public function test_product_without_30cm_variant_is_not_bundle_eligible(): void
+    {
+        $this->createOpenStore();
+        $category = $this->pizzaCategory();
+        $product = Product::query()->create([
+            'category_id' => $category->id,
+            'name' => 'Само голяма',
+            'slug' => 'samo-golema',
+            'short_description' => 'Тест',
+            'description' => 'Тест',
+            'base_price' => 20,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+        ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'name' => '45 см',
+            'size_label' => '45 см',
+            'diameter' => 45,
+            'price' => 20,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+        $product = $product->fresh('variants', 'category');
+
+        $this->assertFalse($product->isBundlePromotionEligible());
+    }
+
+    public function test_product_page_shows_bundle_badge_for_eligible_pizza(): void
+    {
+        $this->createOpenStore();
+        $product = $this->makePizza30();
+
+        $this->get(route('product.show', $product->slug))
+            ->assertOk()
+            ->assertSee('4+1', false);
+    }
+
     public function test_forty_five_cm_pizzas_are_not_eligible(): void
     {
         $this->createOpenStore();

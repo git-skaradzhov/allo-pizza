@@ -93,11 +93,21 @@ class ProductResource extends Resource
                             ->label('Базова цена')
                             ->required()
                             ->numeric()
-                            ->prefix('€'),
+                            ->prefix('€')
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn (Forms\Set $set, Get $get, ?Product $record) => $set(
+                                'is_promo',
+                                self::hasPromoPrices($get, $record),
+                            )),
                         Forms\Components\TextInput::make('old_price')
                             ->label('Стара цена')
                             ->numeric()
-                            ->prefix('€'),
+                            ->prefix('€')
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn (Forms\Set $set, Get $get, ?Product $record) => $set(
+                                'is_promo',
+                                self::hasPromoPrices($get, $record),
+                            )),
                     ])
                     ->columns(2),
                 Forms\Components\Section::make('Статус и етикети')
@@ -109,7 +119,11 @@ class ProductResource extends Resource
                         Forms\Components\Toggle::make('is_featured')
                             ->label('Препоръчан'),
                         Forms\Components\Toggle::make('is_promo')
-                            ->label('Промо'),
+                            ->label('Промо')
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->formatStateUsing(fn ($state, ?Product $record, Get $get): bool => self::hasPromoPrices($get, $record))
+                            ->helperText('Включва се автоматично, когато старата цена е по-висока от текущата.'),
                         Forms\Components\Toggle::make('is_new')
                             ->label('Нов'),
                         Forms\Components\CheckboxList::make('newMenuHighlights')
@@ -171,7 +185,8 @@ class ProductResource extends Resource
                     ->boolean(),
                 Tables\Columns\IconColumn::make('is_promo')
                     ->label('Промо')
-                    ->boolean(),
+                    ->boolean()
+                    ->getStateUsing(fn (Product $record): bool => $record->isDiscounted()),
                 Tables\Columns\IconColumn::make('is_new')
                     ->label('Нов')
                     ->boolean(),
@@ -222,6 +237,27 @@ class ProductResource extends Resource
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function hasPromoPrices(Get $get, ?Product $record = null): bool
+    {
+        $oldPrice = $get('old_price');
+
+        if ($oldPrice === null || $oldPrice === '') {
+            return false;
+        }
+
+        $lowestPrice = (float) ($get('base_price') ?? 0);
+
+        if ($record !== null) {
+            $variantMin = $record->variants()->min('price');
+
+            if ($variantMin !== null) {
+                $lowestPrice = (float) $variantMin;
+            }
+        }
+
+        return (float) $oldPrice > $lowestPrice;
     }
 
     public static function getRelations(): array

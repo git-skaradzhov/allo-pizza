@@ -57,6 +57,25 @@ class Product extends Model implements SeoMeta
         ];
     }
 
+    protected static function booted(): void
+    {
+        static::saving(function (Product $product) {
+            $product->is_promo = $product->isDiscounted();
+        });
+    }
+
+    public function syncPromoFlag(): void
+    {
+        $isPromo = $this->isDiscounted();
+
+        if ($this->is_promo === $isPromo) {
+            return;
+        }
+
+        $this->is_promo = $isPromo;
+        $this->saveQuietly();
+    }
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
@@ -102,5 +121,138 @@ class Product extends Model implements SeoMeta
     public function allowsNotes(): bool
     {
         return $this->allowsExtras();
+    }
+
+    public function isBundlePromotionEligible(): bool
+    {
+        return app(\App\Services\PizzaBundlePromotionService::class)->isProductEligible($this);
+    }
+
+    public function isDiscounted(): bool
+    {
+        if ($this->old_price === null) {
+            return false;
+        }
+
+        return (float) $this->old_price > $this->lowestPrice();
+    }
+
+    public function lowestPrice(): float
+    {
+        $prices = $this->variantPrices();
+
+        return $prices->isNotEmpty()
+            ? (float) $prices->min()
+            : (float) $this->base_price;
+    }
+
+    public function highestPrice(): float
+    {
+        $prices = $this->variantPrices();
+
+        return $prices->isNotEmpty()
+            ? (float) $prices->max()
+            : (float) $this->base_price;
+    }
+
+    public function variantOldPrice(ProductVariant $variant): ?float
+    {
+        if (! $this->isDiscounted()) {
+            return null;
+        }
+
+        $ratio = $this->discountRatio();
+
+        return round((float) $variant->price * $ratio, 2);
+    }
+
+    public function oldPriceForAmount(float $currentPrice): ?float
+    {
+        if (! $this->isDiscounted()) {
+            return null;
+        }
+
+        return round($currentPrice * $this->discountRatio(), 2);
+    }
+
+    public function savingsForAmount(float $currentPrice): float
+    {
+        $oldPrice = $this->oldPriceForAmount($currentPrice);
+
+        return $oldPrice !== null
+            ? round($oldPrice - $currentPrice, 2)
+            : 0.0;
+    }
+
+    /**
+     * @return array{
+     *     current_label: string,
+     *     old_label: ?string,
+     *     savings: ?float,
+     *     savings_max: ?float,
+     *     has_range: bool,
+     * }
+     */
+    public function priceSummary(): array
+    {
+        $min = $this->lowestPrice();
+        $max = $this->highestPrice();
+        $hasVariants = $this->variantPrices()->isNotEmpty();
+        $hasRange = $min !== $max;
+
+        $fromPrefix = $hasVariants ? '' : 'от ';
+
+        $currentLabel = $hasRange
+            ? money($min).' – '.money($max)
+            : $fromPrefix.money($min);
+
+        if (! $this->isDiscounted()) {
+            return [
+                'current_label' => $currentLabel,
+                'old_label' => null,
+                'savings' => null,
+                'savings_max' => null,
+                'has_range' => $hasRange,
+            ];
+        }
+
+        $ratio = $this->discountRatio();
+        $oldMin = round($min * $ratio, 2);
+        $oldMax = round($max * $ratio, 2);
+
+        $oldLabel = $hasRange
+            ? money($oldMin).' – '.money($oldMax)
+            : $fromPrefix.money($oldMin);
+
+        $savings = round($oldMin - $min, 2);
+        $savingsMax = $hasRange ? round($oldMax - $max, 2) : null;
+
+        return [
+            'current_label' => $currentLabel,
+            'old_label' => $oldLabel,
+            'savings' => $savings,
+            'savings_max' => $savingsMax,
+            'has_range' => $hasRange,
+        ];
+    }
+
+    private function discountRatio(): float
+    {
+        $basePrice = (float) $this->base_price;
+
+        if ($basePrice <= 0) {
+            return 1.0;
+        }
+
+        return (float) $this->old_price / $basePrice;
+    }
+
+    private function variantPrices(): \Illuminate\Support\Collection
+    {
+        $variants = $this->relationLoaded('variants')
+            ? $this->variants
+            : $this->variants()->get();
+
+        return $variants->pluck('price')->filter()->map(fn ($price) => (float) $price);
     }
 }
