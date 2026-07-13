@@ -187,8 +187,12 @@
             <div class="flex items-start gap-2.5 sm:gap-3">
                 <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">storefront</span>
                 <div class="min-w-0">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Статус</p>
-                    <p class="text-sm font-extrabold leading-tight {{ $isOpen ? 'text-green-700' : 'text-stone-600' }} sm:text-base">{{ $workingHoursMessage }}</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">{{ $storeStatusLabel }}</p>
+                    <p @class([
+                        'text-xs font-extrabold leading-tight sm:text-sm',
+                        'text-green-700' => $isOpen,
+                        'text-brand-600' => ! $isOpen,
+                    ])>{{ $storeStatusDetail }}</p>
                 </div>
             </div>
         </section>

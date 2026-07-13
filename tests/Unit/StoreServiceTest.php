@@ -54,6 +54,55 @@ class StoreServiceTest extends TestCase
 
         $this->assertFalse($service->isOpen($at));
         $this->assertSame('Затворено · днес: 09:00 – 21:00 ч.', $service->workingHoursMessage($at));
+        $this->assertSame('Затворено', $service->storeStatusLabel($at));
+        $this->assertSame('след 09:00', $service->storeStatusDetail($at));
+    }
+
+    public function test_store_status_detail_before_opening_hours(): void
+    {
+        $this->seedWorkingDay(opensAt: '09:00:00', closesAt: '21:00:00');
+
+        $service = app(StoreService::class);
+        $at = Carbon::parse('2026-07-08 02:52:00', 'Europe/Sofia');
+
+        $this->assertSame('Затворено', $service->storeStatusLabel($at));
+        $this->assertSame('след 09:00', $service->storeStatusDetail($at));
+    }
+
+    public function test_store_status_detail_when_open(): void
+    {
+        $this->seedWorkingDay(opensAt: '09:00:00', closesAt: '21:00:00');
+
+        $service = app(StoreService::class);
+        $at = Carbon::parse('2026-07-08 14:52:00', 'Europe/Sofia');
+
+        $this->assertSame('Отворено', $service->storeStatusLabel($at));
+        $this->assertSame('до 21:00 ч.', $service->storeStatusDetail($at));
+    }
+
+    public function test_store_status_detail_uses_next_open_day_after_closed_day(): void
+    {
+        foreach ([1, 2, 3, 4, 5, 6] as $day) {
+            WorkingHour::query()->create([
+                'day_of_week' => $day,
+                'opens_at' => '09:00:00',
+                'closes_at' => '21:00:00',
+                'is_closed' => false,
+            ]);
+        }
+
+        WorkingHour::query()->create([
+            'day_of_week' => 7,
+            'opens_at' => null,
+            'closes_at' => null,
+            'is_closed' => true,
+        ]);
+
+        $service = app(StoreService::class);
+        $at = Carbon::parse('2026-07-12 12:00:00', 'Europe/Sofia');
+
+        $this->assertSame('Затворено', $service->storeStatusLabel($at));
+        $this->assertSame('след 09:00', $service->storeStatusDetail($at));
     }
 
     public function test_weekly_schedule_summary_is_built_from_database(): void

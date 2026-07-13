@@ -54,6 +54,8 @@ class AppServiceProvider extends ServiceProvider
                 'storeIsOpen' => $storeService->isOpen(),
                 'isOpen' => $storeService->isOpen(),
                 'workingHoursMessage' => $storeService->workingHoursMessage(),
+                'storeStatusLabel' => $storeService->storeStatusLabel(),
+                'storeStatusDetail' => $storeService->storeStatusDetail(),
                 'weeklyWorkingHoursSummary' => $storeService->weeklyScheduleSummary(),
                 'cartCount' => app(CartService::class)->itemCount(),
                 'showLunchMenuNav' => LunchMenu::isPublished(),

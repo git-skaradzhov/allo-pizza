@@ -63,6 +63,34 @@ class StoreService
         return sprintf('Затворено · днес: %s – %s ч.', $opensAt, $closesAt);
     }
 
+    public function storeStatusLabel(?Carbon $at = null): string
+    {
+        return $this->isOpen($at) ? 'Отворено' : 'Затворено';
+    }
+
+    public function storeStatusDetail(?Carbon $at = null): string
+    {
+        $at ??= now();
+
+        if ($this->isOpen($at)) {
+            $workingHour = $this->workingHourFor($at);
+
+            if ($workingHour?->closes_at) {
+                return sprintf('до %s ч.', $this->formatTime($workingHour->closes_at));
+            }
+
+            return '';
+        }
+
+        $nextOpening = $this->nextOpeningTime($at);
+
+        if ($nextOpening !== null) {
+            return sprintf('след %s', $nextOpening);
+        }
+
+        return $this->weeklyScheduleSummary();
+    }
+
     public function weeklyScheduleSummary(): string
     {
         $hours = $this->weeklySchedule();
@@ -124,6 +152,38 @@ class StoreService
         return WorkingHour::query()
             ->where('day_of_week', $at->dayOfWeekIso)
             ->first();
+    }
+
+    private function nextOpeningTime(?Carbon $at = null): ?string
+    {
+        $at ??= now();
+
+        for ($offset = 0; $offset < 7; $offset++) {
+            $checkAt = $at->copy()->addDays($offset);
+            $workingHour = $this->workingHourFor($checkAt);
+
+            if (! $workingHour || $workingHour->is_closed || ! $workingHour->opens_at) {
+                continue;
+            }
+
+            $opensMinutes = $this->timeToMinutes($workingHour->opens_at);
+
+            if ($opensMinutes === null) {
+                continue;
+            }
+
+            if ($offset === 0) {
+                if ($this->currentMinutes($at) < $opensMinutes) {
+                    return $this->formatTime($workingHour->opens_at);
+                }
+
+                continue;
+            }
+
+            return $this->formatTime($workingHour->opens_at);
+        }
+
+        return null;
     }
 
     private function formatDayRange(array $isoDays): string
