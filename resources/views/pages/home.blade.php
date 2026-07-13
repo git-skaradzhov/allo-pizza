@@ -156,6 +156,41 @@
                     -webkit-font-smoothing: antialiased;
                     font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
                 }
+
+                .home-info-content ul {
+                    list-style: none;
+                    margin: 0;
+                    padding: 0;
+                    display: grid;
+                    gap: 0.5rem;
+                }
+
+                .home-info-content li {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 0.625rem;
+                    margin-bottom: 0.25rem;
+                }
+
+                .home-info-content li::before {
+                    content: 'check_circle';
+                    font-family: 'Material Symbols Outlined';
+                    font-weight: normal;
+                    font-style: normal;
+                    font-size: 1.25rem;
+                    line-height: 1.75rem;
+                    letter-spacing: normal;
+                    text-transform: none;
+                    display: inline-block;
+                    white-space: nowrap;
+                    word-wrap: normal;
+                    direction: ltr;
+                    flex-shrink: 0;
+                    color: #EB1C22;
+                    -webkit-font-feature-settings: 'liga';
+                    -webkit-font-smoothing: antialiased;
+                    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+                }
             </style>
         @endpush
 
@@ -416,7 +451,7 @@
                     <h2 class="mt-1 text-2xl font-black tracking-tight text-stone-950 sm:text-3xl">{{ $homeInfoPage->title }}</h2>
                     <p class="mt-3 text-sm text-stone-500 sm:text-base">Посетете ни на място или поръчайте онлайн с бърза доставка в Русе.</p>
                 </div>
-                <div class="home-info-content text-sm leading-7 text-stone-700 [&_a]:font-bold [&_a]:text-brand-600 [&_li]:mb-1 [&_p]:mb-3 [&_strong]:text-stone-950 [&_ul]:grid [&_ul]:gap-2">
+                <div class="home-info-content text-sm leading-7 text-stone-700 [&_a]:font-bold [&_a]:text-brand-600 [&_p]:mb-3 [&_strong]:text-stone-950">
                     {!! $homeInfoPage->content !!}
                 </div>
             </section>
