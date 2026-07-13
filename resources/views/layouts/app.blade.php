@@ -26,9 +26,25 @@
 
     <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">
         <div class="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3">
-            <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2">
-                <img src="{{ asset('images/logo-wide.png') }}" alt="{{ $storeSetting->store_name ?? 'Allo! Pizza' }}" class="h-9 w-auto max-w-[148px] object-contain sm:h-10 sm:max-w-[180px] md:h-11 md:max-w-[220px]">
-            </a>
+            <div class="flex min-w-0 items-center gap-2 sm:gap-3">
+                <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2">
+                    <img src="{{ asset('images/logo-wide.png') }}" alt="{{ $storeSetting->store_name ?? 'Allo! Pizza' }}" class="h-9 w-auto max-w-[148px] object-contain sm:h-10 sm:max-w-[180px] md:h-11 md:max-w-[220px]">
+                </a>
+
+                @if ($storeSetting?->phoneNumbers())
+                    <div class="flex min-w-0 flex-col gap-0.5 lg:hidden">
+                        @foreach ($storeSetting->phoneNumbers() as $phone)
+                            <a href="tel:{{ \App\Models\StoreSetting::normalizePhone($phone) }}"
+                               class="inline-flex items-center gap-1 whitespace-nowrap text-xs font-bold leading-tight text-brand-600 transition hover:text-brand-700 sm:text-sm">
+                                <svg class="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                                </svg>
+                                {{ $phone }}
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
 
             <div class="hidden flex-1 items-center gap-2 lg:flex">
                 <span class="inline-flex items-center gap-1.5 rounded-full bg-gold-500/15 px-3 py-1.5 text-sm font-semibold text-brand-700">
@@ -66,7 +82,7 @@
                     @endif
 
                     @if ($storeSetting?->phoneNumbers())
-                        <div class="hidden flex-col gap-0.5 border-l border-stone-200 pl-3 xl:flex">
+                        <div class="flex flex-col gap-0.5 border-l border-stone-200 pl-3">
                             @foreach ($storeSetting->phoneNumbers() as $phone)
                                 <a href="tel:{{ \App\Models\StoreSetting::normalizePhone($phone) }}"
                                    class="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-bold leading-tight text-brand-600 transition hover:bg-brand-50">
