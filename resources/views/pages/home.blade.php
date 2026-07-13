@@ -161,31 +161,30 @@
 
         {{-- Delivery information strip --}}
         <section class="mb-5 grid grid-cols-2 gap-2 rounded-[1.5rem] bg-white p-3 shadow-soft sm:gap-3 sm:rounded-[2rem] sm:p-4 md:grid-cols-4">
-            <div class="col-span-2 flex items-center gap-2.5 sm:gap-3 md:col-span-1">
+            <div class="flex items-start gap-2.5 sm:gap-3">
                 <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">local_shipping</span>
                 <div class="min-w-0">
                     <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Доставка</p>
-                    <p class="truncate text-xs font-extrabold text-stone-900 sm:text-sm" title="{{ $storeSetting->store_address ?? 'гр. Русе' }}">{{ $storeSetting->store_address ?? 'гр. Русе' }}</p>
-                    @if ($storeSetting->free_delivery_over)
-                        <p class="text-xs font-semibold text-green-700">Безплатна над {{ money((float) $storeSetting->free_delivery_over) }}</p>
-                    @endif
+                    <p class="text-sm font-extrabold leading-tight text-stone-900 sm:text-base">
+                        Безплатна над {{ money((float) ($storeSetting->free_delivery_over ?: 30)) }}
+                    </p>
                 </div>
             </div>
-            <div class="flex items-center gap-2.5 sm:gap-3">
+            <div class="flex items-start gap-2.5 sm:gap-3">
                 <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">schedule</span>
                 <div class="min-w-0">
                     <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Време</p>
                     <p class="text-sm font-extrabold text-stone-900 sm:text-base">до {{ $storeSetting->average_delivery_time ?? 30 }} мин.</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2.5 sm:gap-3">
+            <div class="flex items-start gap-2.5 sm:gap-3">
                 <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">receipt_long</span>
                 <div class="min-w-0">
                     <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Минимум</p>
                     <p class="text-sm font-extrabold text-stone-900 sm:text-base">{{ money((float) ($storeSetting->minimum_order_amount ?? 0)) }}</p>
                 </div>
             </div>
-            <div class="flex items-center gap-2.5 sm:gap-3">
+            <div class="flex items-start gap-2.5 sm:gap-3">
                 <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">storefront</span>
                 <div class="min-w-0">
                     <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Статус</p>
