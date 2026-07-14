@@ -16,13 +16,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->prepend([
+            HandleRedirects::class,
+        ]);
+
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
         ]);
 
         $middleware->web(prepend: [
             ForceHttps::class,
-            HandleRedirects::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

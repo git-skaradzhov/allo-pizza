@@ -48,6 +48,12 @@ class StoreServiceTest extends TestCase
     public function test_store_is_closed_after_working_hours(): void
     {
         $this->seedWorkingDay(opensAt: '09:00:00', closesAt: '21:00:00');
+        WorkingHour::query()->create([
+            'day_of_week' => 4,
+            'opens_at' => '09:00:00',
+            'closes_at' => '21:00:00',
+            'is_closed' => false,
+        ]);
 
         $service = app(StoreService::class);
         $at = Carbon::parse('2026-07-08 22:15:00', 'Europe/Sofia');

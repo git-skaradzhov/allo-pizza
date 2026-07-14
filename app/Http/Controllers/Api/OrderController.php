@@ -14,10 +14,12 @@ use App\Models\ProductVariant;
 use App\Services\ApiOrderPricingService;
 use App\Services\DeliveryService;
 use App\Services\OrderNotificationService;
+use App\Services\OrderPlacementValidator;
 use App\Services\StoreService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -26,6 +28,7 @@ class OrderController extends Controller
         protected StoreService $storeService,
         protected ApiOrderPricingService $apiOrderPricingService,
         protected OrderNotificationService $orderNotificationService,
+        protected OrderPlacementValidator $orderPlacementValidator,
     ) {}
 
     public function store(Request $request): JsonResponse
@@ -40,8 +43,8 @@ class OrderController extends Controller
             'customer_phone' => ['required', 'string', 'max:20'],
             'delivery_type' => ['required', 'in:delivery,pickup'],
             'delivery_address' => ['required_if:delivery_type,delivery', 'nullable', 'string'],
-            'delivery_lat' => ['nullable', 'numeric'],
-            'delivery_lng' => ['nullable', 'numeric'],
+            'delivery_lat' => ['required_if:delivery_type,delivery', 'nullable', 'numeric', 'between:-90,90'],
+            'delivery_lng' => ['required_if:delivery_type,delivery', 'nullable', 'numeric', 'between:-180,180'],
             'payment_method' => ['required', 'in:cash_on_delivery,pay_at_store'],
             'customer_note' => ['nullable', 'string', 'max:1000'],
             'items' => ['required', 'array', 'min:1'],
@@ -58,10 +61,17 @@ class OrderController extends Controller
 
         foreach ($validated['items'] as $itemData) {
             $product = Product::query()
+                ->where('is_active', true)
                 ->with('category')
                 ->findOrFail($itemData['product_id']);
+
+            if (! $product->category?->is_active) {
+                abort(422, 'Продуктът не е наличен.');
+            }
+
             $variant = ProductVariant::query()
                 ->where('product_id', $product->id)
+                ->where('is_active', true)
                 ->findOrFail($itemData['product_variant_id']);
 
             $unitPrice = (float) $variant->price;
@@ -103,6 +113,9 @@ class OrderController extends Controller
         $deliveryLat = isset($validated['delivery_lat']) ? (float) $validated['delivery_lat'] : null;
         $deliveryLng = isset($validated['delivery_lng']) ? (float) $validated['delivery_lng'] : null;
 
+        $this->orderPlacementValidator->assertMinimumOrderAmount($subtotal);
+        $this->orderPlacementValidator->assertDeliveryLocation($deliveryType, $deliveryLat, $deliveryLng);
+
         $deliveryPrice = $deliveryType === DeliveryType::Delivery
             ? $this->deliveryService->deliveryPrice($subtotal, $deliveryLat, $deliveryLng)
             : 0;
@@ -110,42 +123,57 @@ class OrderController extends Controller
         $appliedPromo = $pricing['appliedPromo'];
         $discount = $pricing['totalDiscount'];
 
-        $order = Order::query()->create([
-            'order_number' => Order::generateOrderNumber(),
-            'customer_id' => $request->user()?->customer?->id,
-            'customer_name' => $validated['customer_name'],
-            'customer_email' => $validated['customer_email'] ?? null,
-            'customer_phone' => $validated['customer_phone'],
-            'delivery_type' => $deliveryType,
-            'delivery_address' => $validated['delivery_address'] ?? null,
-            'delivery_lat' => $validated['delivery_lat'] ?? null,
-            'delivery_lng' => $validated['delivery_lng'] ?? null,
-            'delivery_price' => $deliveryPrice,
-            'subtotal' => $subtotal,
-            'discount' => $discount,
-            'promo_code' => $appliedPromo?->code,
-            'total' => max(0, $subtotal - $discount) + $deliveryPrice,
-            'payment_method' => PaymentMethod::from($validated['payment_method']),
-            'status' => OrderStatus::New,
-            'customer_note' => $validated['customer_note'] ?? null,
-        ]);
-
-        if ($appliedPromo) {
-            $appliedPromo->increment('used_count');
-        }
-
-        foreach ($orderItems as $item) {
-            OrderItem::query()->create([
-                'order_id' => $order->id,
-                'product_id' => $item['product']->id,
-                'product_name' => $item['product']->name,
-                'variant_name' => $item['variant']->name.' '.$item['variant']->size_label,
-                'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
-                'total_price' => $item['total_price'],
-                'note' => $item['note'],
+        $order = DB::transaction(function () use (
+            $validated,
+            $request,
+            $deliveryType,
+            $deliveryLat,
+            $deliveryLng,
+            $deliveryPrice,
+            $subtotal,
+            $discount,
+            $appliedPromo,
+            $orderItems,
+        ) {
+            $order = Order::query()->create([
+                'order_number' => Order::generateOrderNumber(),
+                'customer_id' => $request->user()?->customer?->id,
+                'customer_name' => $validated['customer_name'],
+                'customer_email' => $validated['customer_email'] ?? null,
+                'customer_phone' => $validated['customer_phone'],
+                'delivery_type' => $deliveryType,
+                'delivery_address' => $validated['delivery_address'] ?? null,
+                'delivery_lat' => $deliveryLat,
+                'delivery_lng' => $deliveryLng,
+                'delivery_price' => $deliveryPrice,
+                'subtotal' => $subtotal,
+                'discount' => $discount,
+                'promo_code' => $appliedPromo?->code,
+                'total' => max(0, $subtotal - $discount) + $deliveryPrice,
+                'payment_method' => PaymentMethod::from($validated['payment_method']),
+                'status' => OrderStatus::New,
+                'customer_note' => $validated['customer_note'] ?? null,
             ]);
-        }
+
+            if ($appliedPromo) {
+                $appliedPromo->increment('used_count');
+            }
+
+            foreach ($orderItems as $item) {
+                OrderItem::query()->create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product']->id,
+                    'product_name' => $item['product']->name,
+                    'variant_name' => $item['variant']->name.' '.$item['variant']->size_label,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'total_price' => $item['total_price'],
+                    'note' => $item['note'],
+                ]);
+            }
+
+            return $order;
+        });
 
         $this->orderNotificationService->sendOrderCreated($order);
 

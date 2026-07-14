@@ -58,7 +58,14 @@ class DeliveryService
 
     public function isDeliverable(float $lat, float $lng): bool
     {
-        return true;
+        $settings = $this->storeService->settings();
+        $maxRadius = $settings->delivery_radius_km;
+
+        if ($maxRadius === null || (float) $maxRadius <= 0) {
+            return true;
+        }
+
+        return $this->distanceKm($lat, $lng) <= (float) $maxRadius;
     }
 
     /**

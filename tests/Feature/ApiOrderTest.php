@@ -218,4 +218,64 @@ class ApiOrderTest extends TestCase
             ->assertJsonPath('data.discount', 0)
             ->assertJsonPath('data.total', 50);
     }
+
+    public function test_api_order_rejects_subtotal_below_minimum(): void
+    {
+        $this->createOpenStore();
+        StoreSetting::current()->update(['minimum_order_amount' => 20]);
+        $product = $this->createProductWithVariant(5);
+
+        $this->postJson('/api/orders', $this->apiOrderPayload($product, 1))
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['subtotal']);
+    }
+
+    public function test_api_delivery_requires_coordinates(): void
+    {
+        $this->createOpenStore();
+        $product = $this->createProductWithVariant(15);
+
+        $this->postJson('/api/orders', $this->apiOrderPayload($product, 2, [
+            'delivery_type' => 'delivery',
+            'delivery_address' => 'ул. Пример 1',
+            'payment_method' => 'cash_on_delivery',
+        ]))->assertStatus(422)
+            ->assertJsonValidationErrors(['delivery_lat']);
+    }
+
+    public function test_api_delivery_rejects_address_outside_delivery_radius(): void
+    {
+        $this->createOpenStore();
+        StoreSetting::current()->update(['delivery_radius_km' => 5]);
+        $product = $this->createProductWithVariant(15);
+
+        $this->postJson('/api/orders', $this->apiOrderPayload($product, 2, [
+            'delivery_type' => 'delivery',
+            'delivery_address' => 'ул. Далечна 99',
+            'delivery_lat' => 43.9000,
+            'delivery_lng' => 26.1000,
+            'payment_method' => 'cash_on_delivery',
+        ]))->assertStatus(422)
+            ->assertJsonValidationErrors(['delivery_address']);
+    }
+
+    public function test_api_order_rejects_inactive_product(): void
+    {
+        $this->createOpenStore();
+        $product = $this->createProductWithVariant(15);
+        $product->update(['is_active' => false]);
+
+        $this->postJson('/api/orders', $this->apiOrderPayload($product, 1))
+            ->assertNotFound();
+    }
+
+    public function test_api_order_rejects_inactive_variant(): void
+    {
+        $this->createOpenStore();
+        $product = $this->createProductWithVariant(15);
+        $product->variants->first()->update(['is_active' => false]);
+
+        $this->postJson('/api/orders', $this->apiOrderPayload($product, 1))
+            ->assertNotFound();
+    }
 }

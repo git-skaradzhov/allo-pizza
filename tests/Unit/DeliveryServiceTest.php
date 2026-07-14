@@ -74,4 +74,23 @@ class DeliveryServiceTest extends TestCase
         $this->assertNotEmpty($service->zonePolygon());
         $this->assertTrue($service->isWithinZone(43.8407468, 25.9536970));
     }
+
+    public function test_is_deliverable_respects_delivery_radius(): void
+    {
+        $this->createSettings(['delivery_radius_km' => 5]);
+
+        $service = app(DeliveryService::class);
+
+        $this->assertTrue($service->isDeliverable(43.8407468, 25.9536970));
+        $this->assertFalse($service->isDeliverable(43.9000, 26.1000));
+    }
+
+    public function test_is_deliverable_allows_all_locations_when_radius_is_zero(): void
+    {
+        $this->createSettings(['delivery_radius_km' => 0]);
+
+        $service = app(DeliveryService::class);
+
+        $this->assertTrue($service->isDeliverable(43.9000, 26.1000));
+    }
 }

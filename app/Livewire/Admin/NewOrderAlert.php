@@ -74,6 +74,32 @@ class NewOrderAlert extends Component
         }
     }
 
+    public function pollForNewOrders(): void
+    {
+        if (! auth()->user()?->isAdministrator()) {
+            return;
+        }
+
+        $knownIds = $this->queue;
+
+        if ($this->currentOrder !== null) {
+            $knownIds[] = $this->currentOrder->id;
+        }
+
+        $pendingIds = Order::query()
+            ->where('status', OrderStatus::New)
+            ->orderBy('id')
+            ->pluck('id')
+            ->all();
+
+        foreach ($pendingIds as $orderId) {
+            if (! in_array($orderId, $knownIds, true)) {
+                $this->handleNewOrder($orderId);
+                $knownIds[] = $orderId;
+            }
+        }
+    }
+
     public function acceptOrder(): void
     {
         if ($this->currentOrder === null) {

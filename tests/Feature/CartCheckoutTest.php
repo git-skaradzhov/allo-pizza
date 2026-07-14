@@ -50,6 +50,7 @@ class CartCheckoutTest extends TestCase
             'store_email' => 'admin@allopizza.test',
             'store_lat' => 43.8407475,
             'store_lng' => 25.9549665,
+            'delivery_radius_km' => 50,
             'delivery_zone_polygon' => DeliveryZone::defaultPolygon(),
             'delivery_price' => 3,
             'delivery_inside_price' => 2,
@@ -340,5 +341,103 @@ class CartCheckoutTest extends TestCase
         $this->assertEqualsWithDelta((float) $variant->price, (float) $cartItem->unit_price, 0.001);
         $this->assertCount(1, $cartItem->options);
         $this->assertSame('ingredient_removed', $cartItem->options[0]['type']);
+    }
+
+    public function test_checkout_rejects_subtotal_below_minimum(): void
+    {
+        $product = $this->makeProduct();
+        $variant = $product->variants->first();
+
+        StoreSetting::query()->first()->update(['minimum_order_amount' => 50]);
+
+        $customer = \App\Models\Customer::factory()->create();
+        $this->actingAs($customer->user);
+
+        $this->post('/cart/add', [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ]);
+
+        $this->post('/checkout', [
+            'customer_name' => 'Иван Иванов',
+            'customer_phone' => '0888123456',
+            'delivery_type' => 'pickup',
+        ])->assertSessionHasErrors('subtotal');
+
+        $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_checkout_redirects_when_below_minimum_on_index(): void
+    {
+        $product = $this->makeProduct();
+        $variant = $product->variants->first();
+
+        StoreSetting::query()->first()->update(['minimum_order_amount' => 50]);
+
+        $customer = \App\Models\Customer::factory()->create();
+        $this->actingAs($customer->user);
+
+        $this->post('/cart/add', [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ]);
+
+        $this->get(route('checkout'))
+            ->assertRedirect(route('cart'))
+            ->assertSessionHas('error', 'Минималната стойност на поръчката не е достигната.');
+    }
+
+    public function test_delivery_requires_coordinates(): void
+    {
+        $product = $this->makeProduct();
+        $variant = $product->variants->first();
+
+        $customer = \App\Models\Customer::factory()->create();
+        $this->actingAs($customer->user);
+
+        $this->post('/cart/add', [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ]);
+
+        $this->post('/checkout', [
+            'customer_name' => 'Иван Иванов',
+            'customer_phone' => '0888123456',
+            'delivery_type' => 'delivery',
+            'delivery_address' => 'ул. Пример 1',
+        ])->assertSessionHasErrors('delivery_lat');
+
+        $this->assertDatabaseCount('orders', 0);
+    }
+
+    public function test_delivery_rejects_address_outside_delivery_radius(): void
+    {
+        $product = $this->makeProduct();
+        $variant = $product->variants->first();
+
+        StoreSetting::query()->first()->update(['delivery_radius_km' => 5]);
+
+        $customer = \App\Models\Customer::factory()->create();
+        $this->actingAs($customer->user);
+
+        $this->post('/cart/add', [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ]);
+
+        $this->post('/checkout', [
+            'customer_name' => 'Иван Иванов',
+            'customer_phone' => '0888123456',
+            'delivery_type' => 'delivery',
+            'delivery_address' => 'ул. Далечна 99',
+            'delivery_lat' => 43.9000,
+            'delivery_lng' => 26.1000,
+        ])->assertSessionHasErrors('delivery_address');
+
+        $this->assertDatabaseCount('orders', 0);
     }
 }

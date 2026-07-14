@@ -16,6 +16,9 @@ use App\Services\StoreService;
 use App\Support\Seo\SeoBuilder;
 use App\Support\Seo\SeoData;
 use App\Support\Seo\StructuredDataGenerator;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -29,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->configureRateLimiting();
+
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
@@ -78,5 +83,22 @@ class AppServiceProvider extends ServiceProvider
 
             $view->with($shared);
         });
+    }
+
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('api-orders', fn (Request $request) => Limit::perMinute(10)->by($request->ip()));
+
+        RateLimiter::for('api-auth-login', fn (Request $request) => Limit::perMinute(5)->by(
+            strtolower((string) $request->input('email')).'|'.$request->ip()
+        ));
+
+        RateLimiter::for('api-auth-register', fn (Request $request) => Limit::perMinute(3)->by($request->ip()));
+
+        RateLimiter::for('web-auth-login', fn (Request $request) => Limit::perMinute(5)->by(
+            strtolower((string) $request->input('email')).'|'.$request->ip()
+        ));
+
+        RateLimiter::for('web-auth-register', fn (Request $request) => Limit::perMinute(3)->by($request->ip()));
     }
 }

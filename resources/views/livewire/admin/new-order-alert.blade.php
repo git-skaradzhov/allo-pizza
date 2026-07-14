@@ -1,4 +1,5 @@
 <div
+    wire:poll.15s="pollForNewOrders"
     x-data="{
         audio: null,
         audioUnlocked: false,

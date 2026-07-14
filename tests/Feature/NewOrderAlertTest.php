@@ -126,4 +126,17 @@ class NewOrderAlertTest extends TestCase
             ->call('handleNewOrder', $secondOrder->id)
             ->assertSet('queue', [$secondOrder->id]);
     }
+
+    public function test_new_order_alert_polls_for_new_orders(): void
+    {
+        $admin = User::factory()->administrator()->create();
+        $order = Order::factory()->create(['status' => OrderStatus::New]);
+
+        Livewire::actingAs($admin)
+            ->test(NewOrderAlert::class)
+            ->set('currentOrder', null)
+            ->set('queue', [])
+            ->call('pollForNewOrders')
+            ->assertSet('currentOrder.id', $order->id);
+    }
 }

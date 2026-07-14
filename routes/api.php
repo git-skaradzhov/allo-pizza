@@ -15,10 +15,10 @@ Route::get('/products/{product}', [ProductController::class, 'show']);
 Route::get('/banners', [BannerController::class, 'index']);
 Route::get('/lunch-menu', [LunchMenuController::class, 'index']);
 Route::get('/settings', [SettingController::class, 'index']);
-Route::post('/orders', [OrderController::class, 'store']);
+Route::post('/orders', [OrderController::class, 'store'])->middleware('throttle:api-orders');
 
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:api-auth-register');
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:api-auth-login');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);

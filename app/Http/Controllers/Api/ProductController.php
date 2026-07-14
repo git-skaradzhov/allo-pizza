@@ -13,7 +13,11 @@ class ProductController extends Controller
     {
         $products = Product::query()
             ->where('is_active', true)
-            ->with(['category', 'variants', 'ingredients'])
+            ->with([
+                'category',
+                'variants' => fn ($query) => $query->where('is_active', true),
+                'ingredients',
+            ])
             ->orderBy('sort_order')
             ->get();
 
@@ -24,7 +28,11 @@ class ProductController extends Controller
     {
         abort_unless($product->is_active, 404);
 
-        $product->load(['category', 'variants', 'ingredients']);
+        $product->load([
+            'category',
+            'variants' => fn ($query) => $query->where('is_active', true),
+            'ingredients',
+        ]);
 
         return new ProductResource($product);
     }
