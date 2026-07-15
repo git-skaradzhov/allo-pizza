@@ -7,6 +7,120 @@
 @endphp
 
 @section('content')
+    @push('styles')
+        <style>
+            .rich-content {
+                color: #292524;
+                font-size: 1rem;
+                line-height: 1.75;
+                overflow-wrap: anywhere;
+            }
+
+            .rich-content > :first-child {
+                margin-top: 0;
+            }
+
+            .rich-content > :last-child {
+                margin-bottom: 0;
+            }
+
+            .rich-content p {
+                margin: 0 0 1rem;
+            }
+
+            .rich-content h2 {
+                margin: 2.25rem 0 1rem;
+                color: #1c1917;
+                font-size: 1.5rem;
+                font-weight: 800;
+                line-height: 1.3;
+            }
+
+            .rich-content h3 {
+                margin: 1.75rem 0 0.75rem;
+                color: #1c1917;
+                font-size: 1.25rem;
+                font-weight: 700;
+                line-height: 1.4;
+            }
+
+            .rich-content ul,
+            .rich-content ol {
+                margin: 1rem 0;
+                padding-left: 1.5rem;
+            }
+
+            .rich-content ul {
+                list-style: disc;
+            }
+
+            .rich-content ol {
+                list-style: decimal;
+            }
+
+            .rich-content li {
+                margin: 0.4rem 0;
+                padding-left: 0.25rem;
+            }
+
+            .rich-content li > p {
+                margin: 0;
+            }
+
+            .rich-content strong {
+                color: #1c1917;
+                font-weight: 700;
+            }
+
+            .rich-content a {
+                color: #c5171c;
+                font-weight: 600;
+                text-decoration: underline;
+                text-underline-offset: 2px;
+            }
+
+            .rich-content blockquote {
+                margin: 1.5rem 0;
+                border-left: 4px solid #eb1c22;
+                border-radius: 0 0.75rem 0.75rem 0;
+                background: #feeced;
+                padding: 0.75rem 1rem;
+                color: #57534e;
+                font-style: italic;
+            }
+
+            .rich-content pre {
+                margin: 1.5rem 0;
+                overflow-x: auto;
+                border-radius: 0.75rem;
+                background: #1c1917;
+                padding: 1rem;
+                color: #fafaf9;
+            }
+
+            .rich-content img {
+                margin: 1.5rem auto;
+                height: auto;
+                max-width: 100%;
+                border-radius: 0.75rem;
+            }
+
+            @media (max-width: 640px) {
+                .rich-content {
+                    font-size: 0.95rem;
+                    line-height: 1.7;
+                }
+
+                .rich-content h2 {
+                    font-size: 1.3rem;
+                }
+
+                .rich-content h3 {
+                    font-size: 1.15rem;
+                }
+            }
+        </style>
+    @endpush
     @php
         use App\Services\DeliveryService;
         use Illuminate\Support\Facades\Storage;
@@ -68,7 +182,7 @@
 
     @if ($page->slug === 'kontakti')
         <div class="grid gap-6 lg:grid-cols-2 lg:items-stretch lg:gap-8">
-            <div class="prose min-h-[280px] max-w-none rounded-2xl border border-stone-200 bg-white p-6 lg:min-h-[360px]">
+            <div class="rich-content prose min-h-[280px] max-w-none rounded-2xl border border-stone-200 bg-white p-6 lg:min-h-[360px]">
                 {!! $page->content !!}
             </div>
             <div class="min-h-[280px] overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft lg:min-h-[360px]">
@@ -82,7 +196,7 @@
             </div>
         </div>
     @elseif ($page->slug === 'dostavka')
-        <div class="prose max-w-none rounded-2xl border border-stone-200 bg-white p-6">
+        <div class="rich-content prose max-w-none rounded-2xl border border-stone-200 bg-white p-6">
             {!! $page->content !!}
 
             <ul class="not-prose mt-6 space-y-2 text-sm text-stone-700">
@@ -111,7 +225,7 @@
             </p>
         </div>
     @else
-        <div class="prose max-w-none rounded-2xl border border-stone-200 bg-white p-6">
+        <div class="rich-content prose max-w-none rounded-2xl border border-stone-200 bg-white p-6">
             {!! $page->content !!}
         </div>
     @endif
