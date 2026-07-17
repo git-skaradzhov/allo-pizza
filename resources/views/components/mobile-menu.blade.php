@@ -62,21 +62,11 @@
         </div>
 
         <div class="border-b border-white/10 px-4 py-4">
-            <div class="flex flex-wrap items-center gap-2">
-                <span @class([
-                    'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold',
-                    'bg-green-500/20 text-green-400' => $storeIsOpen,
-                    'bg-white/10 text-white/70' => ! $storeIsOpen,
-                ])>
-                    <span @class([
-                        'h-2 w-2 rounded-full',
-                        'bg-green-400' => $storeIsOpen,
-                        'bg-stone-500' => ! $storeIsOpen,
-                    ])></span>
-                    {{ $storeIsOpen ? 'Отворено' : 'Затворено' }}
-                </span>
-                <span class="text-sm text-white/60">Доставка до {{ $storeSetting->average_delivery_time ?? 30 }} мин.</span>
-            </div>
+            <span class="text-sm text-white/60">
+                Доставка до {{ $storeSetting->average_delivery_time ?? 30 }} мин.
+                от {{ money((float) ($storeSetting->free_delivery_over ?: 30)) }}
+                <strong class="font-bold text-white/90">БЕЗПЛАТНА</strong>
+            </span>
         </div>
 
         <nav class="flex-1 overflow-y-auto px-4 py-2">

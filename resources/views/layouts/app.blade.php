@@ -46,12 +46,12 @@
                 @endif
             </div>
 
-            <div class="hidden flex-1 items-center gap-2 lg:flex">
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-gold-500/15 px-3 py-1.5 text-sm font-semibold text-brand-700">
-                    <span class="h-2 w-2 rounded-full {{ ($storeIsOpen ?? false) ? 'bg-green-500' : 'bg-stone-400' }}"></span>
-                    {{ ($storeIsOpen ?? false) ? 'Отворено' : 'Затворено' }}
+            <div class="hidden flex-1 items-center lg:flex">
+                <span class="whitespace-nowrap text-sm text-stone-500">
+                    Доставка до {{ $storeSetting->average_delivery_time ?? 30 }} мин.
+                    от {{ money((float) ($storeSetting->free_delivery_over ?: 30)) }}
+                    <strong class="font-bold text-stone-700">БЕЗПЛАТНА</strong>
                 </span>
-                <span class="text-sm text-stone-500">Доставка до {{ $storeSetting->average_delivery_time ?? 30 }} мин.</span>
             </div>
 
             <nav class="ml-auto flex items-center gap-2 text-xs font-medium sm:gap-3 sm:text-sm lg:gap-2">
