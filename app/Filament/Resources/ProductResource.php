@@ -170,12 +170,12 @@ class ProductResource extends Resource
                             ->relationship(
                                 name: 'ingredients',
                                 titleAttribute: 'name',
-                                modifyQueryUsing: fn ($query) => $query->where('is_extra', false)->orderBy('sort_order'),
+                                modifyQueryUsing: fn ($query) => $query->orderBy('sort_order')->orderBy('name'),
                             )
                             ->multiple()
                             ->preload()
                             ->searchable()
-                            ->helperText('Съставки за показване и премахване от поръчката. Платените добавки се управляват отделно в Съставки.')
+                            ->helperText('Избери съставките от рецептата. С „Може да се премахва“ клиентът може да ги махне. С „Допълнителна“ същата съставка остава и като платена добавка.')
                             ->columnSpanFull(),
                     ]),
                 SeoFormSection::make(),
