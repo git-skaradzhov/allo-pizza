@@ -87,7 +87,9 @@ class ItemsRelationManager extends RelationManager
                     ->label('Бележка')
                     ->placeholder('—')
                     ->wrap()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->color(fn (?string $state): ?string => filled($state) ? 'warning' : null)
+                    ->weight(fn (?string $state): ?string => filled($state) ? 'bold' : null)
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('quantity')
                     ->label('Кол.'),
                 Tables\Columns\TextColumn::make('unit_price')

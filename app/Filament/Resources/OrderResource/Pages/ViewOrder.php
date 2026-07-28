@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\OrderResource\Pages;
 
 use App\Filament\Resources\OrderResource;
+use App\Filament\Resources\OrderResource\Widgets\OrderDetailsOverview;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Database\Eloquent\Model;
 
 class ViewOrder extends ViewRecord
 {
@@ -15,5 +17,17 @@ class ViewOrder extends ViewRecord
         return [
             Actions\EditAction::make(),
         ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            OrderDetailsOverview::class,
+        ];
+    }
+
+    protected function resolveRecord(int | string $key): Model
+    {
+        return parent::resolveRecord($key)->loadMissing(['items.options']);
     }
 }
