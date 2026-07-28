@@ -69,7 +69,7 @@ class StoreSetting extends Model
             'store_address' => 'гр. Русе, ул. „Мария Луиза“, 22',
             'store_lat' => 43.8407475,
             'store_lng' => 25.9549665,
-            'delivery_radius_km' => 5,
+            'delivery_radius_km' => 15,
             'delivery_zone_polygon' => \App\Support\DeliveryZone::defaultPolygon(),
             'delivery_price' => 1.79,
             'delivery_inside_price' => 2.00,

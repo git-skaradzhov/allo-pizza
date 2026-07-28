@@ -86,9 +86,10 @@
                     <div>
                         <label for="address-search" class="block text-sm font-semibold">Намери адрес на картата</label>
                         <div class="mt-1 flex gap-2">
-                            <input type="text" id="address-search" placeholder="Търси улица, град..." class="w-full rounded-xl border-stone-300 text-sm focus:border-brand-400 focus:ring-brand-400">
+                            <input type="text" id="address-search" placeholder="Започнете да пишете ул. и номер…" autocomplete="off" class="w-full rounded-xl border-stone-300 text-sm focus:border-brand-400 focus:ring-brand-400">
                             <button type="button" id="address-search-btn" class="shrink-0 rounded-xl bg-stone-800 px-4 text-sm font-semibold text-white hover:bg-stone-900">Търси</button>
                         </div>
+                        <p class="mt-1 text-xs text-stone-500">Русе и населени места в област Русе — улица или село/квартал.</p>
                     </div>
 
                     <p id="zone-status" class="hidden text-sm"></p>
@@ -117,6 +118,7 @@
                      data-inside-price="{{ (float) $deliveryInsidePrice }}"
                      data-outside-price="{{ (float) $deliveryOutsidePrice }}"
                      data-free-over="{{ $freeDeliveryOver ?? '' }}"
+                     data-delivery-radius="{{ (float) ($settings->delivery_radius_km ?? 15) }}"
                      data-polygon='@json($zonePolygon)'
                      data-old-lat="{{ old('delivery_lat') }}"
                      data-old-lng="{{ old('delivery_lng') }}">
@@ -249,6 +251,7 @@
                 const outsidePrice = parseFloat(mapEl.dataset.outsidePrice || 0);
                 const freeOver = mapEl.dataset.freeOver ? parseFloat(mapEl.dataset.freeOver) : null;
                 const polygon = JSON.parse(mapEl.dataset.polygon || '[]');
+                const deliveryRadiusKm = parseFloat(mapEl.dataset.deliveryRadius || '0');
                 let currentDeliveryFee = insidePrice;
                 let mapInstance = null;
                 let deliveryMarker = null;
@@ -381,17 +384,23 @@
                     if (isDelivery) {
                         if (zonePolygon) {
                             zonePolygon.setMap(mapInstance);
+                        }
+
+                        const lat = parseFloat(latField.value);
+                        const lng = parseFloat(lngField.value);
+                        const hasPoint = !isNaN(lat) && !isNaN(lng);
+
+                        if (deliveryMarker) {
+                            deliveryMarker.setDraggable(true);
+                            deliveryMarker.setVisible(hasPoint);
+                        }
+
+                        // Не връщай картата към зоната, ако вече има избран адрес.
+                        if (!hasPoint && polygon.length >= 3) {
                             const bounds = new google.maps.LatLngBounds();
                             polygon.forEach((point) => bounds.extend({ lat: parseFloat(point.lat), lng: parseFloat(point.lng) }));
                             bounds.extend({ lat: storeLat, lng: storeLng });
                             mapInstance.fitBounds(bounds, 40);
-                        }
-
-                        if (deliveryMarker) {
-                            deliveryMarker.setDraggable(true);
-                            const lat = parseFloat(latField.value);
-                            const lng = parseFloat(lngField.value);
-                            deliveryMarker.setVisible(!isNaN(lat) && !isNaN(lng));
                         }
                     } else {
                         if (zonePolygon) {
@@ -413,6 +422,32 @@
                 document.querySelectorAll('.delivery-type').forEach((el) => el.addEventListener('change', updateTotals));
 
                 function setPoint(lat, lng, fly) {
+                    if (deliveryMode && deliveryRadiusKm > 0) {
+                        const toRad = (deg) => deg * Math.PI / 180;
+                        const dLat = toRad(lat - storeLat);
+                        const dLng = toRad(lng - storeLng);
+                        const a = Math.sin(dLat / 2) ** 2
+                            + Math.cos(toRad(storeLat)) * Math.cos(toRad(lat)) * Math.sin(dLng / 2) ** 2;
+                        const km = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+                        if (km > deliveryRadiusKm) {
+                            if (deliveryMarker) {
+                                deliveryMarker.setVisible(true);
+                                deliveryMarker.setPosition({ lat, lng });
+                            }
+                            if (fly && mapInstance) {
+                                mapInstance.panTo({ lat, lng });
+                                mapInstance.setZoom(13);
+                            }
+                            latField.value = '';
+                            lngField.value = '';
+                            addressField.value = '';
+                            showStatusMessage('Адресът е извън зоната за доставка.', true);
+                            updateTotals();
+                            return;
+                        }
+                    }
+
                     latField.value = lat.toFixed(7);
                     lngField.value = lng.toFixed(7);
 
@@ -493,18 +528,39 @@
                         visible: false,
                     });
 
+                    // Приблизителни граници на област Русе — bias + клиентски филтър.
+                    const ruseBounds = new google.maps.LatLngBounds(
+                        { lat: 43.40, lng: 25.50 },
+                        { lat: 44.15, lng: 26.65 },
+                    );
+
                     deliveryMarker.addListener('dragend', () => {
                         if (!deliveryMode) {
                             return;
                         }
 
                         const pos = deliveryMarker.getPosition();
+                        if (!ruseBounds.contains(pos)) {
+                            showStatusMessage('Адресът е извън област Русе. Моля, изберете адрес в Русе.', true);
+                            const prevLat = parseFloat(latField.value);
+                            const prevLng = parseFloat(lngField.value);
+                            if (!isNaN(prevLat) && !isNaN(prevLng)) {
+                                deliveryMarker.setPosition({ lat: prevLat, lng: prevLng });
+                            }
+                            return;
+                        }
+
                         setPoint(pos.lat(), pos.lng(), false);
                         reverseGeocode(pos.lat(), pos.lng());
                     });
 
                     mapInstance.addListener('click', (event) => {
                         if (!deliveryMode) {
+                            return;
+                        }
+
+                        if (!ruseBounds.contains(event.latLng)) {
+                            showStatusMessage('Адресът е извън област Русе. Моля, изберете адрес в Русе.', true);
                             return;
                         }
 
@@ -515,30 +571,316 @@
 
                     const searchInput = document.getElementById('address-search');
                     const geocoder = new google.maps.Geocoder();
-                    document.getElementById('address-search-btn').addEventListener('click', () => {
-                        const q = searchInput.value.trim();
-                        if (!q) return;
+                    const placesService = (google.maps.places && mapInstance)
+                        ? new google.maps.places.PlacesService(mapInstance)
+                        : null;
 
+                    function distanceKm(lat1, lng1, lat2, lng2) {
+                        const toRad = (deg) => deg * Math.PI / 180;
+                        const dLat = toRad(lat2 - lat1);
+                        const dLng = toRad(lng2 - lng1);
+                        const a = Math.sin(dLat / 2) ** 2
+                            + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+                        return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                    }
+
+                    function componentText(components, type) {
+                        const match = (components || []).find((c) => c.types.includes(type));
+                        return match ? `${match.long_name} ${match.short_name}`.toLowerCase() : '';
+                    }
+
+                    function latLngOf(location) {
+                        return {
+                            lat: typeof location.lat === 'function' ? location.lat() : location.lat,
+                            lng: typeof location.lng === 'function' ? location.lng() : location.lng,
+                        };
+                    }
+
+                    function isInRuseRegion(result) {
+                        const location = result.geometry?.location;
+                        if (!location) {
+                            return false;
+                        }
+
+                        const { lat, lng } = latLngOf(location);
+
+                        if (!ruseBounds.contains({ lat, lng })) {
+                            return false;
+                        }
+
+                        // Геометрия в bbox на областта е достатъчна (села като Мартен).
+                        return distanceKm(storeLat, storeLng, lat, lng) <= 60;
+                    }
+
+                    function resultRank(result) {
+                        const types = result.types || [];
+                        if (types.includes('street_address') || types.includes('premise') || types.includes('subpremise')) {
+                            return 0;
+                        }
+                        if (types.includes('route') || types.includes('intersection')) {
+                            return 1;
+                        }
+                        if (types.includes('neighborhood') || types.includes('sublocality') || types.includes('sublocality_level_1')) {
+                            return 2;
+                        }
+                        if (types.includes('locality') || types.includes('postal_town')) {
+                            return 4;
+                        }
+                        // administrative / political (цяла област и т.н.)
+                        return 5;
+                    }
+
+                    function queryWantsStreet(query) {
+                        return /\d/.test(query) || /ул\.?|улица|бул\.?|булевард|площад|пл\./i.test(query);
+                    }
+
+                    function isBareRuseCity(result) {
+                        const components = result.address_components || [];
+                        const hasRoute = components.some((c) => c.types.includes('route'));
+                        const hasStreetNumber = components.some((c) => c.types.includes('street_number'));
+                        if (hasRoute || hasStreetNumber) {
+                            return false;
+                        }
+
+                        const locality = componentText(components, 'locality').trim();
+                        const formatted = (result.formatted_address || '').trim().toLowerCase();
+                        const localityIsRuse = /^(русе|ruse)\b/.test(locality);
+                        const formattedIsRuse = /^(русе|ruse),?\s*българия$/i.test(formatted)
+                            || /^(русе|ruse),?\s*bulgaria$/i.test(formatted);
+
+                        return localityIsRuse || formattedIsRuse;
+                    }
+
+                    function isPreciseEnough(result, query) {
+                        const components = result.address_components || [];
+                        const hasRoute = components.some((c) => c.types.includes('route'));
+                        const hasStreetNumber = components.some((c) => c.types.includes('street_number'));
+                        const q = (query || '').trim();
+
+                        if (hasRoute || hasStreetNumber) {
+                            return true;
+                        }
+
+                        // Не връщай центъра на гр. Русе при търсене на друго място.
+                        if (isBareRuseCity(result) && !/^(русе|ruse)$/i.test(q)) {
+                            return false;
+                        }
+
+                        const rank = resultRank(result);
+                        const types = result.types || [];
+
+                        if (queryWantsStreet(q)) {
+                            return rank <= 1;
+                        }
+
+                        // Име на село/квартал — приемай locality и neighborhood в областта.
+                        if (rank <= 2 || rank === 4) {
+                            return true;
+                        }
+
+                        // Отхвърли само „Област Русе“ като цяло.
+                        if (types.includes('administrative_area_level_1') && !types.includes('locality')) {
+                            return false;
+                        }
+
+                        return rank < 5;
+                    }
+
+                    function pickRuseAddress(results, query) {
+                        const candidates = (results || [])
+                            .filter(isInRuseRegion)
+                            .filter((result) => isPreciseEnough(result, query));
+
+                        if (!candidates.length) {
+                            return null;
+                        }
+
+                        candidates.sort((a, b) => {
+                            const rankDiff = resultRank(a) - resultRank(b);
+                            if (rankDiff !== 0) {
+                                return rankDiff;
+                            }
+
+                            const aPos = latLngOf(a.geometry.location);
+                            const bPos = latLngOf(b.geometry.location);
+                            return distanceKm(storeLat, storeLng, aPos.lat, aPos.lng)
+                                - distanceKm(storeLat, storeLng, bPos.lat, bPos.lng);
+                        });
+
+                        return candidates[0];
+                    }
+
+                    function applyAddressMatch(match) {
+                        const { lat, lng } = latLngOf(match.geometry.location);
+                        deliveryMarker.setVisible(true);
+                        setPoint(lat, lng, true);
+                        // Ако setPoint е отхвърлил точката (извън радиус), не презаписвай адреса.
+                        if (latField.value) {
+                            addressField.value = match.formatted_address || match.name || '';
+                        }
+                    }
+
+                    function geocodeInRuse(addressQuery, queryForPrecision, done) {
                         geocoder.geocode({
-                            address: `${q}, Русе, България`,
+                            address: addressQuery,
                             componentRestrictions: { country: 'BG' },
+                            bounds: ruseBounds,
+                            region: 'bg',
                         }, (results, status) => {
                             if (status !== 'OK' || !results?.length) {
-                                showStatusMessage('Не открихме този адрес в Google Maps. Опитайте с улица и номер.', true);
+                                done(null);
                                 return;
                             }
 
-                            const location = results[0].geometry.location;
-                            deliveryMarker.setVisible(true);
-                            setPoint(location.lat(), location.lng(), true);
-                            addressField.value = results[0].formatted_address;
+                            done(pickRuseAddress(results, queryForPrecision));
                         });
-                    });
+                    }
+
+                    function findPlaceInRuse(query, done) {
+                        if (!placesService) {
+                            done(null);
+                            return;
+                        }
+
+                        const placeQuery = queryWantsStreet(query)
+                            ? `${/^(ул\.?|улица)\s/i.test(query) ? query : `ул. ${query}`}, Русе, България`
+                            : `${query}, област Русе, България`;
+
+                        placesService.findPlaceFromQuery({
+                            query: placeQuery,
+                            fields: ['formatted_address', 'geometry', 'name', 'types', 'place_id'],
+                            locationBias: ruseBounds,
+                            language: 'bg',
+                        }, (results, status) => {
+                            if (status !== google.maps.places.PlacesServiceStatus.OK || !results?.length) {
+                                done(null);
+                                return;
+                            }
+
+                            const placeId = results[0].place_id;
+                            if (!placeId) {
+                                done(pickRuseAddress(results, query));
+                                return;
+                            }
+
+                            placesService.getDetails({
+                                placeId,
+                                fields: ['formatted_address', 'geometry', 'name', 'types', 'address_components'],
+                                language: 'bg',
+                            }, (place, detailStatus) => {
+                                if (detailStatus !== google.maps.places.PlacesServiceStatus.OK || !place) {
+                                    done(null);
+                                    return;
+                                }
+
+                                if (!isInRuseRegion(place) || !isPreciseEnough(place, query)) {
+                                    done(null);
+                                    return;
+                                }
+
+                                done(place);
+                            });
+                        });
+                    }
+
+                    function searchDeliveryAddress() {
+                        const q = searchInput.value.trim();
+                        if (!q) {
+                            return;
+                        }
+
+                        const queries = [];
+                        const wantsStreet = queryWantsStreet(q);
+                        const hasStreetPrefix = /^(ул\.?|улица|бул\.?|булевард)\s/i.test(q);
+                        const alreadyMentionsRuse = /русе|ruse/i.test(q);
+
+                        if (wantsStreet || hasStreetPrefix) {
+                            if (hasStreetPrefix) {
+                                queries.push(alreadyMentionsRuse ? `${q}, България` : `${q}, Русе, България`);
+                                queries.push(`${q}, 7000 Русе, България`);
+                            } else {
+                                queries.push(`ул. ${q}, Русе, България`);
+                                queries.push(`улица ${q}, Русе, България`);
+                                queries.push(`ул. ${q}, 7000 Русе, България`);
+                                queries.push(alreadyMentionsRuse ? `${q}, България` : `${q}, Русе, България`);
+                            }
+                        } else {
+                            queries.push(`${q}, област Русе, България`);
+                            queries.push(`${q}, Русе, България`);
+                            if (!alreadyMentionsRuse) {
+                                queries.push(`${q}, България`);
+                            }
+                        }
+
+                        const tryNext = (index) => {
+                            if (index >= queries.length) {
+                                findPlaceInRuse(q, (placeMatch) => {
+                                    if (!placeMatch) {
+                                        showStatusMessage('Не открихме този адрес в област Русе. Изберете от предложенията или кликнете на картата.', true);
+                                        return;
+                                    }
+                                    applyAddressMatch(placeMatch);
+                                });
+                                return;
+                            }
+
+                            geocodeInRuse(queries[index], q, (match) => {
+                                if (match) {
+                                    applyAddressMatch(match);
+                                    return;
+                                }
+                                tryNext(index + 1);
+                            });
+                        };
+
+                        tryNext(0);
+                    }
+
+                    let placeJustSelected = false;
+
+                    if (google.maps.places?.Autocomplete) {
+                        const autocomplete = new google.maps.places.Autocomplete(searchInput, {
+                            componentRestrictions: { country: 'bg' },
+                            fields: ['formatted_address', 'geometry', 'name', 'types', 'address_components'],
+                            bounds: ruseBounds,
+                            strictBounds: true,
+                        });
+                        autocomplete.bindTo('bounds', mapInstance);
+
+                        autocomplete.addListener('place_changed', () => {
+                            placeJustSelected = true;
+                            window.setTimeout(() => { placeJustSelected = false; }, 500);
+
+                            const place = autocomplete.getPlace();
+                            if (!place?.geometry?.location) {
+                                showStatusMessage('Изберете адрес от списъка с предложения.', true);
+                                return;
+                            }
+
+                            if (!isInRuseRegion(place)) {
+                                showStatusMessage('Адресът е извън област Русе. Моля, изберете адрес в област Русе.', true);
+                                return;
+                            }
+
+                            if (!isPreciseEnough(place, searchInput.value.trim() || place.formatted_address || '')) {
+                                showStatusMessage('Моля, изберете по-точен адрес (улица и номер или населено място).', true);
+                                return;
+                            }
+
+                            applyAddressMatch(place);
+                        });
+                    }
+
+                    document.getElementById('address-search-btn').addEventListener('click', searchDeliveryAddress);
 
                     searchInput.addEventListener('keydown', (e) => {
                         if (e.key === 'Enter') {
                             e.preventDefault();
-                            document.getElementById('address-search-btn').click();
+                            window.setTimeout(() => {
+                                if (!placeJustSelected) {
+                                    searchDeliveryAddress();
+                                }
+                            }, 300);
                         }
                     });
 
@@ -595,7 +937,7 @@
         </script>
         @if ($googleMapsKey)
             <script
-                src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsKey }}&language=bg&region=BG&callback=initCheckoutGoogleMap&loading=async&auth_referrer_policy=origin"
+                src="https://maps.googleapis.com/maps/api/js?key={{ $googleMapsKey }}&libraries=places&language=bg&region=BG&callback=initCheckoutGoogleMap&loading=async&auth_referrer_policy=origin"
                 async
                 defer
                 onerror="window.handleCheckoutGoogleMapsError && window.handleCheckoutGoogleMapsError()"></script>

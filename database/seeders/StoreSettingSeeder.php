@@ -21,7 +21,7 @@ class StoreSettingSeeder extends Seeder
             'store_address' => 'гр. Русе, ул. „Мария Луиза“, 22',
             'store_lat' => 43.8407475,
             'store_lng' => 25.9549665,
-            'delivery_radius_km' => 7.00,
+            'delivery_radius_km' => 15.00,
             'delivery_zone_polygon' => DeliveryZone::defaultPolygon(),
             'delivery_price' => Money::fromBgn(3.50),
             'delivery_inside_price' => 2.00,
