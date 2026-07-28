@@ -60,7 +60,7 @@ return [
         '/account',
         '/cart',
         '/checkout',
-        '/login',
+        '/user/login',
         '/register',
         '/forgot-password',
         '/reset-password',

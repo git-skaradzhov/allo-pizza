@@ -152,7 +152,7 @@
                     <a href="{{ route('account.orders') }}" class="block rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold transition hover:border-brand-300 hover:bg-brand-50">Моите поръчки</a>
                     <a href="{{ route('account.addresses') }}" class="block rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold transition hover:border-brand-300 hover:bg-brand-50">Адреси за доставка</a>
                     @if (auth()->user()->isAdministrator())
-                        <a href="{{ url('/admin') }}" class="block rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold transition hover:border-brand-300 hover:bg-brand-50">Админ дашборд</a>
+                        <a href="{{ url('/admin/user/login') }}" class="block rounded-2xl border border-stone-200 px-4 py-3 text-sm font-semibold transition hover:border-brand-300 hover:bg-brand-50">Админ дашборд</a>
                     @endif
                 </div>
             </div>

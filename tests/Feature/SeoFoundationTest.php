@@ -83,7 +83,7 @@ class SeoFoundationTest extends TestCase
     public function test_private_pages_are_noindex(): void
     {
         $this->get('/cart')->assertSee('<meta name="robots" content="noindex,nofollow">', false);
-        $this->get('/login')->assertSee('<meta name="robots" content="noindex,nofollow">', false);
+        $this->get('/user/login')->assertSee('<meta name="robots" content="noindex,nofollow">', false);
     }
 
     public function test_redirect_middleware_applies_permanent_redirect(): void

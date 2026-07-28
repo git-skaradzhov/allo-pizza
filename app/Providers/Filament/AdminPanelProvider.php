@@ -28,9 +28,8 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('admin/user/login')
             ->login()
-            ->loginRouteSlug('user/login')
             ->brandName('Allo! Pizza')
             ->brandLogo(asset('images/logo-wide.png'))
             ->brandLogoHeight('2.25rem')

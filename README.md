@@ -24,7 +24,7 @@ docker compose up --build
 | URL | Адрес |
 |-----|-------|
 | Сайт | http://localhost:8000 |
-| Админ | http://localhost:8000/admin |
+| Админ | http://localhost:8000/admin/user/login |
 
 **Админ:** `admin@pizzeria.local` / `password`
 
@@ -61,8 +61,8 @@ cd ~/Projects/pizzeria-orders
 
 | Роля | URL | Данни |
 |------|-----|-------|
-| Админ | `/admin` | `admin@pizzeria.local` / `password` |
-| Клиент | `/login` | Регистрация през `/register` |
+| Админ | `/admin/user/login` | `admin@pizzeria.local` / `password` |
+| Клиент | `/user/login` | Регистрация през `/register` |
 
 ## API
 

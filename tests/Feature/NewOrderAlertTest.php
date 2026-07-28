@@ -81,10 +81,13 @@ class NewOrderAlertTest extends TestCase
             ->assertSet('queue', []);
     }
 
-    public function test_admin_login_is_available_at_custom_path(): void
+    public function test_admin_panel_is_available_at_custom_path(): void
     {
-        $this->get('/admin/user/login')
+        $this->get('/admin/user/login/login')
             ->assertOk();
+
+        $this->get('/admin')
+            ->assertNotFound();
 
         $this->get('/admin/login')
             ->assertNotFound();
