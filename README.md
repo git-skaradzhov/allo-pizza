@@ -26,7 +26,7 @@ docker compose up --build
 | Сайт | http://localhost:8000 |
 | Админ | http://localhost:8000/admin/user/login |
 
-**Админ:** `admin@pizzeria.local` / `password`
+**Админ:** `info@allopizza.net` / `Allo20Pizza26`
 
 Спиране: `docker compose down`
 
@@ -61,7 +61,7 @@ cd ~/Projects/pizzeria-orders
 
 | Роля | URL | Данни |
 |------|-----|-------|
-| Админ | `/admin/user/login` | `admin@pizzeria.local` / `password` |
+| Админ | `/admin/user/login` | `info@allopizza.net` / `Allo20Pizza26` |
 | Клиент | `/user/login` | Регистрация през `/register` |
 
 ## API

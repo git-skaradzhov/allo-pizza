@@ -5,20 +5,33 @@ namespace Database\Seeders;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::query()->updateOrCreate(
-            ['email' => 'admin@pizzeria.local'],
-            [
+        $admin = User::query()
+            ->whereIn('email', ['info@allopizza.net', 'admin@pizzeria.local'])
+            ->first();
+
+        if ($admin) {
+            $admin->update([
                 'name' => 'Администратор',
-                'password' => Hash::make('password'),
+                'email' => 'info@allopizza.net',
+                'password' => 'Allo20Pizza26',
                 'role' => UserRole::Administrator,
                 'email_verified_at' => now(),
-            ]
-        );
+            ]);
+
+            return;
+        }
+
+        User::query()->create([
+            'name' => 'Администратор',
+            'email' => 'info@allopizza.net',
+            'password' => 'Allo20Pizza26',
+            'role' => UserRole::Administrator,
+            'email_verified_at' => now(),
+        ]);
     }
 }
