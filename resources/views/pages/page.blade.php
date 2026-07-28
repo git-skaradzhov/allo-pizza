@@ -165,7 +165,7 @@
                 </div>
                 <div class="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 shadow-soft">
                     <span class="h-3 w-3 rounded-sm bg-stone-300 ring-2 ring-stone-400"></span>
-                    <span><strong>{{ money($outsidePrice) }}</strong> извън района</span>
+                    <span>Извън района — уточнява се допълнително</span>
                 </div>
             </div>
 
@@ -206,7 +206,7 @@
                 </li>
                 <li class="flex items-start gap-2">
                     <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-stone-400"></span>
-                    <span><strong>{{ money((float) ($storeSetting->delivery_outside_price ?? 3)) }}</strong> — доставка извън района</span>
+                    <span>Уточнява се допълнително — доставка извън района</span>
                 </li>
                 @if ($storeSetting->free_delivery_over)
                     <li class="flex items-start gap-2">
@@ -415,7 +415,7 @@
                             statusEl.className = 'text-sm ' + (inside ? 'text-green-700' : 'text-brand-600');
                             statusEl.textContent = inside
                                 ? 'Избраната точка е в района — ' + formatMoney(insidePrice)
-                                : 'Избраната точка е извън района — ' + formatMoney(outsidePrice);
+                                : 'Избраната точка е извън района — уточнява се допълнително';
                         }
                     }
 

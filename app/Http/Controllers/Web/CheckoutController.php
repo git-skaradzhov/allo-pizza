@@ -108,6 +108,9 @@ class CheckoutController extends Controller
             ? $this->deliveryService->deliveryPrice($subtotal, $deliveryLat, $deliveryLng)
             : 0;
 
+        $deliveryQuoteRequired = $deliveryType === DeliveryType::Delivery
+            && $this->deliveryService->requiresDeliveryQuote($deliveryLat, $deliveryLng);
+
         $appliedPromo = $pricing['appliedPromo'];
         $discount = $pricing['totalDiscount'];
 
@@ -119,6 +122,7 @@ class CheckoutController extends Controller
             $deliveryLat,
             $deliveryLng,
             $deliveryPrice,
+            $deliveryQuoteRequired,
             $subtotal,
             $discount,
             $appliedPromo,
@@ -135,6 +139,7 @@ class CheckoutController extends Controller
                 'delivery_lat' => $deliveryLat,
                 'delivery_lng' => $deliveryLng,
                 'delivery_price' => $deliveryPrice,
+                'delivery_quote_required' => $deliveryQuoteRequired,
                 'subtotal' => $subtotal,
                 'discount' => $discount,
                 'promo_code' => $appliedPromo?->code,

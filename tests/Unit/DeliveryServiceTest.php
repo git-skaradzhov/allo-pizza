@@ -53,16 +53,20 @@ class DeliveryServiceTest extends TestCase
         $service = app(DeliveryService::class);
 
         $this->assertSame(2.0, $service->deliveryPrice(20, 43.8407468, 25.9536970));
-        $this->assertSame(3.0, $service->deliveryPrice(20, 43.9000, 26.1000));
+        $this->assertSame(0.0, $service->deliveryPrice(20, 43.9000, 26.1000));
+        $this->assertTrue($service->requiresDeliveryQuote(43.9000, 26.1000));
+        $this->assertFalse($service->requiresDeliveryQuote(43.8407468, 25.9536970));
     }
 
-    public function test_free_delivery_over_applies_before_zone_pricing(): void
+    public function test_free_delivery_over_applies_only_inside_zone(): void
     {
         $this->createSettings();
 
         $service = app(DeliveryService::class);
 
+        $this->assertSame(0.0, $service->deliveryPrice(30, 43.8407468, 25.9536970));
         $this->assertSame(0.0, $service->deliveryPrice(30, 43.9000, 26.1000));
+        $this->assertTrue($service->requiresDeliveryQuote(43.9000, 26.1000));
     }
 
     public function test_default_polygon_is_used_when_database_value_missing(): void

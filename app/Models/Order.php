@@ -25,6 +25,7 @@ class Order extends Model
         'delivery_lat',
         'delivery_lng',
         'delivery_price',
+        'delivery_quote_required',
         'subtotal',
         'discount',
         'promo_code',
@@ -42,6 +43,7 @@ class Order extends Model
             'delivery_lat' => 'decimal:7',
             'delivery_lng' => 'decimal:7',
             'delivery_price' => 'decimal:2',
+            'delivery_quote_required' => 'boolean',
             'subtotal' => 'decimal:2',
             'discount' => 'decimal:2',
             'total' => 'decimal:2',
@@ -58,6 +60,15 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function deliveryFeeLabel(): string
+    {
+        if ($this->delivery_quote_required) {
+            return 'Уточнява се допълнително';
+        }
+
+        return money($this->delivery_price);
     }
 
     public static function generateOrderNumber(): string

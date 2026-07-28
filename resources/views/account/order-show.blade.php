@@ -83,7 +83,7 @@
                 </div>
                 <div class="flex justify-between">
                     <span>Доставка</span>
-                    <span>{{ money($order->delivery_price) }}</span>
+                    <span>{{ $order->deliveryFeeLabel() }}</span>
                 </div>
                 <div class="flex justify-between font-semibold">
                     <span>Общо</span>

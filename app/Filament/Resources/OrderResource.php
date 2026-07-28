@@ -100,6 +100,10 @@ class OrderResource extends Resource
                             ->numeric()
                             ->prefix('€')
                             ->default(0),
+                        Forms\Components\Toggle::make('delivery_quote_required')
+                            ->label('Доставката се уточнява допълнително')
+                            ->inline(false)
+                            ->columnSpanFull(),
                     ])
                     ->columns(3),
                 Forms\Components\Section::make('Плащане')

@@ -133,7 +133,7 @@ class CartCheckoutTest extends TestCase
         Mail::assertSent(NewOrderAdminNotification::class);
     }
 
-    public function test_order_outside_zone_charges_outside_delivery_price(): void
+    public function test_order_outside_zone_marks_delivery_quote_required(): void
     {
         Mail::fake();
 
@@ -162,8 +162,10 @@ class CartCheckoutTest extends TestCase
 
         $order = Order::query()->first();
 
-        $this->assertEqualsWithDelta(3.0, (float) $order->delivery_price, 0.001);
-        $this->assertEqualsWithDelta((float) $variant->price + 3.0, (float) $order->total, 0.001);
+        $this->assertTrue($order->delivery_quote_required);
+        $this->assertEqualsWithDelta(0.0, (float) $order->delivery_price, 0.001);
+        $this->assertEqualsWithDelta((float) $variant->price, (float) $order->total, 0.001);
+        $this->assertSame('Уточнява се допълнително', $order->deliveryFeeLabel());
     }
 
     public function test_order_includes_extras_in_database(): void

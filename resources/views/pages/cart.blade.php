@@ -160,7 +160,7 @@
                         <span class="font-semibold">{{ $deliveryPrice > 0 ? money($deliveryPrice) : 'Безплатна' }}</span>
                     </div>
                     <p class="text-xs text-stone-400">
-                        {{ money($settings->delivery_inside_price) }} в района · {{ money($settings->delivery_outside_price) }} извън района
+                        {{ money($settings->delivery_inside_price) }} в района · извън района — уточнява се допълнително
                     </p>
                     @if ($settings->free_delivery_over)
                         <p class="text-xs text-stone-400">Безплатна доставка над {{ money($settings->free_delivery_over) }}</p>

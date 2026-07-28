@@ -42,7 +42,7 @@
     @endif
     <tr>
         <td style="padding:4px 0;color:#57534e;">Доставка</td>
-        <td style="padding:4px 0;text-align:right;">{{ money($order->delivery_price) }}</td>
+        <td style="padding:4px 0;text-align:right;">{{ $order->deliveryFeeLabel() }}</td>
     </tr>
     <tr>
         <td style="padding:8px 0;font-weight:bold;font-size:16px;">Общо</td>

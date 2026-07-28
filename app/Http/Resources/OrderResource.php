@@ -21,6 +21,8 @@ class OrderResource extends JsonResource
             'delivery_lat' => $this->delivery_lat ? (float) $this->delivery_lat : null,
             'delivery_lng' => $this->delivery_lng ? (float) $this->delivery_lng : null,
             'delivery_price' => (float) $this->delivery_price,
+            'delivery_quote_required' => (bool) $this->delivery_quote_required,
+            'delivery_fee_label' => $this->deliveryFeeLabel(),
             'subtotal' => (float) $this->subtotal,
             'discount' => (float) $this->discount,
             'total' => (float) $this->total,

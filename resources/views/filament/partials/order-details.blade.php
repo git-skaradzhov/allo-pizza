@@ -74,7 +74,10 @@
         @endif
 
         <dt class="text-gray-600 dark:text-gray-400">Доставка</dt>
-        <dd class="text-right font-medium">{{ money($order->delivery_price) }}</dd>
+        <dd @class([
+            'text-right font-medium',
+            'text-amber-700 dark:text-amber-300' => $order->delivery_quote_required,
+        ])>{{ $order->deliveryFeeLabel() }}</dd>
 
         <dt class="text-lg font-bold text-gray-950 dark:text-white">Общо</dt>
         <dd class="text-right text-lg font-bold text-primary-600 dark:text-primary-400">{{ money($order->total) }}</dd>

@@ -28,7 +28,7 @@
             </div>
             <div class="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 shadow-soft">
                 <span class="h-3 w-3 rounded-sm bg-stone-300 ring-2 ring-stone-400"></span>
-                <span><strong>{{ money($outsidePrice) }}</strong> извън района</span>
+                <span>Извън района — уточнява се допълнително</span>
             </div>
         </div>
     @endif
@@ -53,7 +53,7 @@
             </div>
             <div class="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-3 py-2 shadow-soft">
                 <span class="h-3 w-3 rounded-sm bg-stone-300 ring-2 ring-stone-400"></span>
-                <span><strong>{{ money($outsidePrice) }}</strong> извън района</span>
+                <span>Извън района — уточнява се допълнително</span>
             </div>
         </div>
     @endif

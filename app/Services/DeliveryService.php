@@ -32,17 +32,28 @@ class DeliveryService
     {
         $settings = $this->storeService->settings();
 
+        if ($lat !== null && $lng !== null && $this->requiresDeliveryQuote($lat, $lng)) {
+            return 0.0;
+        }
+
         if ($settings->free_delivery_over && $subtotal >= (float) $settings->free_delivery_over) {
             return 0;
         }
 
         if ($lat !== null && $lng !== null) {
-            return $this->isWithinZone($lat, $lng)
-                ? (float) $settings->delivery_inside_price
-                : (float) $settings->delivery_outside_price;
+            return (float) $settings->delivery_inside_price;
         }
 
         return (float) $settings->delivery_inside_price;
+    }
+
+    public function requiresDeliveryQuote(?float $lat, ?float $lng): bool
+    {
+        if ($lat === null || $lng === null) {
+            return false;
+        }
+
+        return ! $this->isWithinZone($lat, $lng);
     }
 
     /**

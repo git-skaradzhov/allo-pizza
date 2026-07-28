@@ -33,6 +33,7 @@ class OrderFactory extends Factory
             'delivery_lat' => fake()->latitude(42.6, 42.8),
             'delivery_lng' => fake()->longitude(23.2, 23.4),
             'delivery_price' => $deliveryPrice,
+            'delivery_quote_required' => false,
             'subtotal' => $subtotal,
             'discount' => $discount,
             'total' => $subtotal + $deliveryPrice - $discount,

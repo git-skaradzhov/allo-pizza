@@ -209,7 +209,7 @@
                     <span class="font-semibold" id="summary-delivery" data-delivery="{{ (float) $deliveryPrice }}">{{ $deliveryPrice > 0 ? money($deliveryPrice) : 'Безплатна' }}</span>
                 </div>
                 <p class="text-xs text-stone-400">
-                    {{ money($deliveryInsidePrice) }} в района · {{ money($deliveryOutsidePrice) }} извън района
+                    {{ money($deliveryInsidePrice) }} в района · извън района — уточнява се допълнително
                 </p>
                 @if ($settings->free_delivery_over)
                     <p class="text-xs text-stone-400">Безплатна доставка над {{ money($settings->free_delivery_over) }}</p>
@@ -290,12 +290,23 @@
                 }
 
                 function deliveryFeeForPoint(lat, lng) {
-                    if (freeOver !== null && subtotal >= freeOver) return 0;
+                    if (freeOver !== null && subtotal >= freeOver) {
+                        if (!lat || !lng || polygon.length < 3 || pointInPolygon(lat, lng, polygon)) {
+                            return 0;
+                        }
+                    }
                     if (!lat || !lng) return insidePrice;
                     if (polygon.length >= 3) {
-                        return pointInPolygon(lat, lng, polygon) ? insidePrice : outsidePrice;
+                        return pointInPolygon(lat, lng, polygon) ? insidePrice : 0;
                     }
                     return insidePrice;
+                }
+
+                function deliveryQuoteRequired(lat, lng) {
+                    if (!lat || !lng || polygon.length < 3) {
+                        return false;
+                    }
+                    return !pointInPolygon(lat, lng, polygon);
                 }
 
                 function updateZoneStatus(lat, lng) {
@@ -307,6 +318,12 @@
                     zoneStatus.classList.remove('hidden');
                     currentDeliveryFee = deliveryFeeForPoint(lat, lng);
 
+                    if (deliveryQuoteRequired(lat, lng)) {
+                        zoneStatus.className = 'mt-2 text-sm text-brand-600';
+                        zoneStatus.textContent = 'Извън района — уточнява се допълнително';
+                        return;
+                    }
+
                     if (freeOver !== null && subtotal >= freeOver) {
                         zoneStatus.className = 'mt-2 text-sm text-green-700';
                         zoneStatus.textContent = 'Безплатна доставка за тази поръчка.';
@@ -314,11 +331,8 @@
                     }
 
                     if (polygon.length >= 3) {
-                        const inside = pointInPolygon(lat, lng, polygon);
-                        zoneStatus.className = 'mt-2 text-sm ' + (inside ? 'text-green-700' : 'text-brand-600');
-                        zoneStatus.textContent = inside
-                            ? 'В района за доставка — ' + formatMoney(insidePrice)
-                            : 'Извън района — ' + formatMoney(outsidePrice);
+                        zoneStatus.className = 'mt-2 text-sm text-green-700';
+                        zoneStatus.textContent = 'В района за доставка — ' + formatMoney(insidePrice);
                         return;
                     }
 
@@ -363,10 +377,13 @@
 
                     const lat = parseFloat(latField.value);
                     const lng = parseFloat(lngField.value);
+                    const quoteRequired = isDelivery && deliveryQuoteRequired(lat, lng);
                     const fee = isDelivery ? deliveryFeeForPoint(lat, lng) : 0;
                     currentDeliveryFee = fee;
 
-                    deliveryEl.textContent = fee > 0 ? formatMoney(fee) : (isDelivery ? 'Безплатна' : '—');
+                    deliveryEl.textContent = quoteRequired
+                        ? 'Уточнява се допълнително'
+                        : (fee > 0 ? formatMoney(fee) : (isDelivery ? 'Безплатна' : '—'));
                     totalEl.textContent = formatMoney(Math.max(0, subtotal - discount) + fee);
 
                     if (isDelivery) {
