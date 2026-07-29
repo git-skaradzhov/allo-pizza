@@ -13,18 +13,23 @@
                     $name = $option->name;
                     $lineTotal = (float) $option->price;
                     $quantity = 1;
+                    $portionWeight = null;
                 } else {
                     $type = $option['type'] ?? '';
                     $name = $option['name'] ?? '';
                     $unitPrice = (float) ($option['price'] ?? 0);
                     $quantity = (int) ($option['quantity'] ?? 1);
                     $lineTotal = $unitPrice * $quantity;
+                    $portionWeight = $option['portion_weight'] ?? null;
                 }
                 $isRemoved = $type === 'ingredient_removed';
                 $isExtra = $type === 'extra_added';
             @endphp
             <p class="text-xs {{ $isRemoved ? 'text-stone-400 line-through' : 'text-stone-500' }}">
                 {{ $isExtra ? '+ ' : ($isRemoved ? '− ' : '') }}{{ $name }}
+                @if ($isExtra && $portionWeight)
+                    <span class="text-stone-400">({{ $portionWeight }})</span>
+                @endif
                 @if ($isExtra && $quantity > 1 && ! ($option instanceof \App\Models\OrderItemOption))
                     <span class="text-stone-400">×{{ $quantity }}</span>
                 @endif

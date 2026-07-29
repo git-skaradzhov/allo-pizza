@@ -243,6 +243,86 @@ class CartCheckoutTest extends TestCase
         $this->assertEqualsWithDelta(19.50, (float) $cartItem->unit_price, 0.001);
     }
 
+    public function test_extra_portion_weight_uses_variant_bonus_for_45cm(): void
+    {
+        $product = $this->makeProduct();
+        $variant = ProductVariant::query()->create([
+            'product_id' => $product->id,
+            'name' => 'Голяма',
+            'size_label' => '45 см',
+            'price' => 18.00,
+            'extra_price_multiplier' => 1.50,
+            'extra_weight_bonus_grams' => 25,
+            'is_active' => true,
+            'sort_order' => 2,
+        ]);
+        $extra = Ingredient::query()->create([
+            'name' => 'Моцарела',
+            'price' => 1.00,
+            'portion_weight' => '50 гр',
+            'is_removable' => false,
+            'is_extra' => true,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $customer = \App\Models\Customer::factory()->create();
+        $this->actingAs($customer->user);
+
+        $this->post('/cart/add', [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+            'extras' => [$extra->id => 1],
+        ]);
+
+        $cartItem = \App\Models\CartItem::query()->first();
+
+        $this->assertSame('75 гр', $cartItem->options[0]['portion_weight'] ?? null);
+
+        $this->post('/checkout', [
+            'customer_name' => 'Тест Клиент',
+            'customer_phone' => '0888123456',
+            'customer_email' => 'test@example.com',
+            'delivery_type' => 'pickup',
+            'payment_method' => 'pay_at_store',
+        ])->assertRedirect();
+
+        $orderItem = Order::query()->first()->items()->first();
+
+        $this->assertDatabaseHas('order_item_options', [
+            'order_item_id' => $orderItem->id,
+            'name' => 'Моцарела (75 гр)',
+            'option_type' => 'extra_added',
+        ]);
+    }
+
+    public function test_extra_portion_weight_stays_base_for_30cm(): void
+    {
+        $product = $this->makeProduct();
+        $variant = $product->variants->first();
+        $extra = Ingredient::query()->create([
+            'name' => 'Моцарела',
+            'price' => 1.00,
+            'portion_weight' => '50 гр',
+            'is_removable' => false,
+            'is_extra' => true,
+            'is_active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $this->post('/cart/add', [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+            'extras' => [$extra->id => 1],
+        ]);
+
+        $cartItem = \App\Models\CartItem::query()->first();
+
+        $this->assertSame('50 гр', $cartItem->options[0]['portion_weight'] ?? null);
+    }
+
     public function test_extra_quantity_multiplies_unit_price(): void
     {
         $product = $this->makeProduct();

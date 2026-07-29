@@ -174,6 +174,11 @@ class CheckoutController extends Controller
                     $quantity = (int) ($option['quantity'] ?? 1);
                     $unitPrice = (float) ($option['price'] ?? 0);
                     $name = $option['name'] ?? '';
+                    $portionWeight = $option['portion_weight'] ?? null;
+
+                    if (($option['type'] ?? '') === 'extra_added' && $portionWeight) {
+                        $name .= ' ('.$portionWeight.')';
+                    }
 
                     if (($option['type'] ?? '') === 'extra_added' && $quantity > 1) {
                         $name .= ' ×'.$quantity;

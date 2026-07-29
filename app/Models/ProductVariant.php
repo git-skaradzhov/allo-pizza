@@ -15,6 +15,7 @@ class ProductVariant extends Model
         'name',
         'price',
         'extra_price_multiplier',
+        'extra_weight_bonus_grams',
         'size_label',
         'weight',
         'diameter',
@@ -27,6 +28,7 @@ class ProductVariant extends Model
         return [
             'price' => 'decimal:2',
             'extra_price_multiplier' => 'decimal:2',
+            'extra_weight_bonus_grams' => 'integer',
             'is_active' => 'boolean',
         ];
     }

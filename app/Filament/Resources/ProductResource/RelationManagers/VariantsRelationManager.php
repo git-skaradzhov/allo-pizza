@@ -39,6 +39,14 @@ class VariantsRelationManager extends RelationManager
                     ->minValue(0.01)
                     ->step(0.01)
                     ->required(),
+                Forms\Components\TextInput::make('extra_weight_bonus_grams')
+                    ->label('Бонус грамаж на добавки')
+                    ->helperText('Допълнителни грамове към грамажа на добавките (напр. 25 за 45 см)')
+                    ->numeric()
+                    ->default(0)
+                    ->minValue(0)
+                    ->suffix('гр')
+                    ->required(),
                 Forms\Components\TextInput::make('size_label')
                     ->label('Размер')
                     ->maxLength(255),
@@ -71,6 +79,8 @@ class VariantsRelationManager extends RelationManager
                     ->money('EUR'),
                 Tables\Columns\TextColumn::make('extra_price_multiplier')
                     ->label('Множ. добавки'),
+                Tables\Columns\TextColumn::make('extra_weight_bonus_grams')
+                    ->label('Бонус гр.'),
                 Tables\Columns\TextColumn::make('size_label')
                     ->label('Размер'),
                 Tables\Columns\TextColumn::make('weight')

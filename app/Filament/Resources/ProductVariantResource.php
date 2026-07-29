@@ -53,6 +53,14 @@ class ProductVariantResource extends Resource
                             ->minValue(0.01)
                             ->step(0.01)
                             ->required(),
+                        Forms\Components\TextInput::make('extra_weight_bonus_grams')
+                            ->label('Бонус грамаж на добавки')
+                            ->helperText('Допълнителни грамове към грамажа на добавките (напр. 25 за 45 см)')
+                            ->numeric()
+                            ->default(0)
+                            ->minValue(0)
+                            ->suffix('гр')
+                            ->required(),
                         Forms\Components\TextInput::make('size_label')
                             ->label('Размер')
                             ->maxLength(255),
@@ -92,6 +100,9 @@ class ProductVariantResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('extra_price_multiplier')
                     ->label('Множ. добавки')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('extra_weight_bonus_grams')
+                    ->label('Бонус гр.')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('size_label')
                     ->label('Размер'),

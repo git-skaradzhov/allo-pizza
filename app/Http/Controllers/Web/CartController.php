@@ -127,6 +127,7 @@ class CartController extends Controller
                         'name' => $ingredient->name,
                         'price' => $ingredient->priceForVariant($variant),
                         'quantity' => $quantity,
+                        'portion_weight' => $ingredient->portionWeightForVariant($variant),
                     ];
                 }
             }

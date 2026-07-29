@@ -143,6 +143,7 @@
                                        data-price="{{ (float) $variant->price }}"
                                        data-old-price="{{ $variantOldPrice ?? '' }}"
                                        data-extra-multiplier="{{ (float) ($variant->extra_price_multiplier ?? 1) }}"
+                                       data-extra-weight-bonus="{{ (int) ($variant->extra_weight_bonus_grams ?? 0) }}"
                                        class="peer sr-only variant-radio" {{ $i === 0 ? 'checked' : '' }}>
                                 <span class="block rounded-xl px-2 py-2.5 text-center text-xs font-semibold text-stone-600 transition peer-checked:bg-white peer-checked:text-brand-600 peer-checked:shadow-soft sm:px-3 sm:text-sm">
                                     <span class="block">{{ $variant->name }}</span>
@@ -181,11 +182,15 @@
                             <div class="extra-row flex items-center justify-between gap-3 px-4 py-3"
                                  data-ingredient-id="{{ $ingredient->id }}"
                                  data-linked-to-recipe="{{ $recipeIngredientIds->contains($ingredient->id) ? '1' : '0' }}"
-                                 data-base-price="{{ (float) $ingredient->price }}">
+                                 data-base-price="{{ (float) $ingredient->price }}"
+                                 @if ($ingredient->portion_weight)
+                                     data-base-weight-grams="{{ (int) preg_replace('/\D/', '', $ingredient->portion_weight) }}"
+                                     data-weight-suffix="{{ preg_replace('/^\d+\s*/', '', $ingredient->portion_weight) }}"
+                                 @endif>
                                 <div class="min-w-0 flex-1">
                                     <p class="text-sm font-semibold text-stone-800">{{ $ingredient->name }}</p>
                                     @if ($ingredient->portion_weight)
-                                        <p class="text-xs text-stone-400">{{ $ingredient->portion_weight }}</p>
+                                        <p class="extra-weight-label text-xs text-stone-400">{{ $ingredient->portion_weight }}</p>
                                     @endif
                                 </div>
                                 <div class="flex shrink-0 items-center gap-3">
@@ -333,6 +338,11 @@
                     return variant ? parseFloat(variant.dataset.extraMultiplier || '1') : 1;
                 }
 
+                function getWeightBonus() {
+                    const variant = form.querySelector('.variant-radio:checked');
+                    return variant ? parseInt(variant.dataset.extraWeightBonus || '0', 10) : 0;
+                }
+
                 function updateExtraPrices() {
                     const multiplier = getMultiplier();
                     form.querySelectorAll('.extra-row').forEach((row) => {
@@ -342,6 +352,20 @@
                         if (label) {
                             label.textContent = formatMoney(price);
                         }
+                    });
+                }
+
+                function updateExtraWeights() {
+                    const bonus = getWeightBonus();
+                    form.querySelectorAll('.extra-row').forEach((row) => {
+                        const label = row.querySelector('.extra-weight-label');
+                        if (!label || row.dataset.baseWeightGrams === undefined) {
+                            return;
+                        }
+
+                        const baseGrams = parseInt(row.dataset.baseWeightGrams || '0', 10);
+                        const suffix = row.dataset.weightSuffix || 'гр';
+                        label.textContent = (baseGrams + bonus) + ' ' + suffix;
                     });
                 }
 
@@ -400,6 +424,7 @@
                 form.querySelectorAll('.variant-radio').forEach((el) => {
                     el.addEventListener('change', () => {
                         updateExtraPrices();
+                        updateExtraWeights();
                         recalc();
                     });
                 });
@@ -429,6 +454,7 @@
                 });
 
                 updateExtraPrices();
+                updateExtraWeights();
                 syncRemovedExtrasVisibility();
                 recalc();
             })();

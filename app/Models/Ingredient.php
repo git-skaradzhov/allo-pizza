@@ -40,4 +40,9 @@ class Ingredient extends Model
     {
         return \App\Support\ExtraPricing::priceFor($this, $variant);
     }
+
+    public function portionWeightForVariant(ProductVariant $variant): ?string
+    {
+        return \App\Support\ExtraWeight::for($this, $variant);
+    }
 }
