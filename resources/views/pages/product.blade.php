@@ -33,7 +33,13 @@
 
         <div class="flex items-start justify-center">
             @if ($galleryDisplayUrls->isNotEmpty())
-                <div id="product-gallery" data-product-gallery class="w-full max-w-md space-y-3">
+                <div id="product-gallery" data-product-gallery class="relative w-full max-w-md space-y-3">
+                    @if ($product->is_new)
+                        <div class="product-image-new">
+                            <x-product-new-icon aria-hidden="true" />
+                        </div>
+                    @endif
+
                     <button type="button"
                             data-gallery-open
                             aria-label="Увеличи снимката"
@@ -72,34 +78,35 @@
                     @endif
                 </div>
             @else
-                <div class="flex aspect-square w-full max-w-md items-center justify-center overflow-hidden rounded-3xl border border-stone-100 bg-white">
-                    <span class="text-7xl sm:text-[8rem]">🍕</span>
+                <div class="relative w-full max-w-md">
+                    @if ($product->is_new)
+                        <div class="product-image-new">
+                            <x-product-new-icon aria-hidden="true" />
+                        </div>
+                    @endif
+                    <div class="flex aspect-square w-full items-center justify-center overflow-hidden rounded-3xl border border-stone-100 bg-white">
+                        <span class="text-7xl sm:text-[8rem]">🍕</span>
+                    </div>
                 </div>
             @endif
         </div>
 
         <div>
-            <div class="flex items-start justify-between gap-3">
-                <div>
-                    @if ($product->is_new)
-                        <x-product-new-icon aria-hidden="true" />
+            @if ($product->is_spicy || $product->isDiscounted())
+                <div class="mb-3 flex flex-col items-end gap-2">
+                    @if ($product->is_spicy)
+                        <span class="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-bold text-brand-600">🌶 Люто</span>
+                    @endif
+                    @if ($product->isDiscounted())
+                        <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-xs font-bold text-white">Промо</span>
                     @endif
                 </div>
+            @endif
 
-                @if ($product->is_spicy || $product->isDiscounted())
-                    <div class="flex flex-col items-end gap-2">
-                        @if ($product->is_spicy)
-                            <span class="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-bold text-brand-600">🌶 Люто</span>
-                        @endif
-                        @if ($product->isDiscounted())
-                            <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-xs font-bold text-white">Промо</span>
-                        @endif
-                    </div>
-                @endif
-            </div>
-
-            <h1 class="mt-3 text-3xl font-extrabold tracking-tight sm:text-4xl">{{ $product->name }}</h1>
-            <p class="mt-2 text-stone-500">{{ $product->short_description }}</p>
+            <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl">{{ $product->name }}</h1>
+            @if ($product->short_description)
+                <p class="mt-2 text-stone-500">{{ $product->short_description }}</p>
+            @endif
 
             @if ($product->ingredients->isNotEmpty())
                 <p class="mt-3 text-sm text-stone-600">
@@ -231,6 +238,15 @@
             </div>
         </div>
     </form>
+
+    @if ($product->description)
+        <section class="product-description">
+            <h2 class="product-description__title">Описание</h2>
+            <div class="product-description__body">
+                {!! $product->description !!}
+            </div>
+        </section>
+    @endif
 
     @push('scripts')
         <script>
