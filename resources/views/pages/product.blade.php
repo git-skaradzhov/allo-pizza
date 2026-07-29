@@ -35,8 +35,13 @@
             @if ($galleryDisplayUrls->isNotEmpty())
                 <div id="product-gallery" data-product-gallery class="relative w-full max-w-md space-y-3">
                     @if ($product->is_new)
-                        <div class="product-image-new">
+                        <div class="product-image-badge product-image-badge--new">
                             <x-product-new-icon aria-hidden="true" />
+                        </div>
+                    @endif
+                    @if ($product->is_spicy)
+                        <div class="product-image-badge product-image-badge--spicy">
+                            <span class="product-image-badge__label">🌶 Люто</span>
                         </div>
                     @endif
 
@@ -80,8 +85,13 @@
             @else
                 <div class="relative w-full max-w-md">
                     @if ($product->is_new)
-                        <div class="product-image-new">
+                        <div class="product-image-badge product-image-badge--new">
                             <x-product-new-icon aria-hidden="true" />
+                        </div>
+                    @endif
+                    @if ($product->is_spicy)
+                        <div class="product-image-badge product-image-badge--spicy">
+                            <span class="product-image-badge__label">🌶 Люто</span>
                         </div>
                     @endif
                     <div class="flex aspect-square w-full items-center justify-center overflow-hidden rounded-3xl border border-stone-100 bg-white">
@@ -92,14 +102,9 @@
         </div>
 
         <div>
-            @if ($product->is_spicy || $product->isDiscounted())
+            @if ($product->isDiscounted())
                 <div class="mb-3 flex flex-col items-end gap-2">
-                    @if ($product->is_spicy)
-                        <span class="rounded-full bg-stone-100 px-2.5 py-0.5 text-xs font-bold text-brand-600">🌶 Люто</span>
-                    @endif
-                    @if ($product->isDiscounted())
-                        <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-xs font-bold text-white">Промо</span>
-                    @endif
+                    <span class="rounded-full bg-brand-500 px-2.5 py-0.5 text-xs font-bold text-white">Промо</span>
                 </div>
             @endif
 
