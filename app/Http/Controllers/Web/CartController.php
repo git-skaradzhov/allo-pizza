@@ -10,6 +10,7 @@ use App\Models\ProductVariant;
 use App\Services\CartPricingService;
 use App\Services\CartService;
 use App\Services\DeliveryService;
+use App\Services\Meta\MetaPurchaseTracker;
 use App\Services\PizzaBundlePromotionService;
 use App\Services\PromoService;
 use App\Services\StoreService;
@@ -26,6 +27,7 @@ class CartController extends Controller
         protected StoreService $storeService,
         protected PromoService $promoService,
         protected PizzaBundlePromotionService $pizzaBundlePromotionService,
+        protected MetaPurchaseTracker $metaPurchaseTracker,
     ) {}
 
     public function index(): View
@@ -143,13 +145,16 @@ class CartController extends Controller
             }
         }
 
-        $this->cartService->addItem(
+        $quantity = $validated['quantity'] ?? 1;
+        $item = $this->cartService->addItem(
             $product,
             $variant,
-            $validated['quantity'] ?? 1,
+            $quantity,
             $product->allowsNotes() ? ($validated['note'] ?? null) : null,
             $options
         );
+
+        $this->metaPurchaseTracker->trackAddToCart($item, $quantity);
 
         return redirect()->route('cart')->with('status', 'Продуктът е добавен в количката.');
     }

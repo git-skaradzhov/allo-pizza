@@ -13,6 +13,8 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\ApiOrderPricingService;
 use App\Services\DeliveryService;
+use App\Services\Meta\MetaEventFactory;
+use App\Services\Meta\MetaPurchaseTracker;
 use App\Services\OrderNotificationService;
 use App\Services\OrderPlacementValidator;
 use App\Services\StoreService;
@@ -29,6 +31,8 @@ class OrderController extends Controller
         protected ApiOrderPricingService $apiOrderPricingService,
         protected OrderNotificationService $orderNotificationService,
         protected OrderPlacementValidator $orderPlacementValidator,
+        protected MetaPurchaseTracker $metaPurchaseTracker,
+        protected MetaEventFactory $metaEventFactory,
     ) {}
 
     public function store(Request $request): JsonResponse
@@ -168,6 +172,7 @@ class OrderController extends Controller
                 OrderItem::query()->create([
                     'order_id' => $order->id,
                     'product_id' => $item['product']->id,
+                    'meta_content_id' => $this->metaEventFactory->productContentId((int) $item['product']->id),
                     'product_name' => $item['product']->name,
                     'variant_name' => $item['variant']->name.' '.$item['variant']->size_label,
                     'quantity' => $item['quantity'],
@@ -181,6 +186,7 @@ class OrderController extends Controller
         });
 
         $this->orderNotificationService->sendOrderCreated($order);
+        $this->metaPurchaseTracker->trackPurchaseAfterCommit($order, flashBrowserEvent: false);
 
         return (new OrderResource($order))
             ->response()

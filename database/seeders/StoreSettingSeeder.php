@@ -31,6 +31,7 @@ class StoreSettingSeeder extends Seeder
             'average_delivery_time' => 30,
             'is_store_open' => true,
             'closed_message' => null,
+            'meta_pixel_id' => '1385265280465389',
         ])->save();
     }
 }

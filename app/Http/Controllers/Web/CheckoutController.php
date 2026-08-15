@@ -11,6 +11,9 @@ use App\Models\OrderItem;
 use App\Services\CartPricingService;
 use App\Services\CartService;
 use App\Services\DeliveryService;
+use App\Services\Meta\MetaEventFactory;
+use App\Services\Meta\MetaPageEventRegistrar;
+use App\Services\Meta\MetaPurchaseTracker;
 use App\Services\OrderNotificationService;
 use App\Services\OrderPlacementValidator;
 use App\Services\PromoService;
@@ -30,6 +33,9 @@ class CheckoutController extends Controller
         protected PromoService $promoService,
         protected OrderNotificationService $orderNotificationService,
         protected OrderPlacementValidator $orderPlacementValidator,
+        protected MetaPageEventRegistrar $metaPageEvents,
+        protected MetaPurchaseTracker $metaPurchaseTracker,
+        protected MetaEventFactory $metaEventFactory,
     ) {}
 
     public function index(): View|RedirectResponse
@@ -46,6 +52,8 @@ class CheckoutController extends Controller
         if ($pricing['subtotal'] < (float) $settings->minimum_order_amount) {
             return redirect()->route('cart')->with('error', 'Минималната стойност на поръчката не е достигната.');
         }
+
+        $this->metaPageEvents->queueInitiateCheckout($cart, $pricing, request());
 
         return view('pages.checkout', [
             'cart' => $cart,
@@ -158,6 +166,7 @@ class CheckoutController extends Controller
                     'order_id' => $order->id,
                     'item_type' => $item->item_type,
                     'product_id' => $item->product_id,
+                    'meta_content_id' => $this->metaEventFactory->contentIdForCartItem($item),
                     'product_name' => $item->displayName(),
                     'variant_name' => $item->isLunchItem()
                         ? 'Обедно меню'
@@ -201,6 +210,7 @@ class CheckoutController extends Controller
         $this->promoService->clear();
 
         $this->orderNotificationService->sendOrderCreated($order);
+        $this->metaPurchaseTracker->trackPurchaseAfterCommit($order);
 
         $message = 'Поръчката е приета успешно. Номер: '.$order->order_number;
 

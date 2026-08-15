@@ -12,6 +12,9 @@ use App\Observers\OrderObserver;
 use App\Observers\ProductImageObserver;
 use App\Observers\ProductObserver;
 use App\Services\CartService;
+use App\Services\Meta\MetaConsentService;
+use App\Services\Meta\MetaPageEventRegistrar;
+use App\Services\Meta\MetaPixelIdResolver;
 use App\Services\StoreService;
 use App\Support\Seo\SeoBuilder;
 use App\Support\Seo\SeoData;
@@ -27,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->app->scoped(MetaPageEventRegistrar::class);
     }
 
     public function boot(): void
@@ -79,6 +82,18 @@ class AppServiceProvider extends ServiceProvider
 
                 $shared['seo'] = $seo;
                 $shared['structuredData'] = app(StructuredDataGenerator::class)->generate($seo);
+
+                $registrar = app(MetaPageEventRegistrar::class);
+                $registrar->queuePageView(request());
+
+                $shared['metaPageEvents'] = $registrar->browserEvents();
+                $shared['metaFlashEvents'] = session('meta_browser_events', []);
+                $shared['metaTrackingConfig'] = [
+                    'consentUrl' => route('cookie-consent.store'),
+                    'eventsUrl' => route('meta.events.store'),
+                    'pixelId' => app(MetaPixelIdResolver::class)->resolve($settings),
+                    'serverMarketingConsent' => app(MetaConsentService::class)->status(request()),
+                ];
             }
 
             $view->with($shared);
@@ -100,5 +115,9 @@ class AppServiceProvider extends ServiceProvider
         ));
 
         RateLimiter::for('web-auth-register', fn (Request $request) => Limit::perMinute(3)->by($request->ip()));
+
+        RateLimiter::for('meta-consent', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+
+        RateLimiter::for('meta-events', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
     }
 }

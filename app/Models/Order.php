@@ -34,6 +34,10 @@ class Order extends Model
         'status',
         'customer_note',
         'admin_note',
+        'meta_purchase_event_id',
+        'meta_purchase_sent_at',
+        'meta_purchase_attempts',
+        'meta_purchase_last_error',
     ];
 
     protected function casts(): array
@@ -49,6 +53,8 @@ class Order extends Model
             'total' => 'decimal:2',
             'payment_method' => PaymentMethod::class,
             'status' => OrderStatus::class,
+            'meta_purchase_sent_at' => 'datetime',
+            'meta_purchase_attempts' => 'integer',
         ];
     }
 

@@ -1,13 +1,27 @@
+@props([
+    'pageEvents' => [],
+    'flashEvents' => [],
+    'trackingConfig' => null,
+])
+
 @php
     use App\Models\StoreSetting;
+    use App\Services\Meta\MetaConsentService;
+    use App\Services\Meta\MetaPixelIdResolver;
 
     $settings = $storeSetting ?? StoreSetting::current();
     $gaId = $settings->google_analytics_id ?? null;
     $gtmId = $settings->google_tag_manager_id ?? null;
     $googleVerification = $settings->google_site_verification ?? null;
     $bingVerification = $settings->bing_site_verification ?? null;
-    $metaPixelId = $settings->meta_pixel_id ?? null;
+    $metaPixelId = app(MetaPixelIdResolver::class)->resolve($settings);
     $hasTracking = $gaId || $gtmId || $metaPixelId;
+    $metaTrackingConfig = $trackingConfig ?? [
+        'consentUrl' => route('cookie-consent.store'),
+        'eventsUrl' => route('meta.events.store'),
+        'pixelId' => $metaPixelId,
+        'serverMarketingConsent' => app(MetaConsentService::class)->status(request()),
+    ];
 @endphp
 
 @if ($googleVerification)
@@ -17,6 +31,10 @@
 @if ($bingVerification)
     <meta name="msvalidate.01" content="{{ $bingVerification }}">
 @endif
+
+<script type="application/json" id="meta-tracking-config">@json($metaTrackingConfig)</script>
+<script type="application/json" id="meta-page-events">@json($pageEvents)</script>
+<script type="application/json" id="meta-flash-events">@json($flashEvents)</script>
 
 @if ($hasTracking)
     @php
