@@ -1,19 +1,28 @@
 <?php
 
-use App\Http\Controllers\Web\RobotsController;
-use App\Http\Controllers\Web\SitemapController;
 use App\Http\Controllers\Web\AccountController;
 use App\Http\Controllers\Web\CartController;
 use App\Http\Controllers\Web\CategoryController;
 use App\Http\Controllers\Web\CheckoutController;
+use App\Http\Controllers\Web\CookieConsentController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\LunchMenuController;
 use App\Http\Controllers\Web\MenuController;
+use App\Http\Controllers\Web\MetaEventController;
 use App\Http\Controllers\Web\NewMenuHighlightController;
 use App\Http\Controllers\Web\PageController;
 use App\Http\Controllers\Web\ProductController;
-use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Web\RobotsController;
+use App\Http\Controllers\Web\SitemapController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
+
+Route::post('/cookie-consent', [CookieConsentController::class, 'store'])
+    ->middleware('throttle:meta-consent')
+    ->name('cookie-consent.store');
+Route::post('/meta/events', [MetaEventController::class, 'store'])
+    ->middleware('throttle:meta-events')
+    ->name('meta.events.store');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');

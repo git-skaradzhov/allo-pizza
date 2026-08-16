@@ -5,8 +5,8 @@ let analyticsLoaded = false;
 let marketingLoaded = false;
 let consentReadyCallbacks = [];
 
-function getAnalyticsConfig() {
-    const element = document.getElementById('analytics-config');
+function getJsonConfig(elementId) {
+    const element = document.getElementById(elementId);
 
     if (!element) {
         return null;
@@ -17,6 +17,18 @@ function getAnalyticsConfig() {
     } catch {
         return null;
     }
+}
+
+function getAnalyticsConfig() {
+    return getJsonConfig('analytics-config');
+}
+
+function getMetaTrackingConfig() {
+    return getJsonConfig('meta-tracking-config') || {};
+}
+
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 }
 
 function readStoredConsent() {
@@ -122,12 +134,14 @@ function loadGoogleAnalytics(gaId) {
 }
 
 function loadMetaPixel(metaPixelId) {
-    if (window.fbq) {
+    if (window.fbq && window.fbq.__alloPizzaInitialized) {
+        MetaTracking.markPixelReady();
+
         return Promise.resolve();
     }
 
     return new Promise((resolve) => {
-        !function (f, b, e, v, n, t, s) {
+        !(function (f, b, e, v, n, t, s) {
             if (f.fbq) {
                 return;
             }
@@ -147,24 +161,149 @@ function loadMetaPixel(metaPixelId) {
             t = b.createElement(e);
             t.async = !0;
             t.src = v;
-            t.onload = resolve;
+            t.onload = function () {
+                if (!window.fbq.__alloPizzaInitialized) {
+                    window.fbq('init', metaPixelId);
+                    window.fbq.__alloPizzaInitialized = true;
+                }
+
+                MetaTracking.markPixelReady();
+                resolve();
+            };
+            t.onerror = resolve;
             s = b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t, s);
-        }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+        }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js'));
 
-        window.fbq('init', metaPixelId);
-        window.fbq('track', 'PageView');
+        if (window.fbq && !window.fbq.__alloPizzaInitialized && window.fbq.loaded) {
+            window.fbq('init', metaPixelId);
+            window.fbq.__alloPizzaInitialized = true;
+        }
     });
 }
+
+const MetaTracking = (function createMetaTracking() {
+    let pixelReady = false;
+    let marketingGranted = false;
+    let initialized = false;
+    const queue = [];
+    const sentEventIds = new Set();
+    const postedTokens = new Set();
+
+    function readDomEvents() {
+        const pageEvents = getJsonConfig('meta-page-events') || [];
+        const flashEvents = getJsonConfig('meta-flash-events') || [];
+
+        [...pageEvents, ...flashEvents].forEach((event) => enqueue(event));
+    }
+
+    function enqueue(event) {
+        if (!event || !event.event_name || !event.event_id) {
+            return;
+        }
+
+        queue.push(event);
+        flush();
+    }
+
+    function dispatch(event) {
+        if (sentEventIds.has(event.event_id)) {
+            return;
+        }
+
+        if (typeof window.fbq !== 'function') {
+            return;
+        }
+
+        sentEventIds.add(event.event_id);
+        window.fbq('track', event.event_name, event.payload || {}, {
+            eventID: event.event_id,
+        });
+
+        if (event.token) {
+            postToken(event.token);
+        }
+    }
+
+    function postToken(token) {
+        if (!token || postedTokens.has(token)) {
+            return;
+        }
+
+        postedTokens.add(token);
+
+        const config = getMetaTrackingConfig();
+
+        if (!config.eventsUrl) {
+            return;
+        }
+
+        fetch(config.eventsUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ token }),
+        }).catch(() => {});
+    }
+
+    function flush() {
+        if (!marketingGranted || !pixelReady) {
+            return;
+        }
+
+        while (queue.length > 0) {
+            dispatch(queue.shift());
+        }
+    }
+
+    function setMarketingConsent(granted) {
+        marketingGranted = Boolean(granted);
+
+        if (!marketingGranted) {
+            queue.length = 0;
+
+            return;
+        }
+
+        flush();
+    }
+
+    function markPixelReady() {
+        pixelReady = true;
+        flush();
+    }
+
+    function init() {
+        if (initialized) {
+            return;
+        }
+
+        initialized = true;
+        readDomEvents();
+    }
+
+    return {
+        init,
+        enqueue,
+        setMarketingConsent,
+        markPixelReady,
+    };
+}());
 
 function applyTracking(preferences) {
     const config = getAnalyticsConfig();
 
+    updateGoogleConsent(preferences);
+    MetaTracking.setMarketingConsent(Boolean(preferences.marketing));
+
     if (!config) {
         return;
     }
-
-    updateGoogleConsent(preferences);
 
     if (preferences.analytics && !analyticsLoaded) {
         if (config.gtmId) {
@@ -265,9 +404,33 @@ function closeSettingsModal() {
     document.body.classList.remove('overflow-hidden');
 }
 
-function commitConsent(preferences) {
+function syncConsentToServer(preferences) {
+    const config = getMetaTrackingConfig();
+
+    if (!config.consentUrl) {
+        return Promise.resolve();
+    }
+
+    return fetch(config.consentUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'X-CSRF-TOKEN': getCsrfToken(),
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({
+            analytics: Boolean(preferences.analytics),
+            marketing: Boolean(preferences.marketing),
+        }),
+    }).catch(() => {});
+}
+
+async function commitConsent(preferences) {
     const saved = saveConsent(preferences);
 
+    await syncConsentToServer(saved);
     applyTracking(saved);
     hideBanner();
     closeSettingsModal();
@@ -276,12 +439,24 @@ function commitConsent(preferences) {
 
 let cookieConsentInitialized = false;
 
+function maybeSyncLegacyConsent(stored) {
+    const config = getMetaTrackingConfig();
+
+    if (!stored || config.serverMarketingConsent) {
+        return Promise.resolve();
+    }
+
+    return syncConsentToServer(stored);
+}
+
 function initCookieConsent() {
     if (cookieConsentInitialized) {
         return;
     }
 
     cookieConsentInitialized = true;
+    MetaTracking.init();
+
     const banner = document.getElementById('cookie-consent-banner');
     const modal = document.getElementById('cookie-consent-settings');
 
@@ -296,7 +471,9 @@ function initCookieConsent() {
         const stored = readStoredConsent();
 
         if (stored) {
-            applyTracking(stored);
+            maybeSyncLegacyConsent(stored).then(() => {
+                applyTracking(stored);
+            });
             hideBanner();
             notifyConsentReady(stored);
         } else {
@@ -354,6 +531,8 @@ window.CookieConsent = {
         }
     },
 };
+
+window.MetaTracking = MetaTracking;
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initCookieConsent);

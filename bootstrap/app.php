@@ -27,6 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(prepend: [
             ForceHttps::class,
         ]);
+
+        $middleware->encryptCookies(except: [
+            '_fbp',
+            '_fbc',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

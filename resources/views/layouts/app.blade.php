@@ -6,7 +6,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <x-seo-meta :seo="$seo ?? null" />
-    <x-analytics />
+    <x-analytics
+        :page-events="$metaPageEvents ?? []"
+        :flash-events="$metaFlashEvents ?? []"
+        :tracking-config="$metaTrackingConfig ?? null"
+    />
     <x-structured-data :graphs="$structuredData ?? []" />
 
     <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">

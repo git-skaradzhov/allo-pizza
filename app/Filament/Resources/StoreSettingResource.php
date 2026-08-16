@@ -176,7 +176,7 @@ class StoreSettingResource extends Resource
                             ->label('Bing Webmaster verification'),
                         Forms\Components\TextInput::make('meta_pixel_id')
                             ->label('Meta Pixel ID')
-                            ->placeholder('Meta Pixel placeholder'),
+                            ->placeholder('1385265280465389'),
                     ])
                     ->columns(2)
                     ->collapsed(),
