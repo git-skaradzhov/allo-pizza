@@ -16,7 +16,7 @@
         : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($storeSetting->store_address ?? '');
 @endphp
 
-<footer class="mt-16 border-t border-stone-200 bg-white">
+<footer class="mt-16 border-t border-stone-200 bg-white print:hidden">
     <div class="mx-auto max-w-7xl px-3 py-10 sm:px-4">
         <div class="flex flex-col">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

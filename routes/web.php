@@ -47,6 +47,7 @@ Route::post('/cart/promo', [CartController::class, 'applyPromo'])->name('cart.pr
 Route::delete('/cart/promo', [CartController::class, 'removePromo'])->name('cart.promo.remove');
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
 Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+Route::get('/checkout/thanks/{order:order_number}', [CheckoutController::class, 'thanks'])->name('checkout.thanks');
 Route::get('/pages/{slug}', [PageController::class, 'show'])->name('pages.show');
 
 Route::middleware('auth')->prefix('account')->name('account.')->group(function () {

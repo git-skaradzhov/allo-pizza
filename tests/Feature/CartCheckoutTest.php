@@ -117,14 +117,14 @@ class CartCheckoutTest extends TestCase
             'payment_method' => 'cash_on_delivery',
         ]);
 
-        $response->assertRedirect();
+        $order = Order::query()->first();
+        $this->assertNotNull($order);
+        $response->assertRedirect(route('checkout.thanks', $order));
 
         $this->assertDatabaseHas('orders', [
             'customer_name' => 'Иван Иванов',
             'customer_phone' => '0888123456',
         ]);
-
-        $order = Order::query()->first();
         $expectedTotal = (float) $variant->price + 2.0;
         $this->assertEqualsWithDelta($expectedTotal, (float) $order->total, 0.001);
         $this->assertEqualsWithDelta(2.0, (float) $order->delivery_price, 0.001);

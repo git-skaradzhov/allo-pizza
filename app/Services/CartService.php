@@ -22,9 +22,18 @@ class CartService
             return Cart::query()->firstOrCreate(['customer_id' => $customer->id]);
         }
 
-        $sessionId = Session::getId();
+        if ($cartId = Session::get('cart_id')) {
+            $existing = Cart::query()->whereNull('customer_id')->find($cartId);
 
-        return Cart::query()->firstOrCreate(['session_id' => $sessionId]);
+            if ($existing) {
+                return $existing;
+            }
+        }
+
+        $cart = Cart::query()->firstOrCreate(['session_id' => Session::getId()]);
+        Session::put('cart_id', $cart->id);
+
+        return $cart;
     }
 
     public function addItem(
@@ -165,7 +174,8 @@ class CartService
 
     public function mergeGuestCartIntoCustomer(Customer $customer): void
     {
-        $sessionCart = Cart::query()->where('session_id', Session::getId())->first();
+        $sessionCart = Cart::query()->where('session_id', Session::getId())->first()
+            ?? Cart::query()->whereNull('customer_id')->find(Session::get('cart_id'));
 
         if (! $sessionCart || $sessionCart->items()->count() === 0) {
             return;
@@ -197,6 +207,7 @@ class CartService
         }
 
         $sessionCart->delete();
+        Session::forget('cart_id');
     }
 
     protected function resolveCustomer(): ?Customer

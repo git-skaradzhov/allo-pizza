@@ -212,16 +212,31 @@ class CheckoutController extends Controller
         $this->orderNotificationService->sendOrderCreated($order);
         $this->metaPurchaseTracker->trackPurchaseAfterCommit($order);
 
-        $message = 'Поръчката е приета успешно. Номер: '.$order->order_number;
-
-        if (auth()->check()) {
-            return redirect()
-                ->route('account.orders.show', $order)
-                ->with('status', $message);
-        }
+        $request->session()->put('checkout.completed_order_id', $order->id);
 
         return redirect()
-            ->route('home')
-            ->with('status', $message);
+            ->route('checkout.thanks', $order)
+            ->with('status', 'Поръчката е приета успешно. Номер: '.$order->order_number);
+    }
+
+    public function thanks(Request $request, Order $order): View
+    {
+        $this->authorizeThankYouAccess($request, $order);
+
+        $order->load(['items.options']);
+
+        return view('pages.checkout-thanks', [
+            'order' => $order,
+            'settings' => $this->storeService->settings(),
+        ]);
+    }
+
+    protected function authorizeThankYouAccess(Request $request, Order $order): void
+    {
+        $fromCurrentCheckout = (int) $request->session()->get('checkout.completed_order_id') === $order->id;
+        $ownsOrder = $order->customer_id !== null
+            && $request->user()?->customer?->id === $order->customer_id;
+
+        abort_unless($fromCurrentCheckout || $ownsOrder, 404);
     }
 }

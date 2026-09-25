@@ -23,6 +23,7 @@ return [
         'cart.promo.remove',
         'checkout',
         'checkout.store',
+        'checkout.thanks',
         'login',
         'register',
         'password.request',

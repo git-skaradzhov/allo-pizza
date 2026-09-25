@@ -12,7 +12,7 @@
         : 'https://www.google.com/maps/search/?api=1&query=' . urlencode($storeSetting->store_address ?? '');
 @endphp
 
-<div id="mobile-menu" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+<div id="mobile-menu" class="fixed inset-0 z-50 hidden print:hidden" aria-hidden="true">
     <div
         id="mobile-menu-backdrop"
         class="absolute inset-0 bg-black/60 opacity-0 transition-opacity duration-300"
