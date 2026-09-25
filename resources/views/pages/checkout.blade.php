@@ -272,7 +272,24 @@
                 }
 
                 customerEmailField?.addEventListener('input', normalizeEmailField);
-                checkoutForm?.addEventListener('submit', normalizeEmailField);
+
+                let checkoutSubmitting = false;
+                checkoutForm?.addEventListener('submit', (event) => {
+                    normalizeEmailField();
+
+                    if (checkoutSubmitting) {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    checkoutSubmitting = true;
+                    const submitButton = checkoutForm.querySelector('button[type="submit"]');
+                    window.setTimeout(() => {
+                        if (submitButton) {
+                            submitButton.disabled = true;
+                        }
+                    }, 0);
+                });
 
                 function pointInPolygon(lat, lng, points) {
                     if (!points || points.length < 3) return false;

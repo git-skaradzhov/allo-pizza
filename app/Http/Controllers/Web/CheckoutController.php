@@ -81,7 +81,7 @@ class CheckoutController extends Controller
         $cart = $this->cartService->getCart()->load(['items.product.category', 'items.variant']);
 
         if ($cart->items->isEmpty()) {
-            return redirect()->route('cart')->with('error', 'Количката е празна.');
+            return $this->redirectWhenCheckoutCartIsEmpty($request);
         }
 
         if (! $this->storeService->isOpen()) {
@@ -229,6 +229,18 @@ class CheckoutController extends Controller
             'order' => $order,
             'settings' => $this->storeService->settings(),
         ]);
+    }
+
+    protected function redirectWhenCheckoutCartIsEmpty(Request $request): RedirectResponse
+    {
+        $completedOrderId = $request->session()->get('checkout.completed_order_id');
+        $order = $completedOrderId ? Order::query()->find($completedOrderId) : null;
+
+        if ($order) {
+            return redirect()->route('checkout.thanks', $order);
+        }
+
+        return redirect()->route('cart')->with('error', 'Количката е празна.');
     }
 
     protected function authorizeThankYouAccess(Request $request, Order $order): void

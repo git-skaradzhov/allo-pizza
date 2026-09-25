@@ -7,6 +7,7 @@ use App\Mail\NewOrderAdminNotification;
 use App\Mail\OrderConfirmation;
 use App\Models\Order;
 use App\Models\StoreSetting;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Mail;
 
 class OrderNotificationService
@@ -15,11 +16,13 @@ class OrderNotificationService
     {
         $order->loadMissing('items.options');
 
-        try {
-            OrderCreated::dispatch($order);
-        } catch (\Throwable $e) {
-            report($e);
-        }
+        Bus::dispatchAfterResponse(function () use ($order): void {
+            try {
+                OrderCreated::dispatch($order);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        });
 
         if (! empty($order->customer_email)) {
             try {

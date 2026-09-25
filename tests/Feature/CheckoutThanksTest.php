@@ -80,6 +80,34 @@ class CheckoutThanksTest extends TestCase
         $response->assertRedirect(route('checkout.thanks', $order));
     }
 
+    public function test_second_checkout_submit_returns_to_the_thank_you_page(): void
+    {
+        $this->createOpenStore();
+        $product = $this->createProductWithVariant(12.50);
+        $variant = $product->variants->first();
+
+        $this->post('/cart/add', [
+            'product_id' => $product->id,
+            'product_variant_id' => $variant->id,
+            'quantity' => 1,
+        ]);
+
+        $this->post('/checkout', [
+            'customer_name' => 'Гост Клиент',
+            'customer_phone' => '0888123456',
+            'delivery_type' => 'pickup',
+        ])->assertRedirect();
+
+        $order = Order::query()->first();
+        $this->assertNotNull($order);
+
+        $this->post('/checkout', [
+            'customer_name' => 'Гост Клиент',
+            'customer_phone' => '0888123456',
+            'delivery_type' => 'pickup',
+        ])->assertRedirect(route('checkout.thanks', $order));
+    }
+
     public function test_thank_you_page_is_not_public(): void
     {
         $order = Order::factory()->create();

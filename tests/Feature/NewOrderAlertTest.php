@@ -27,6 +27,7 @@ class NewOrderAlertTest extends TestCase
         $order = Order::factory()->create();
 
         app(OrderNotificationService::class)->sendOrderCreated($order);
+        $this->app->terminate();
 
         Event::assertDispatched(OrderCreated::class, fn (OrderCreated $event): bool => $event->order->id === $order->id);
     }
