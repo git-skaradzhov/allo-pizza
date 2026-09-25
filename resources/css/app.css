@@ -36,6 +36,39 @@
     box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
 }
 
+.product-buy-bar {
+    display: flex;
+    align-items: stretch;
+    gap: 0.5rem;
+}
+
+@media (max-width: 1023px) {
+    .product-buy-bar {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 35;
+        margin: 0;
+        padding: 0.75rem;
+        padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
+        background: #fff;
+        border-top: 1px solid #e7e5e4;
+        box-shadow: 0 -8px 24px rgb(0 0 0 / 0.08);
+    }
+
+    body:has(.product-buy-bar) {
+        padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+@media (min-width: 1024px) {
+    .product-buy-bar {
+        margin-top: 1.5rem;
+        gap: 1rem;
+    }
+}
+
 .product-description {
     margin-top: 40px;
     border-top: 1px solid #e7e5e4;
@@ -84,6 +117,16 @@
 
     body {
         background: #fff !important;
+        padding-bottom: 0 !important;
+    }
+
+    .product-buy-bar {
+        position: static !important;
+        margin-top: 1.5rem !important;
+        padding: 0 !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
     }
 
     .print-receipt {

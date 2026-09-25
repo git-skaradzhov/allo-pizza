@@ -227,18 +227,18 @@
                 </div>
             @endif
 
-            <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-                <div class="flex items-center rounded-xl border border-stone-300">
-                    <button type="button" id="qty-minus" class="px-4 py-3 text-lg font-bold text-stone-500 hover:text-brand-600">−</button>
+            <div class="product-buy-bar">
+                <div class="flex shrink-0 items-center rounded-xl border border-stone-300 bg-white">
+                    <button type="button" id="qty-minus" class="px-3 py-3 text-lg font-bold text-stone-500 hover:text-brand-600 sm:px-4">−</button>
                     <input type="number" id="quantity" name="quantity" value="1" min="1" max="20"
-                           class="w-12 border-0 p-0 text-center text-lg font-bold focus:ring-0" readonly>
-                    <button type="button" id="qty-plus" class="px-4 py-3 text-lg font-bold text-stone-500 hover:text-brand-600">+</button>
+                           class="w-8 border-0 p-0 text-center text-lg font-bold focus:ring-0 sm:w-12" readonly>
+                    <button type="button" id="qty-plus" class="px-3 py-3 text-lg font-bold text-stone-500 hover:text-brand-600 sm:px-4">+</button>
                 </div>
 
                 <button type="submit"
-                        class="flex w-full flex-1 items-center justify-between gap-2 rounded-2xl bg-brand-500 px-5 py-4 text-base font-bold text-white shadow-soft transition hover:bg-brand-600 sm:text-lg">
-                    <span>Добави в количката</span>
-                    <span id="product-price" class="text-right leading-tight">
+                        class="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-2xl bg-brand-500 px-3 py-3 text-sm font-bold text-white shadow-soft transition hover:bg-brand-600 sm:px-5 sm:py-4 sm:text-base lg:text-lg">
+                    <span class="text-left leading-tight">Добави в количката</span>
+                    <span id="product-price" class="shrink-0 whitespace-nowrap text-right leading-tight">
                         @if ($firstOldPrice)
                             <span data-price-old="true" class="block text-xs font-medium text-white/70 line-through">{{ money((float) $firstOldPrice) }}</span>
                         @endif
