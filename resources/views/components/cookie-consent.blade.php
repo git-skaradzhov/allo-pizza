@@ -5,7 +5,7 @@
 
 <div
     id="cookie-consent-banner"
-    class="fixed inset-x-0 bottom-0 z-50 hidden border-t border-stone-200 bg-white p-4 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] sm:p-5"
+    class="fixed inset-x-0 bottom-0 z-50 hidden border-t border-stone-200 bg-white p-4 shadow-[0_-4px_24px_rgba(0,0,0,0.08)] print:hidden sm:p-5"
     role="dialog"
     aria-labelledby="cookie-consent-title"
     aria-describedby="cookie-consent-description"

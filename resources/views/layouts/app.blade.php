@@ -21,6 +21,34 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('styles')
+    <style>
+        @media print {
+            .site-header,
+            footer,
+            #mobile-menu,
+            #cookie-consent-banner,
+            #cookie-consent-settings,
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background: #fff !important;
+            }
+
+            main {
+                max-width: none !important;
+                padding: 0 !important;
+            }
+
+            .print-receipt {
+                border: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
 </head>
 <body class="min-h-screen bg-stone-50 font-sans text-stone-900 antialiased @yield('bodyClass')">
     <a href="#main-content"
@@ -28,7 +56,7 @@
         Към съдържанието
     </a>
 
-    <header class="sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur">
+    <header class="site-header sticky top-0 z-40 border-b border-stone-200 bg-white/95 backdrop-blur print:hidden">
         <div class="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3">
             <div class="flex min-w-0 items-center gap-2 sm:gap-3">
                 <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2">
@@ -162,11 +190,11 @@
     <x-mobile-menu />
 
     @if (session('status'))
-        <div class="bg-green-50 px-4 py-3 text-center text-sm font-medium text-green-800">{{ session('status') }}</div>
+        <div class="no-print bg-green-50 px-4 py-3 text-center text-sm font-medium text-green-800">{{ session('status') }}</div>
     @endif
 
     @if (session('error'))
-        <div class="bg-brand-50 px-4 py-3 text-center text-sm font-medium text-brand-700">{{ session('error') }}</div>
+        <div class="no-print bg-brand-50 px-4 py-3 text-center text-sm font-medium text-brand-700">{{ session('error') }}</div>
     @endif
 
     @hasSection('full')

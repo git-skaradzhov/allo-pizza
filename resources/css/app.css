@@ -76,6 +76,23 @@
     }
 }
 
+@media print {
+    @page {
+        size: A4;
+        margin: 12mm;
+    }
+
+    body {
+        background: #fff !important;
+    }
+
+    .print-receipt {
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+    }
+}
+
 @layer utilities {
     .sr-only {
         position: absolute;
