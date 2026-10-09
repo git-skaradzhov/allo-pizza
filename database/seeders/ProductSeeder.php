@@ -238,7 +238,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Пепси 0,5 л.',
                 'base_price' => 1.30,
                 'size_label' => '0,5 л',
-                'image' => 'https://qbb.bg/wp-content/uploads/2018/05/Pepsi0.5l.png',
+                'image' => 'products/pepsi-500-1024.webp',
             ],
             [
                 'name' => 'Пепси Zero 0,5 л',
@@ -247,7 +247,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Пепси Zero 0,5 л.',
                 'base_price' => 1.30,
                 'size_label' => '0,5 л',
-                'image' => 'https://qbb.bg/wp-content/uploads/2018/05/500.pz_.png',
+                'image' => 'products/pepsi-zero-500-1024.webp',
             ],
             [
                 'name' => 'Mirinda портокал 0,5 л',
@@ -256,7 +256,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Mirinda портокал 0,5 л.',
                 'base_price' => 1.30,
                 'size_label' => '0,5 л',
-                'image' => 'https://qbb.bg/wp-content/uploads/2018/06/500mO.png',
+                'image' => 'products/mirinda-portokal-500-1024.webp',
             ],
             [
                 'name' => 'Mirinda лимон 0,5 л',
@@ -265,7 +265,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Mirinda лимон 0,5 л.',
                 'base_price' => 1.30,
                 'size_label' => '0,5 л',
-                'image' => 'https://qbb.bg/wp-content/uploads/2024/05/500ml.png',
+                'image' => 'products/mirinda-limon-500-1024.webp',
             ],
             [
                 'name' => 'Mirinda ананас 0,5 л',
@@ -274,7 +274,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Mirinda ананас 0,5 л.',
                 'base_price' => 1.30,
                 'size_label' => '0,5 л',
-                'image' => 'https://qbb.bg/wp-content/uploads/2026/05/Mirinda_05L_Pineapple.png',
+                'image' => 'products/mirinda-ananas-500-1024.webp',
             ],
             [
                 'name' => 'Evervess тоник 0,5 л',
@@ -283,7 +283,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Evervess тоник 0,5 л.',
                 'base_price' => 1.30,
                 'size_label' => '0,5 л',
-                'image' => 'https://qbb.bg/wp-content/uploads/2018/05/500evt.png',
+                'image' => 'products/evervess-tonik-500-1024.webp',
             ],
             [
                 'name' => 'Prisun горски плодове 0,5 л',
@@ -292,7 +292,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Prisun горски плодове 0,5 л.',
                 'base_price' => 1.30,
                 'size_label' => '0,5 л',
-                'image' => 'https://qbb.bg/wp-content/uploads/2024/05/500pff.png',
+                'image' => 'products/prisun-gorski-plodove-500-1024.webp',
             ],
             [
                 'name' => 'Prisun ябълка 0,5 л',
@@ -301,7 +301,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Prisun ябълка 0,5 л.',
                 'base_price' => 1.30,
                 'size_label' => '0,5 л',
-                'image' => 'https://qbb.bg/wp-content/uploads/2024/05/500pa.png',
+                'image' => 'products/prisun-yabalka-500-1024.webp',
             ],
             [
                 'name' => 'Газирана вода Велинград 0,5 л',
@@ -310,7 +310,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Газирана вода Велинград 0,5 л.',
                 'base_price' => 1.00,
                 'size_label' => '0,5 л',
-                'image' => 'https://www.velingradvoda.bg/assets/upload/files/3d-model-vgcarbonated-05l-bg-bubbles.jpg',
+                'image' => 'products/velingrad-gazirana-500-1024.webp',
             ],
             [
                 'name' => 'Изворна вода Rilana 0,5 л',
@@ -319,7 +319,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Изворна вода Rilana 0,5 л.',
                 'base_price' => 0.80,
                 'size_label' => '0,5 л',
-                'image' => 'https://qbb.bg/wp-content/uploads/2022/09/rilanas500.png',
+                'image' => 'products/rilana-izvorna-500-1024.webp',
             ],
             [
                 'name' => 'Пепси 1 л',
@@ -328,7 +328,7 @@ class ProductSeeder extends Seeder
                 'description' => 'Пепси 1 л.',
                 'base_price' => 1.70,
                 'size_label' => '1 л',
-                'image' => 'https://qbb.bg/wp-content/uploads/2024/05/Pepsi1l.png',
+                'image' => 'products/pepsi-1000-1024.webp',
             ],
         ];
 
