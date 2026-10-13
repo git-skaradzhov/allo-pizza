@@ -20,10 +20,19 @@ class HandleRedirects
             return $next($request);
         }
 
-        $path = '/'.ltrim($request->path(), '/');
+        $originalPath = '/'.ltrim($request->getPathInfo(), '/');
+        $path = $originalPath === '/' ? '/' : rtrim($originalPath, '/');
 
-        if ($path !== '/') {
-            $path = rtrim($path, '/');
+        if ($this->isLegacyWordpressQuery($request) || $path === '/index.php') {
+            return redirect()->to(url('/'), 301);
+        }
+
+        if (preg_match('#^/(wp-admin|wp-content|wp-includes|wp-json)(/|$)#', $path) === 1) {
+            abort(410);
+        }
+
+        if ($path === '/get-the-sensation' || str_starts_with($path, '/get-the-sensation/')) {
+            return redirect()->to(url('/'), 301);
         }
 
         $redirect = Redirect::query()
@@ -39,6 +48,25 @@ class HandleRedirects
             return redirect()->away($target, $redirect->status_code);
         }
 
+        if ($originalPath !== $path) {
+            $query = $request->getQueryString();
+
+            return redirect()->to($query ? $path.'?'.$query : $path, 301);
+        }
+
         return $next($request);
+    }
+
+    private function isLegacyWordpressQuery(Request $request): bool
+    {
+        foreach (['page_id', 'p'] as $key) {
+            $value = $request->query($key);
+
+            if (is_string($value) && preg_match('/^\d+$/', $value) === 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
