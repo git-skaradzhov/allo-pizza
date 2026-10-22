@@ -36,6 +36,30 @@ class SecurityAndMediaTest extends TestCase
         $this->assertStringContainsString('immutable', (string) $response->headers->get('Cache-Control'));
     }
 
+    public function test_home_page_exposes_google_favicon_links(): void
+    {
+        $response = $this->get('/');
+
+        $response->assertOk();
+        $response->assertSee('/favicon.ico', false);
+        $response->assertSee('images/favicon-48.png', false);
+        $response->assertSee('images/favicon-192.png', false);
+        $response->assertSee('apple-touch-icon.png', false);
+        $this->assertFileExists(public_path('favicon.ico'));
+        $this->assertSame([48, 48], array_slice(getimagesize(public_path('images/favicon-48.png')), 0, 2));
+        $this->assertSame([192, 192], array_slice(getimagesize(public_path('images/favicon-192.png')), 0, 2));
+    }
+
+    public function test_favicon_ico_is_served_without_a_session(): void
+    {
+        $response = $this->get('/favicon.ico');
+
+        $response->assertOk();
+        $this->assertNull($response->headers->get('Set-Cookie'));
+        $this->assertStringContainsString('image/', (string) $response->headers->get('Content-Type'));
+        $this->assertStringContainsString('max-age=31536000', (string) $response->headers->get('Cache-Control'));
+    }
+
     public function test_home_title_includes_city_without_duplicating_brand(): void
     {
         Page::query()->create([
