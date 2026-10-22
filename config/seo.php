@@ -16,7 +16,7 @@ return [
 
     'default_image' => 'images/logo-wide.png',
 
-    'logo' => 'images/logo-square.png',
+    'logo' => 'images/logo-400.png',
 
     'locale' => 'bg_BG',
 
