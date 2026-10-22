@@ -31,18 +31,22 @@
                             $heroMobile = optimized_image($hero->mobile_image ?? null, 'hero-mobile');
                             $heroDesktopSrc = $heroDesktop['src'];
                             $heroMobileSrc = $heroMobile['src'] ?: $heroDesktopSrc;
+                            $heroDesktopFallback = $heroDesktop['fallback'] ?: $heroDesktopSrc;
+                            $heroMobileFallback = $heroMobile['fallback'] ?: $heroMobileSrc;
+                            $heroDesktopSizes = $heroDesktop['sizes'];
+                            $heroMobileSizes = $heroMobile['sizes'];
                             $heroLink = $hero->button_url ?: ($hero->button_text ? route('menu') : null);
                         @endphp
                         @if ($index === 0 && ($heroDesktopSrc || $heroMobileSrc))
                             @push('head')
                                 @if ($heroMobileSrc)
                                     <link rel="preload" as="image" href="{{ $heroMobileSrc }}"
-                                          @if ($heroMobile['srcset']) imagesrcset="{{ $heroMobile['srcset'] }}" imagesizes="100vw" @endif
+                                          @if ($heroMobile['srcset']) imagesrcset="{{ $heroMobile['srcset'] }}" imagesizes="{{ $heroMobileSizes }}" @endif
                                           media="(max-width: 639px)" fetchpriority="high">
                                 @endif
                                 @if ($heroDesktopSrc)
                                     <link rel="preload" as="image" href="{{ $heroDesktopSrc }}"
-                                          @if ($heroDesktop['srcset']) imagesrcset="{{ $heroDesktop['srcset'] }}" imagesizes="100vw" @endif
+                                          @if ($heroDesktop['srcset']) imagesrcset="{{ $heroDesktop['srcset'] }}" imagesizes="{{ $heroDesktopSizes }}" @endif
                                           media="(min-width: 640px)" fetchpriority="high">
                                 @endif
                             @endpush
@@ -64,17 +68,17 @@
                             @if ($heroDesktopSrc || $heroMobileSrc)
                                 <picture class="hero-slide-picture">
                                     @foreach ($heroDesktop['sources'] as $source)
-                                        <source media="(min-width: 640px)" type="{{ $source['type'] }}" srcset="{{ $source['srcset'] }}" sizes="100vw">
+                                        <source media="(min-width: 640px)" type="{{ $source['type'] }}" srcset="{{ $source['srcset'] }}" sizes="{{ $heroDesktopSizes }}">
                                     @endforeach
-                                    @if ($heroDesktopSrc)
-                                        <source media="(min-width: 640px)" srcset="{{ $heroDesktop['srcset'] ?: $heroDesktopSrc }}" sizes="100vw">
+                                    @if ($heroDesktopFallback)
+                                        <source media="(min-width: 640px)" srcset="{{ $heroDesktopFallback }}" sizes="{{ $heroDesktopSizes }}">
                                     @endif
                                     @foreach ($heroMobile['sources'] as $source)
-                                        <source type="{{ $source['type'] }}" srcset="{{ $source['srcset'] }}" sizes="100vw">
+                                        <source type="{{ $source['type'] }}" srcset="{{ $source['srcset'] }}" sizes="{{ $heroMobileSizes }}">
                                     @endforeach
-                                    <img src="{{ $heroMobileSrc }}" alt="{{ $hero->title }}"
+                                    <img src="{{ $heroMobileFallback ?: $heroDesktopFallback }}" alt="{{ $hero->title }}"
                                          class="hero-slide-image"
-                                         @if ($heroMobile['srcset']) srcset="{{ $heroMobile['srcset'] }}" sizes="100vw" @endif
+                                         @if ($heroMobile['srcset']) srcset="{{ $heroMobile['srcset'] }}" sizes="{{ $heroMobileSizes }}" @endif
                                          @if ($index === 0) fetchpriority="high" loading="eager" @else loading="lazy" @endif
                                          decoding="async">
                                 </picture>

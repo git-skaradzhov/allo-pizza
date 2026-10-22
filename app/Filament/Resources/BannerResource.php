@@ -57,8 +57,8 @@ class BannerResource extends Resource
                                 return app(BannerImageProcessor::class)->store($file, $preset);
                             })
                             ->helperText(fn (Forms\Get $get): string => $get('position') === BannerPosition::HomeHero->value
-                                ? 'Препоръчителен размер: 2100×800 px (21:8). Качва се като оптимизиран WebP с srcset.'
-                                : 'По желание. Ако липсва, началната страница показва цветна промо карта. Качва се като оптимизиран WebP.')
+                                ? 'Препоръчителен размер: 1920×800 px или по-широк (до 2560). Оригиналът се запазва; генерират се WebP варианти 1920/1600/1200/800.'
+                                : 'По желание. Ако липсва, началната страница показва цветна промо карта. Оригиналът се запазва; генерират се WebP варианти 600/400.')
                             ->visibility('public'),
                         Forms\Components\FileUpload::make('mobile_image')
                             ->label('Изображение (мобилен)')
@@ -70,7 +70,7 @@ class BannerResource extends Resource
                             ->saveUploadedFileUsing(function (TemporaryUploadedFile $file): string {
                                 return app(BannerImageProcessor::class)->store($file, 'hero-mobile');
                             })
-                            ->helperText('650×650 px (1:1). По желание — ако липсва, се ползва десктопното. Качва се като оптимизиран WebP.')
+                            ->helperText('Препоръчителен размер: около 1200×1200 px. По желание — ако липсва, се ползва десктопното. Оригиналът се запазва; генерират се WebP варианти 1200/800/480.')
                             ->visibility('public')
                             ->visible(fn (Forms\Get $get): bool => $get('position') === BannerPosition::HomeHero->value),
                         Forms\Components\Toggle::make('image_only')

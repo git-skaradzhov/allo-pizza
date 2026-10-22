@@ -15,14 +15,14 @@ class BannerObserver
     {
         foreach (['image', 'mobile_image'] as $field) {
             if ($banner->isDirty($field) && $banner->getOriginal($field)) {
-                $this->processor->deleteVariants((string) $banner->getOriginal($field));
+                $this->processor->deleteStored((string) $banner->getOriginal($field));
             }
         }
     }
 
     public function deleting(Banner $banner): void
     {
-        $this->processor->deleteVariants($banner->image);
-        $this->processor->deleteVariants($banner->mobile_image);
+        $this->processor->deleteStored($banner->image);
+        $this->processor->deleteStored($banner->mobile_image);
     }
 }
