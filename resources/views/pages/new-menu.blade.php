@@ -14,6 +14,25 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('css/new-menu-dark.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+    <style>
+        .nm-feature-icon {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 1.375rem;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
 @endpush
 
 @section('full')
@@ -47,19 +66,19 @@
                     <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-4 pt-1">
                         <div class="flex items-center gap-3">
                             <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-500/60 text-brand-500 shadow-[0_0_16px_rgba(235,28,34,0.25)]">
-                                <x-ui-icon name="menu-book" class="h-6 w-6" />
+                                <span class="nm-feature-icon" aria-hidden="true">menu_book</span>
                             </span>
                             <span class="text-xs font-bold uppercase leading-tight tracking-wide text-stone-200">Нови<br>рецепти</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-500/60 text-brand-500 shadow-[0_0_16px_rgba(235,28,34,0.25)]">
-                                <x-ui-icon name="eco" class="h-6 w-6" />
+                                <span class="nm-feature-icon" aria-hidden="true">eco</span>
                             </span>
                             <span class="text-xs font-bold uppercase leading-tight tracking-wide text-stone-200">Пресни<br>съставки</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-brand-500/60 text-brand-500 shadow-[0_0_16px_rgba(235,28,34,0.25)]">
-                                <x-ui-icon name="heart" class="h-6 w-6" />
+                                <span class="nm-feature-icon" aria-hidden="true">favorite</span>
                             </span>
                             <span class="text-xs font-bold uppercase leading-tight tracking-wide text-stone-200">Създадени<br>с любов</span>
                         </div>
@@ -80,19 +99,19 @@
                     <div class="grid flex-1 gap-5 sm:grid-cols-3 sm:gap-8">
                         <div class="flex items-center gap-3">
                             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-500/40 text-brand-500">
-                                <x-ui-icon name="calendar" class="h-5 w-5" />
+                                <span class="nm-feature-icon text-[1.125rem]" aria-hidden="true">calendar_month</span>
                             </span>
                             <p class="text-sm leading-snug text-stone-300">Всеки месец<br><span class="font-bold text-white">нови предложения</span></p>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-500/40 text-brand-500">
-                                <x-ui-icon name="stars" class="h-5 w-5" />
+                                <span class="nm-feature-icon text-[1.125rem]" aria-hidden="true">stars</span>
                             </span>
                             <p class="text-sm leading-snug text-stone-300">Специално<br><span class="font-bold text-white">селектирани вкусове</span></p>
                         </div>
                         <div class="flex items-center gap-3">
                             <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-brand-500/40 text-brand-500">
-                                <x-ui-icon name="verified" class="h-5 w-5" />
+                                <span class="nm-feature-icon text-[1.125rem]" aria-hidden="true">verified</span>
                             </span>
                             <p class="text-sm leading-snug text-stone-300">Пресни и<br><span class="font-bold text-white">качествени съставки</span></p>
                         </div>
