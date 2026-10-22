@@ -5,11 +5,13 @@ namespace App\Filament\Resources;
 use App\Enums\BannerPosition;
 use App\Filament\Resources\BannerResource\Pages;
 use App\Models\Banner;
+use App\Services\BannerImageProcessor;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class BannerResource extends Resource
 {
@@ -45,18 +47,30 @@ class BannerResource extends Resource
                             ->image()
                             ->disk('public')
                             ->directory('banners')
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/avif'])
                             ->getUploadedFileUsing(fn (string $file): ?array => admin_media_upload_metadata($file))
+                            ->saveUploadedFileUsing(function (TemporaryUploadedFile $file, Forms\Get $get): string {
+                                $preset = $get('position') === BannerPosition::HomeHero->value
+                                    ? 'hero-desktop'
+                                    : 'card';
+
+                                return app(BannerImageProcessor::class)->store($file, $preset);
+                            })
                             ->helperText(fn (Forms\Get $get): string => $get('position') === BannerPosition::HomeHero->value
-                                ? 'Препоръчителен размер: 2100×800 px (21:8).'
-                                : 'По желание. Ако липсва, началната страница показва цветна промо карта.')
+                                ? 'Препоръчителен размер: 2100×800 px (21:8). Качва се като оптимизиран WebP с srcset.'
+                                : 'По желание. Ако липсва, началната страница показва цветна промо карта. Качва се като оптимизиран WebP.')
                             ->visibility('public'),
                         Forms\Components\FileUpload::make('mobile_image')
                             ->label('Изображение (мобилен)')
                             ->image()
                             ->disk('public')
                             ->directory('banners')
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/avif'])
                             ->getUploadedFileUsing(fn (string $file): ?array => admin_media_upload_metadata($file))
-                            ->helperText('650×650 px (1:1). По желание — ако липсва, се ползва десктопното.')
+                            ->saveUploadedFileUsing(function (TemporaryUploadedFile $file): string {
+                                return app(BannerImageProcessor::class)->store($file, 'hero-mobile');
+                            })
+                            ->helperText('650×650 px (1:1). По желание — ако липсва, се ползва десктопното. Качва се като оптимизиран WebP.')
                             ->visibility('public')
                             ->visible(fn (Forms\Get $get): bool => $get('position') === BannerPosition::HomeHero->value),
                         Forms\Components\Toggle::make('image_only')

@@ -25,4 +25,4 @@ php artisan test
 echo ""
 echo "Done! Start the server with: php artisan serve"
 echo "Admin panel: http://localhost:8000/admin"
-echo "Login: admin@pizzeria.local / password"
+echo "Admin login comes from ADMIN_EMAIL / ADMIN_PASSWORD in .env (see AdminUserSeeder)."

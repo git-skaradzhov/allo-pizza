@@ -44,7 +44,7 @@
 
         <article class="print-receipt rounded-3xl border border-stone-200 bg-white p-6 sm:p-8">
             <header class="border-b border-stone-200 pb-5 text-center">
-                <img src="{{ asset('images/logo-wide.png') }}" alt="{{ $storeName }}" class="mx-auto h-10 w-auto object-contain">
+                <x-store-logo class="mx-auto h-10 w-auto object-contain" />
                 <p class="mt-3 text-lg font-extrabold">{{ $storeName }}</p>
                 @if ($settings->store_address)
                     <p class="mt-1 text-sm text-stone-500">{{ $settings->store_address }}</p>

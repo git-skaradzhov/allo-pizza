@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\DeliveryZone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,6 +16,7 @@ class StoreSetting extends Model
         'store_phone_secondary',
         'store_email',
         'store_address',
+        'store_city',
         'store_lat',
         'store_lng',
         'delivery_radius_km',
@@ -67,10 +69,11 @@ class StoreSetting extends Model
             'store_phone_secondary' => '0899 679 710',
             'store_email' => 'allopizza@abv.bg',
             'store_address' => 'гр. Русе, ул. „Мария Луиза“, 22',
+            'store_city' => 'Русе',
             'store_lat' => 43.8407475,
             'store_lng' => 25.9549665,
             'delivery_radius_km' => 15,
-            'delivery_zone_polygon' => \App\Support\DeliveryZone::defaultPolygon(),
+            'delivery_zone_polygon' => DeliveryZone::defaultPolygon(),
             'delivery_price' => 1.79,
             'delivery_inside_price' => 2.00,
             'delivery_outside_price' => 3.00,
@@ -136,5 +139,37 @@ class StoreSetting extends Model
     public static function normalizePhone(string $phone): string
     {
         return preg_replace('/\s+/', '', $phone) ?? $phone;
+    }
+
+    public function city(): ?string
+    {
+        if (filled($this->store_city)) {
+            return trim((string) $this->store_city);
+        }
+
+        if (is_string($this->store_address) && preg_match('/гр\.\s*([^,]+)/u', $this->store_address, $matches)) {
+            $city = trim($matches[1]);
+
+            return $city !== '' ? $city : null;
+        }
+
+        $configured = trim((string) config('seo.city', ''));
+
+        return $configured !== '' ? $configured : null;
+    }
+
+    public function streetAddress(): ?string
+    {
+        $address = trim((string) $this->store_address);
+
+        if ($address === '') {
+            return null;
+        }
+
+        if (preg_match('/гр\.\s*[^,]+,\s*(.+)/u', $address, $matches)) {
+            return trim($matches[1]);
+        }
+
+        return $address;
     }
 }

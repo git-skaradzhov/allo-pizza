@@ -208,18 +208,18 @@
                     <span class="text-stone-500">Доставка</span>
                     <span class="font-semibold" id="summary-delivery" data-delivery="{{ (float) $deliveryPrice }}">{{ $deliveryPrice > 0 ? money($deliveryPrice) : 'Безплатна' }}</span>
                 </div>
-                <p class="text-xs text-stone-400">
+                <p class="text-xs text-stone-600">
                     {{ money($deliveryInsidePrice) }} в района · извън района — уточнява се допълнително
                 </p>
                 @if ($settings->free_delivery_over)
-                    <p class="text-xs text-stone-400">Безплатна доставка над {{ money($settings->free_delivery_over) }}</p>
+                    <p class="text-xs text-stone-600">Безплатна доставка над {{ money($settings->free_delivery_over) }}</p>
                 @endif
             </div>
             <div class="mt-3 flex justify-between border-t border-stone-200 pt-3 text-lg font-extrabold">
                 <span>Общо</span>
                 <span class="text-brand-600" id="summary-total">{{ money(max(0, $subtotal - $discount) + $deliveryPrice) }}</span>
             </div>
-            <p class="mt-3 text-xs text-stone-400">Минимална поръчка: {{ money($settings->minimum_order_amount) }}</p>
+            <p class="mt-3 text-xs text-stone-600">Минимална поръчка: {{ money($settings->minimum_order_amount) }}</p>
         </div>
     </div>
 

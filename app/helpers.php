@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\BannerImageProcessor;
 use App\Support\Money;
 use Illuminate\Support\Facades\Storage;
 
@@ -25,8 +26,8 @@ if (! function_exists('money')) {
     }
 }
 
-if (! function_exists('public_media_url')) {
-    function public_media_url(mixed $image): ?string
+if (! function_exists('public_media_path')) {
+    function public_media_path(mixed $image): ?string
     {
         if (is_string($image)) {
             $image = trim($image);
@@ -57,11 +58,46 @@ if (! function_exists('public_media_url')) {
             $image = substr($image, strlen('/storage/'));
         }
 
+        return $image;
+    }
+}
+
+if (! function_exists('public_media_url')) {
+    function public_media_url(mixed $image): ?string
+    {
+        $image = public_media_path($image);
+
+        if ($image === null) {
+            return null;
+        }
+
+        if (str_starts_with($image, 'http')) {
+            return $image;
+        }
+
         if (! Storage::disk('public')->exists($image)) {
             return null;
         }
 
-        return route('media.public', ['path' => $image], false);
+        return Storage::disk('public')->url($image);
+    }
+}
+
+if (! function_exists('optimized_image')) {
+    /**
+     * @return array{src: ?string, srcset: ?string, sources: list<array{type: string, srcset: string}>}
+     */
+    function optimized_image(mixed $image, string $preset = 'default'): array
+    {
+        $path = public_media_path($image);
+
+        if ($path === null || str_starts_with($path, 'http')) {
+            $url = public_media_url($image);
+
+            return ['src' => $url, 'srcset' => null, 'sources' => []];
+        }
+
+        return app(BannerImageProcessor::class)->pictureAttributes($path, $preset);
     }
 }
 

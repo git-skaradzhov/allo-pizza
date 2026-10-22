@@ -88,7 +88,7 @@
                                 <form method="POST" action="{{ route('cart.items.remove', $item) }}">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="text-stone-400 hover:text-brand-600" title="Премахни">
+                                    <button type="submit" class="text-stone-600 hover:text-brand-600" title="Премахни" aria-label="Премахни от количката">
                                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                                     </button>
                                 </form>
@@ -159,11 +159,11 @@
                         <span class="text-stone-500">Доставка</span>
                         <span class="font-semibold">{{ $deliveryPrice > 0 ? money($deliveryPrice) : 'Безплатна' }}</span>
                     </div>
-                    <p class="text-xs text-stone-400">
+                    <p class="text-xs text-stone-600">
                         {{ money($settings->delivery_inside_price) }} в района · извън района — уточнява се допълнително
                     </p>
                     @if ($settings->free_delivery_over)
-                        <p class="text-xs text-stone-400">Безплатна доставка над {{ money($settings->free_delivery_over) }}</p>
+                        <p class="text-xs text-stone-600">Безплатна доставка над {{ money($settings->free_delivery_over) }}</p>
                     @endif
                 </div>
 

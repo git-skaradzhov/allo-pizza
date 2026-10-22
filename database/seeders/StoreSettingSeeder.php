@@ -11,7 +11,7 @@ class StoreSettingSeeder extends Seeder
 {
     public function run(): void
     {
-        $settings = StoreSetting::query()->first() ?? new StoreSetting();
+        $settings = StoreSetting::query()->first() ?? new StoreSetting;
 
         $settings->fill([
             'store_name' => 'Allo! Pizza',
@@ -19,6 +19,7 @@ class StoreSettingSeeder extends Seeder
             'store_phone_secondary' => '0899 679 710',
             'store_email' => 'allopizza@abv.bg',
             'store_address' => 'гр. Русе, ул. „Мария Луиза“, 22',
+            'store_city' => 'Русе',
             'store_lat' => 43.8407475,
             'store_lng' => 25.9549665,
             'delivery_radius_km' => 15.00,

@@ -115,7 +115,7 @@
 
             @if ($product->ingredients->isNotEmpty())
                 <p class="mt-3 text-sm text-stone-600">
-                    <span class="font-semibold text-stone-400">Състав:</span>
+                    <span class="font-semibold text-stone-600">Състав:</span>
                     {{ $product->ingredients->pluck('name')->join(', ') }}
                 </p>
             @endif
@@ -130,7 +130,7 @@
 
             @if ($product->variants->isNotEmpty())
                 <div class="mt-6">
-                    <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-stone-400">Размер</h2>
+                    <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-stone-600">Размер</h2>
                     <div class="grid grid-cols-3 gap-1.5 rounded-2xl bg-stone-100 p-1.5 sm:gap-2">
                         @foreach ($product->variants as $i => $variant)
                             @php
@@ -160,7 +160,7 @@
 
             @if ($removableIngredients->isNotEmpty())
                 <div class="mt-6">
-                    <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-stone-400">Премахни съставки</h2>
+                    <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-stone-600">Премахни съставки</h2>
                     <div class="flex flex-wrap gap-2">
                         @foreach ($removableIngredients as $ingredient)
                             <label class="cursor-pointer">
@@ -176,7 +176,7 @@
 
             @if ($extraIngredients->isNotEmpty())
                 <div class="mt-6">
-                    <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-stone-400">Добави съставки</h2>
+                    <h2 class="mb-2 text-sm font-bold uppercase tracking-wide text-stone-600">Добави съставки</h2>
                     <div class="max-h-80 divide-y divide-stone-100 overflow-y-auto overscroll-contain rounded-2xl border border-stone-200 bg-white">
                         @foreach ($extraIngredients as $ingredient)
                             <div class="extra-row flex items-center justify-between gap-3 px-4 py-3"
@@ -221,7 +221,7 @@
 
             @if ($product->allowsNotes())
                 <div class="mt-6">
-                    <label for="note" class="mb-2 block text-sm font-bold uppercase tracking-wide text-stone-400">Бележка</label>
+                    <label for="note" class="mb-2 block text-sm font-bold uppercase tracking-wide text-stone-600">Бележка</label>
                     <input type="text" id="note" name="note" maxlength="500" placeholder="напр. без лук, разрязана..."
                            class="w-full rounded-xl border-stone-300 text-sm focus:border-brand-400 focus:ring-brand-400">
                 </div>

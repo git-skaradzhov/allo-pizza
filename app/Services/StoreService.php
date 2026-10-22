@@ -138,6 +138,42 @@ class StoreService
         return 'В момента не приемаме поръчки. '.$this->weeklyScheduleSummary();
     }
 
+    /**
+     * @return list<string>
+     */
+    public function schemaOpeningHours(): array
+    {
+        $hours = [];
+
+        foreach ($this->groupedOpenHours() as $timeRange => $days) {
+            $hours[] = $this->compactSchemaDays($days).' '.$timeRange;
+        }
+
+        return $hours;
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function schemaOpeningHoursSpecification(): array
+    {
+        $dayCodes = $this->schemaDayCodes();
+        $spec = [];
+
+        foreach ($this->groupedOpenHours() as $timeRange => $days) {
+            [$opens, $closes] = explode('-', $timeRange, 2);
+
+            $spec[] = [
+                '@type' => 'OpeningHoursSpecification',
+                'dayOfWeek' => array_map(fn (int $day) => $dayCodes[$day] ?? null, $days),
+                'opens' => $opens,
+                'closes' => $closes,
+            ];
+        }
+
+        return $spec;
+    }
+
     public function weeklySchedule(): Collection
     {
         return WorkingHour::query()
@@ -262,5 +298,87 @@ class StoreService
         }
 
         return substr((string) $time, 0, 5);
+    }
+
+    /**
+     * @return array<string, list<int>>
+     */
+    private function groupedOpenHours(): array
+    {
+        $groups = [];
+
+        foreach ($this->weeklySchedule() as $hour) {
+            if ($hour->is_closed || ! $hour->opens_at || ! $hour->closes_at) {
+                continue;
+            }
+
+            $key = $this->formatTime($hour->opens_at).'-'.$this->formatTime($hour->closes_at);
+            $groups[$key][] = (int) $hour->day_of_week;
+        }
+
+        return $groups;
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function schemaDayCodes(): array
+    {
+        return [
+            1 => 'Monday',
+            2 => 'Tuesday',
+            3 => 'Wednesday',
+            4 => 'Thursday',
+            5 => 'Friday',
+            6 => 'Saturday',
+            7 => 'Sunday',
+        ];
+    }
+
+    /**
+     * @param  list<int>  $isoDays
+     */
+    private function compactSchemaDays(array $isoDays): string
+    {
+        $isoDays = array_values(array_unique(array_map('intval', $isoDays)));
+        sort($isoDays);
+
+        $short = [
+            1 => 'Mo',
+            2 => 'Tu',
+            3 => 'We',
+            4 => 'Th',
+            5 => 'Fr',
+            6 => 'Sa',
+            7 => 'Su',
+        ];
+
+        if ($isoDays === []) {
+            return '';
+        }
+
+        $runs = [];
+        $currentRun = [$isoDays[0]];
+
+        for ($index = 1; $index < count($isoDays); $index++) {
+            if ($isoDays[$index] === end($currentRun) + 1) {
+                $currentRun[] = $isoDays[$index];
+            } else {
+                $runs[] = $currentRun;
+                $currentRun = [$isoDays[$index]];
+            }
+        }
+
+        $runs[] = $currentRun;
+
+        return collect($runs)
+            ->map(function (array $run) use ($short): string {
+                if (count($run) === 1) {
+                    return $short[$run[0]];
+                }
+
+                return $short[$run[0]].'-'.$short[$run[array_key_last($run)]];
+            })
+            ->implode(',');
     }
 }

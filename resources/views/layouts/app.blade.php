@@ -14,12 +14,9 @@
     <x-structured-data :graphs="$structuredData ?? []" />
 
     <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" as="style">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('head')
     @stack('styles')
     <style>
         @media print {
@@ -60,7 +57,7 @@
         <div class="mx-auto flex max-w-7xl items-center gap-2 px-3 py-2.5 sm:gap-4 sm:px-4 sm:py-3">
             <div class="flex min-w-0 items-center gap-2 sm:gap-3">
                 <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2">
-                    <img src="{{ asset('images/logo-wide.png') }}" alt="{{ $storeSetting->store_name ?? 'Allo! Pizza' }}" class="h-9 w-auto max-w-[148px] object-contain sm:h-10 sm:max-w-[180px] md:h-11 md:max-w-[220px]">
+                    <x-store-logo />
                 </a>
 
                 @if ($storeSetting?->phoneNumbers())
@@ -172,6 +169,7 @@
                 </button>
 
                 <a href="{{ route('cart') }}"
+                   aria-label="Количка{{ ($cartCount ?? 0) > 0 ? ' ('.$cartCount.')' : '' }}"
                    class="relative inline-flex items-center gap-2 rounded-xl bg-brand-500 px-3 py-2 font-semibold text-white shadow-soft transition hover:bg-brand-600 sm:px-4">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l-1 12H6L5 9z"/>

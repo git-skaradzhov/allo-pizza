@@ -4,16 +4,15 @@
     use App\Support\Seo\SeoBuilder;
 
     $pageHeading = 'Allo! Pizza – Поръчай пица онлайн';
+    if ($storeSetting?->city()) {
+        $pageHeading .= ' в '.$storeSetting->city();
+    }
     $seo = app(SeoBuilder::class)->forHome($homeInfoPage);
 @endphp
 
 @section('full')
     <div id="main-content" class="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-5">
-        <h1 @class([
-            'font-extrabold tracking-tight',
-            'sr-only' => $heroBanners->isNotEmpty(),
-            'mb-5 text-3xl' => $heroBanners->isEmpty(),
-        ])>{{ $pageHeading }}</h1>
+        <h1 class="mb-4 text-2xl font-black tracking-tight text-stone-950 sm:mb-5 sm:text-3xl">{{ $pageHeading }}</h1>
         @php
             $isHeroCarousel = $heroBanners->count() > 1;
         @endphp
@@ -28,10 +27,26 @@
             ])>
                     @foreach ($heroBanners as $index => $hero)
                         @php
-                            $heroDesktopImage = public_media_url($hero->image);
-                            $heroMobileImage = public_media_url($hero->mobile_image ?? null) ?: $heroDesktopImage;
+                            $heroDesktop = optimized_image($hero->image, 'hero-desktop');
+                            $heroMobile = optimized_image($hero->mobile_image ?? null, 'hero-mobile');
+                            $heroDesktopSrc = $heroDesktop['src'];
+                            $heroMobileSrc = $heroMobile['src'] ?: $heroDesktopSrc;
                             $heroLink = $hero->button_url ?: ($hero->button_text ? route('menu') : null);
                         @endphp
+                        @if ($index === 0 && ($heroDesktopSrc || $heroMobileSrc))
+                            @push('head')
+                                @if ($heroMobileSrc)
+                                    <link rel="preload" as="image" href="{{ $heroMobileSrc }}"
+                                          @if ($heroMobile['srcset']) imagesrcset="{{ $heroMobile['srcset'] }}" imagesizes="100vw" @endif
+                                          media="(max-width: 639px)" fetchpriority="high">
+                                @endif
+                                @if ($heroDesktopSrc)
+                                    <link rel="preload" as="image" href="{{ $heroDesktopSrc }}"
+                                          @if ($heroDesktop['srcset']) imagesrcset="{{ $heroDesktop['srcset'] }}" imagesizes="100vw" @endif
+                                          media="(min-width: 640px)" fetchpriority="high">
+                                @endif
+                            @endpush
+                        @endif
                         <div @if ($isHeroCarousel)
                                  data-hero-slide
                                  class="absolute inset-0 overflow-hidden {{ $index === 0 ? 'is-active' : '' }}"
@@ -46,14 +61,21 @@
                                     <span class="sr-only">{{ $hero->button_text ?: $hero->title }}</span>
                                 </a>
                             @endif
-                            @if ($heroDesktopImage || $heroMobileImage)
+                            @if ($heroDesktopSrc || $heroMobileSrc)
                                 <picture class="hero-slide-picture">
-                                    @if ($heroDesktopImage)
-                                        <source media="(min-width: 640px)" srcset="{{ $heroDesktopImage }}">
+                                    @foreach ($heroDesktop['sources'] as $source)
+                                        <source media="(min-width: 640px)" type="{{ $source['type'] }}" srcset="{{ $source['srcset'] }}" sizes="100vw">
+                                    @endforeach
+                                    @if ($heroDesktopSrc)
+                                        <source media="(min-width: 640px)" srcset="{{ $heroDesktop['srcset'] ?: $heroDesktopSrc }}" sizes="100vw">
                                     @endif
-                                    <img src="{{ $heroMobileImage ?: $heroDesktopImage }}" alt="{{ $hero->title }}"
+                                    @foreach ($heroMobile['sources'] as $source)
+                                        <source type="{{ $source['type'] }}" srcset="{{ $source['srcset'] }}" sizes="100vw">
+                                    @endforeach
+                                    <img src="{{ $heroMobileSrc }}" alt="{{ $hero->title }}"
                                          class="hero-slide-image"
-                                         loading="{{ $index === 0 ? 'eager' : 'lazy' }}"
+                                         @if ($heroMobile['srcset']) srcset="{{ $heroMobile['srcset'] }}" sizes="100vw" @endif
+                                         @if ($index === 0) fetchpriority="high" loading="eager" @else loading="lazy" @endif
                                          decoding="async">
                                 </picture>
                                 @unless ($hero->image_only ?? false)
@@ -67,7 +89,7 @@
                             @unless ($hero->image_only ?? false)
                                 <div class="hero-slide-overlay absolute inset-0 z-20 flex flex-col justify-end p-5 sm:p-8">
                                     <div @if ($isHeroCarousel) class="hero-slide-content max-w-xl" @else class="max-w-xl" @endif>
-                                        <p class="text-sm font-bold uppercase tracking-wide text-gold-300">Allo! Pizza · Русе</p>
+                                        <p class="text-sm font-bold uppercase tracking-wide text-gold-400">Allo! Pizza{{ $storeSetting?->city() ? ' · '.$storeSetting->city() : '' }}</p>
                                         <p class="mt-1 text-2xl font-black tracking-tight text-white sm:text-4xl">{{ $hero->title }}</p>
                                         @if ($hero->subtitle)
                                             <p class="mt-2 max-w-lg text-sm text-white/90 sm:text-base">{{ $hero->subtitle }}</p>
@@ -124,39 +146,10 @@
                 </div>
             @endif
 
-            @if ($heroBanners->isNotEmpty())
-                @push('styles')
-                    <link rel="stylesheet" href="{{ asset('css/hero-carousel.css') }}">
-                @endpush
-            @endif
-
-            @if ($isHeroCarousel)
-                @push('scripts')
-                    <script src="{{ asset('js/hero-carousel.js') }}" defer></script>
-                @endpush
-            @endif
         @endif
 
         @push('styles')
-            <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
             <style>
-                .info-strip-icon {
-                    font-family: 'Material Symbols Outlined';
-                    font-weight: normal;
-                    font-style: normal;
-                    font-size: 1.75rem;
-                    line-height: 1;
-                    letter-spacing: normal;
-                    text-transform: none;
-                    display: inline-block;
-                    white-space: nowrap;
-                    word-wrap: normal;
-                    direction: ltr;
-                    -webkit-font-feature-settings: 'liga';
-                    -webkit-font-smoothing: antialiased;
-                    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-                }
-
                 .home-info-content ul {
                     list-style: none;
                     margin: 0;
@@ -171,25 +164,15 @@
                 }
 
                 .home-info-content li::before {
-                    content: 'check_circle';
-                    font-family: 'Material Symbols Outlined';
-                    font-weight: normal;
-                    font-style: normal;
-                    font-size: 1.25rem;
-                    line-height: 1.75rem;
-                    letter-spacing: normal;
-                    text-transform: none;
-                    display: block;
-                    white-space: nowrap;
-                    word-wrap: normal;
-                    direction: ltr;
+                    content: '';
                     position: absolute;
                     left: 0;
-                    top: 0.125rem;
-                    color: #EB1C22;
-                    -webkit-font-feature-settings: 'liga';
-                    -webkit-font-smoothing: antialiased;
-                    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+                    top: 0.3rem;
+                    width: 1.15rem;
+                    height: 1.15rem;
+                    background-color: #EB1C22;
+                    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 2a10 10 0 100 20 10 10 0 000-20zm4.3 7.3a1 1 0 00-1.4-1.4L11 11.8l-1.9-1.9a1 1 0 10-1.4 1.4l2.6 2.6a1 1 0 001.4 0l4.6-4.6z'/%3E%3C/svg%3E") center / contain no-repeat;
+                    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23000' d='M12 2a10 10 0 100 20 10 10 0 000-20zm4.3 7.3a1 1 0 00-1.4-1.4L11 11.8l-1.9-1.9a1 1 0 10-1.4 1.4l2.6 2.6a1 1 0 001.4 0l4.6-4.6z'/%3E%3C/svg%3E") center / contain no-repeat;
                 }
 
                 .home-info-content li strong {
@@ -204,32 +187,32 @@
         {{-- Delivery information strip --}}
         <section class="mb-5 grid grid-cols-2 gap-2 rounded-[1.5rem] bg-white p-3 shadow-soft sm:gap-3 sm:rounded-[2rem] sm:p-4 md:grid-cols-4">
             <div class="flex items-start gap-2.5 sm:gap-3">
-                <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">local_shipping</span>
+                <x-ui-icon name="truck" class="h-7 w-7 shrink-0 text-brand-600" />
                 <div class="min-w-0">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Доставка</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-stone-600">Доставка</p>
                     <p class="text-sm font-extrabold leading-tight text-stone-900 sm:text-base">
                         Безплатна над {{ money((float) ($storeSetting->free_delivery_over ?: 30)) }}
                     </p>
                 </div>
             </div>
             <div class="flex items-start gap-2.5 sm:gap-3">
-                <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">schedule</span>
+                <x-ui-icon name="clock" class="h-7 w-7 shrink-0 text-brand-600" />
                 <div class="min-w-0">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Време</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-stone-600">Време</p>
                     <p class="text-sm font-extrabold text-stone-900 sm:text-base">до {{ $storeSetting->average_delivery_time ?? 30 }} мин.</p>
                 </div>
             </div>
             <div class="flex items-start gap-2.5 sm:gap-3">
-                <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">receipt_long</span>
+                <x-ui-icon name="receipt" class="h-7 w-7 shrink-0 text-brand-600" />
                 <div class="min-w-0">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">Минимум</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-stone-600">Минимум</p>
                     <p class="text-sm font-extrabold text-stone-900 sm:text-base">{{ money((float) ($storeSetting->minimum_order_amount ?? 0)) }}</p>
                 </div>
             </div>
             <div class="flex items-start gap-2.5 sm:gap-3">
-                <span class="info-strip-icon shrink-0 text-brand-500" aria-hidden="true">storefront</span>
+                <x-ui-icon name="storefront" class="h-7 w-7 shrink-0 text-brand-600" />
                 <div class="min-w-0">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-stone-400">{{ $storeStatusLabel }}</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-stone-600">{{ $storeStatusLabel }}</p>
                     <p @class([
                         'text-xs font-extrabold leading-tight sm:text-sm',
                         'text-green-700' => $isOpen,
@@ -294,7 +277,8 @@
                             @endif
                             @foreach ($smallBanners as $index => $banner)
                                 @php
-                                    $bannerImage = public_media_url($banner->image);
+                                    $bannerMedia = optimized_image($banner->image, 'card');
+                                    $bannerImage = $bannerMedia['src'];
                                     $theme = $cardThemes[$index % count($cardThemes)];
                                     $titleLower = mb_strtolower($banner->title);
                                     $bannerEmoji = match (true) {
@@ -317,6 +301,7 @@
                                    class="group relative flex shrink-0 snap-start overflow-hidden rounded-[1.35rem] p-4 shadow-soft transition hover:-translate-y-0.5 hover:shadow-card sm:rounded-[1.65rem] {{ $bannerImage ? 'bg-stone-900' : 'bg-gradient-to-br '.$theme['bg'] }}">
                                     @if ($bannerImage)
                                         <img src="{{ $bannerImage }}" alt="{{ $banner->title }}" loading="lazy" draggable="false"
+                                             @if ($bannerMedia['srcset']) srcset="{{ $bannerMedia['srcset'] }}" sizes="200px" @endif
                                              style="filter: brightness(0.82);"
                                              class="absolute inset-0 z-0 h-full w-full object-cover transition duration-300 group-hover:scale-105">
                                         <span class="absolute inset-0 z-10" style="background: {{ $theme['overlay'] }}"></span>

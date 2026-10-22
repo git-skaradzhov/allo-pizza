@@ -55,6 +55,10 @@ class StoreSettingResource extends Resource
                             ->label('Адрес')
                             ->rows(2)
                             ->columnSpanFull(),
+                        Forms\Components\TextInput::make('store_city')
+                            ->label('Град')
+                            ->helperText('Използва се в SEO заглавия и JSON-LD. Ако е празно, се опитва да се вземе от адреса.')
+                            ->maxLength(255),
                         Forms\Components\TextInput::make('store_lat')
                             ->label('Географска ширина')
                             ->numeric(),

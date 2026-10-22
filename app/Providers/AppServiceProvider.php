@@ -2,12 +2,14 @@
 
 namespace App\Providers;
 
+use App\Models\Banner;
 use App\Models\LunchMenu;
 use App\Models\NewMenuHighlight;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\StoreSetting;
+use App\Observers\BannerObserver;
 use App\Observers\OrderObserver;
 use App\Observers\ProductImageObserver;
 use App\Observers\ProductObserver;
@@ -44,6 +46,7 @@ class AppServiceProvider extends ServiceProvider
         Order::observe(OrderObserver::class);
         Product::observe(ProductObserver::class);
         ProductImage::observe(ProductImageObserver::class);
+        Banner::observe(BannerObserver::class);
 
         View::composer([
             'layouts.app',

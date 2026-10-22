@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Page;
 use App\Models\Product;
 use App\Models\Redirect;
+use App\Models\WorkingHour;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Tests\TestCase;
@@ -53,6 +54,11 @@ class SeoFoundationTest extends TestCase
 
     public function test_home_page_has_canonical_meta_and_json_ld(): void
     {
+        WorkingHour::query()->updateOrCreate(
+            ['day_of_week' => 1],
+            ['opens_at' => '09:00:00', 'closes_at' => '21:00:00', 'is_closed' => false],
+        );
+
         $response = $this->get('/');
 
         $response->assertOk();
@@ -60,7 +66,15 @@ class SeoFoundationTest extends TestCase
         $response->assertSee('<meta name="robots" content="index,follow">', false);
         $response->assertSee('application/ld+json', false);
         $response->assertSee('"@type": "Organization"', false);
+        $response->assertSee('"Restaurant"', false);
+        $response->assertSee('"LocalBusiness"', false);
+        $response->assertSee('"openingHours"', false);
+        $response->assertSee('"hasMenu"', false);
+        $response->assertSee('"servesCuisine"', false);
         $response->assertSee('<h1', false);
+        $response->assertDontSee('sr-only">Allo! Pizza', false);
+        $this->assertStringNotContainsString('Allo! Pizza | Allo! Pizza', $response->getContent());
+        $this->assertStringNotContainsString('онлайн поръчка на пица | Allo! Pizza', $response->getContent());
     }
 
     public function test_product_page_has_product_schema_and_open_graph(): void
@@ -79,7 +93,26 @@ class SeoFoundationTest extends TestCase
         $response->assertSee('<meta property="og:type" content="product">', false);
         $response->assertSee('"@type": "Product"', false);
         $response->assertSee('Тестова пица | Allo! Pizza', false);
+        $response->assertSee('"@type": "Offer"', false);
         $response->assertSee('Описание за тестова пица.', false);
+    }
+
+    public function test_menu_page_includes_menu_item_schema(): void
+    {
+        $category = Category::factory()->create(['is_active' => true, 'name' => 'Пици']);
+        Product::factory()->create([
+            'category_id' => $category->id,
+            'is_active' => true,
+            'name' => 'Маргарита',
+        ]);
+
+        $response = $this->get(route('menu'));
+
+        $response->assertOk();
+        $response->assertSee('"@type": "Menu"', false);
+        $response->assertSee('"@type": "MenuItem"', false);
+        $response->assertSee('Маргарита', false);
+        $response->assertSee('"@type": "Offer"', false);
     }
 
     public function test_private_pages_are_noindex(): void

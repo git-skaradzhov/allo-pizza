@@ -1,5 +1,6 @@
 import './bootstrap';
 import './product-gallery';
+import { initHeroCarousel } from './hero-carousel';
 
 function enableDragScroll(track) {
     if (track.dataset.dragScrollInit === 'true') {
@@ -146,6 +147,7 @@ function initMobileMenu() {
 
 document.addEventListener('DOMContentLoaded', () => {
     initMobileMenu();
+    initHeroCarousel();
 
     document.querySelectorAll('[data-slider-track]').forEach((track) => {
         enableDragScroll(track);

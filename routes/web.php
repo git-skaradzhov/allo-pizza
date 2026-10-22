@@ -14,8 +14,13 @@ use App\Http\Controllers\Web\PageController;
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\RobotsController;
 use App\Http\Controllers\Web\SitemapController;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 Route::post('/cookie-consent', [CookieConsentController::class, 'store'])
     ->middleware('throttle:meta-consent')
@@ -30,8 +35,15 @@ Route::get('/robots.txt', [RobotsController::class, 'index'])->name('robots');
 Route::get('/media/{path}', function (string $path) {
     abort_unless(Storage::disk('public')->exists($path), 404);
 
-    return Storage::disk('public')->response($path);
-})->where('path', '.*')->name('media.public');
+    return redirect(Storage::disk('public')->url($path), 301)
+        ->header('Cache-Control', 'public, max-age=31536000, immutable');
+})->where('path', '.*')->name('media.public')->withoutMiddleware([
+    EncryptCookies::class,
+    AddQueuedCookiesToResponse::class,
+    StartSession::class,
+    ShareErrorsFromSession::class,
+    ValidateCsrfToken::class,
+]);
 Route::get('/menu', [MenuController::class, 'index'])->name('menu');
 Route::get('/obedno-menyu', [LunchMenuController::class, 'index'])->name('lunch.index');
 Route::get('/novo-v-menuto', [NewMenuHighlightController::class, 'index'])->name('new-menu.index');
