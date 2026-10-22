@@ -4,6 +4,7 @@ namespace App\Support\Seo;
 
 use App\Contracts\SeoMeta;
 use App\Models\Category;
+use App\Models\NewMenuHighlight;
 use App\Models\Page;
 use App\Models\Product;
 use App\Models\StoreSetting;
@@ -20,11 +21,11 @@ class SeoBuilder
 
     public function forHome(?Page $homePage = null): SeoData
     {
-        $title = $homePage?->seo_title ?: 'Allo! Pizza – Поръчай пица онлайн';
+        $title = $homePage?->seo_title ?: $this->defaultHomeTitle();
         $description = $homePage?->seo_description ?: config('seo.default_description');
 
         return $this->make([
-            'title' => $this->formatTitle($title),
+            'title' => $this->formatTitle($this->withCity($title)),
             'description' => $description,
             'canonical' => route('home'),
             'image' => $this->resolveImage($homePage?->featured_image),
@@ -33,7 +34,7 @@ class SeoBuilder
         ]);
     }
 
-    public function forMenu(): SeoData
+    public function forMenu(iterable $categories = []): SeoData
     {
         return $this->make([
             'title' => $this->formatTitle('Меню'),
@@ -44,6 +45,7 @@ class SeoBuilder
                 ['label' => 'Начало', 'url' => route('home')],
                 ['label' => 'Меню'],
             ],
+            'context' => ['categories' => $categories],
         ]);
     }
 
@@ -120,7 +122,7 @@ class SeoBuilder
         );
     }
 
-    public function forNewMenu(?Page $page, ?\App\Models\NewMenuHighlight $highlight = null): SeoData
+    public function forNewMenu(?Page $page, ?NewMenuHighlight $highlight = null): SeoData
     {
         $pageTitle = $page?->title ?? $highlight?->title ?? 'Ново в менюто';
 
@@ -257,14 +259,39 @@ class SeoBuilder
 
     private function formatTitle(string $title): string
     {
-        $title = trim($title);
+        $title = trim(preg_replace('/\s+/', ' ', $title) ?? $title);
         $suffix = trim((string) ($this->settings->seo_title_suffix ?: config('seo.title_suffix')));
+        $brand = trim((string) ($this->settings->store_name ?: config('app.name', 'Allo! Pizza')));
 
         if ($suffix === '' || Str::endsWith($title, $suffix)) {
             return $title;
         }
 
+        if ($brand !== '' && Str::contains($title, $brand)) {
+            return $title;
+        }
+
         return "{$title} {$suffix}";
+    }
+
+    private function defaultHomeTitle(): string
+    {
+        return $this->withCity('Allo! Pizza – Поръчай пица онлайн');
+    }
+
+    private function withCity(string $title): string
+    {
+        $city = $this->settings->city();
+
+        if ($city === null || $city === '') {
+            return $title;
+        }
+
+        if (Str::contains(mb_strtolower($title), mb_strtolower($city))) {
+            return $title;
+        }
+
+        return rtrim($title, ' .–-').' в '.$city;
     }
 
     private function defaultImage(): ?string

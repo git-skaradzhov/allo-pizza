@@ -26,7 +26,7 @@ docker compose up --build
 | Сайт | http://localhost:8000 |
 | Админ | http://localhost:8000/admin/user/login |
 
-**Админ:** `info@allopizza.net` / `Allo20Pizza26`
+Админ акаунтът се създава от `database/seeders/AdminUserSeeder.php` чрез `ADMIN_EMAIL` и `ADMIN_PASSWORD` в `.env`. Не записвайте реални пароли в git.
 
 Спиране: `docker compose down`
 
@@ -61,7 +61,7 @@ cd ~/Projects/pizzeria-orders
 
 | Роля | URL | Данни |
 |------|-----|-------|
-| Админ | `/admin/user/login` | `info@allopizza.net` / `Allo20Pizza26` |
+| Админ | `/admin/user/login` | вижте `ADMIN_EMAIL` / `ADMIN_PASSWORD` в `.env` |
 | Клиент | `/user/login` | Регистрация през `/register` |
 
 ## API

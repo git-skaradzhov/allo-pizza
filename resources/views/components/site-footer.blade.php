@@ -21,7 +21,7 @@
         <div class="flex flex-col">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="flex items-center gap-4">
-                    <img src="{{ asset('images/logo-wide.png') }}" alt="{{ $storeSetting->store_name ?? 'Allo! Pizza' }}" class="h-11 w-auto max-w-[160px] shrink-0 object-contain">
+                    <x-store-logo class="h-11 w-auto max-w-[160px] shrink-0 object-contain" />
                     <div>
                         <p class="text-sm font-bold text-stone-900">{{ $storeSetting->store_name ?? 'Allo! Pizza' }}</p>
                         <p class="mt-0.5 text-sm text-stone-500">Топла пица с бърза доставка в Русе</p>
@@ -85,7 +85,7 @@
                 </button>
             </nav>
 
-            <p class="mt-8 border-t border-stone-100 pt-6 text-xs text-stone-400">
+            <p class="mt-8 border-t border-stone-100 pt-6 text-xs text-stone-600">
                 &copy; {{ date('Y') }} {{ $storeSetting->store_name ?? 'Allo! Pizza' }}. Всички права запазени.
             </p>
         </div>

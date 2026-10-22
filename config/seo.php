@@ -3,6 +3,12 @@
 return [
     'title_suffix' => env('SEO_TITLE_SUFFIX', '| Allo! Pizza'),
 
+    'city' => env('SEO_CITY'),
+
+    'price_range' => env('SEO_PRICE_RANGE', '€€'),
+
+    'serves_cuisine' => env('SEO_SERVES_CUISINE', 'Pizza'),
+
     'default_description' => env(
         'SEO_DEFAULT_DESCRIPTION',
         'Поръчайте пица онлайн с бърза доставка в Русе. Свежи продукти, промо кодове и удобна онлайн поръчка от Allo! Pizza.',

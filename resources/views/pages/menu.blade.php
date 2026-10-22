@@ -3,7 +3,7 @@
 @php
     use App\Support\Seo\SeoBuilder;
 
-    $seo = app(SeoBuilder::class)->forMenu();
+    $seo = app(SeoBuilder::class)->forMenu($categories);
 @endphp
 
 @section('full')

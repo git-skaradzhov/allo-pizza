@@ -27,7 +27,7 @@
     >
         <div class="flex items-center justify-between border-b border-white/10 px-4 py-3">
             <a href="{{ route('home') }}" class="flex shrink-0 items-center" data-mobile-menu-close>
-                <img src="{{ asset('images/logo-wide.png') }}" alt="{{ $storeSetting->store_name ?? 'Allo! Pizza' }}" class="h-9 w-auto max-w-[160px] object-contain">
+                <x-store-logo class="h-9 w-auto max-w-[160px] object-contain" />
             </a>
             <button
                 type="button"
