@@ -61,8 +61,7 @@ bash scripts/run-artisan.sh migrate --force
 echo "==> Linking storage"
 bash scripts/run-artisan.sh storage:link || true
 
-echo "==> Optimizing banner images"
-bash scripts/run-artisan.sh banners:optimize-images || true
+echo "==> Skipping banner image rewrite (run banners:optimize-images --force manually when needed)"
 
 echo "==> Caching Laravel bootstrap files"
 bash scripts/run-artisan.sh optimize
