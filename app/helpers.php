@@ -85,7 +85,7 @@ if (! function_exists('public_media_url')) {
 
 if (! function_exists('optimized_image')) {
     /**
-     * @return array{src: ?string, srcset: ?string, sources: list<array{type: string, srcset: string}>}
+     * @return array{src: ?string, srcset: ?string, sources: list<array{type: string, srcset: string}>, fallback: ?string, sizes: string}
      */
     function optimized_image(mixed $image, string $preset = 'default'): array
     {
@@ -94,7 +94,13 @@ if (! function_exists('optimized_image')) {
         if ($path === null || str_starts_with($path, 'http')) {
             $url = public_media_url($image);
 
-            return ['src' => $url, 'srcset' => null, 'sources' => []];
+            return [
+                'src' => $url,
+                'srcset' => null,
+                'sources' => [],
+                'fallback' => $url,
+                'sizes' => BannerImageProcessor::SIZES[$preset] ?? BannerImageProcessor::SIZES['default'],
+            ];
         }
 
         return app(BannerImageProcessor::class)->pictureAttributes($path, $preset);

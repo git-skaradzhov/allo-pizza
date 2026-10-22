@@ -14,15 +14,26 @@ class BannerImageProcessor
 
     public const EXTENSION = 'webp';
 
-    public const QUALITY = 78;
+    public const HERO_QUALITY = 85;
 
-    public const WIDTHS = [2100, 1400, 800, 480];
+    public const CARD_QUALITY = 80;
+
+    public const MAX_WIDTH = 2560;
+
+    public const WIDTHS = [2560, 2100, 1920, 1600, 1200, 800, 600, 480, 400];
 
     public const PRESETS = [
-        'hero-desktop' => [2100, 1400, 800],
-        'hero-mobile' => [800, 480],
+        'hero-desktop' => [1920, 1600, 1200, 800],
+        'hero-mobile' => [1200, 800, 480],
         'card' => [600, 400],
-        'default' => [1400, 800],
+        'default' => [1600, 1200, 800],
+    ];
+
+    public const SIZES = [
+        'hero-desktop' => '(min-width: 1280px) 1280px, 100vw',
+        'hero-mobile' => '100vw',
+        'card' => '200px',
+        'default' => '(min-width: 1280px) 1280px, 100vw',
     ];
 
     public function __construct(
@@ -35,35 +46,57 @@ class BannerImageProcessor
     {
         $basename = Str::slug((string) pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
         $basename = ($basename !== '' ? $basename : 'banner').'-'.Str::lower(Str::random(8));
+        $extension = strtolower((string) $file->getClientOriginalExtension());
 
-        return $this->writeVariants($file->getRealPath(), $basename, $preset);
-    }
-
-    public function optimizeExisting(string $storedPath, string $preset = 'default'): ?string
-    {
-        if ($this->hasVariants($storedPath, $preset)) {
-            return $this->canonicalPath($storedPath, $preset);
+        if (! in_array($extension, ['png', 'jpg', 'jpeg', 'webp', 'avif'], true)) {
+            $extension = 'png';
         }
 
-        $disk = Storage::disk('public');
-        $absolute = $disk->path($storedPath);
+        $originalPath = self::DIRECTORY.'/'.$basename.'.'.$extension;
+        Storage::disk('public')->put($originalPath, (string) file_get_contents($file->getRealPath()));
+        $this->writeVariants($file->getRealPath(), $basename, $preset);
 
-        if (! is_file($absolute)) {
+        return $originalPath;
+    }
+
+    public function optimizeExisting(string $storedPath, string $preset = 'default', bool $force = false): ?string
+    {
+        $sourceAbsolute = $this->resolveSourceAbsolutePath($storedPath);
+
+        if ($sourceAbsolute === null) {
             return null;
         }
 
-        $basename = pathinfo($storedPath, PATHINFO_FILENAME);
-        $basename = (string) preg_replace('/-(\d+)$/', '', $basename);
+        $originalPath = $this->restoreOriginalPath($storedPath) ?? $storedPath;
 
-        if ($basename === '') {
-            $basename = 'banner-'.Str::lower(Str::random(8));
+        if (! $force && $this->hasAdequateVariants($storedPath, $preset, $sourceAbsolute)) {
+            return $originalPath;
         }
 
         try {
-            return $this->writeVariants($absolute, $basename, $preset);
+            $this->writeVariants($sourceAbsolute, $this->basenameWithoutWidth($storedPath), $preset);
         } catch (\Throwable) {
             return null;
         }
+
+        return $originalPath;
+    }
+
+    public function restoreOriginalPath(string $storedPath): ?string
+    {
+        $basename = $this->basenameWithoutWidth($storedPath);
+        $directory = $this->directoryOf($storedPath);
+        $disk = Storage::disk('public');
+
+        foreach (['png', 'jpg', 'jpeg', 'webp', 'avif'] as $extension) {
+            $candidate = $this->join($directory, $basename.'.'.$extension);
+
+            if ($disk->exists($candidate) && ! $this->isSizedVariant($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return $disk->exists($storedPath) ? $storedPath : null;
     }
 
     public function deleteVariants(?string $storedPath): void
@@ -74,7 +107,7 @@ class BannerImageProcessor
 
         $disk = Storage::disk('public');
 
-        foreach ($this->allKnownWidths() as $width) {
+        foreach ($this->discoverVariantWidths($storedPath, 'webp') as $width) {
             foreach (['webp', 'avif'] as $extension) {
                 $path = $this->variantPath($storedPath, $width, $extension);
 
@@ -83,32 +116,66 @@ class BannerImageProcessor
                 }
             }
         }
+    }
 
-        if ($disk->exists($storedPath) && ! preg_match('/-\d+\.webp$/i', $storedPath)) {
+    public function deleteStored(?string $storedPath): void
+    {
+        if (! is_string($storedPath) || $storedPath === '') {
+            return;
+        }
+
+        $this->deleteVariants($storedPath);
+
+        $disk = Storage::disk('public');
+        $original = $this->restoreOriginalPath($storedPath);
+
+        if ($original !== null && $disk->exists($original)) {
+            $disk->delete($original);
+        }
+
+        if ($disk->exists($storedPath)) {
             $disk->delete($storedPath);
         }
     }
 
     /**
-     * @return array{src: ?string, srcset: ?string, sources: list<array{type: string, srcset: string}>}
+     * @return array{src: ?string, srcset: ?string, sources: list<array{type: string, srcset: string}>, fallback: ?string, sizes: string}
      */
     public function pictureAttributes(?string $storedPath, string $preset = 'default'): array
     {
-        $empty = ['src' => null, 'srcset' => null, 'sources' => []];
+        $empty = [
+            'src' => null,
+            'srcset' => null,
+            'sources' => [],
+            'fallback' => null,
+            'sizes' => self::SIZES[$preset] ?? self::SIZES['default'],
+        ];
 
         if (! is_string($storedPath) || $storedPath === '') {
             return $empty;
         }
 
-        $fallback = public_media_url($storedPath);
+        $originalPath = $this->restoreOriginalPath($storedPath) ?? $storedPath;
+        $fallback = public_media_url($originalPath) ?? public_media_url($storedPath);
 
         if ($fallback === null) {
             return $empty;
         }
 
-        $widths = $this->presetWidths($preset);
+        $widths = $this->discoverVariantWidths($storedPath, 'webp');
+
+        if (! $this->variantsAreUseful($storedPath, $preset, $widths)) {
+            return [
+                'src' => $fallback,
+                'srcset' => null,
+                'sources' => [],
+                'fallback' => $fallback,
+                'sizes' => $empty['sizes'],
+            ];
+        }
+
         $webpSrcset = $this->srcsetFor($storedPath, $widths, 'webp');
-        $avifSrcset = $this->srcsetFor($storedPath, $widths, 'avif');
+        $avifSrcset = $this->srcsetFor($storedPath, $this->discoverVariantWidths($storedPath, 'avif'), 'avif');
         $sources = [];
 
         if ($avifSrcset !== null) {
@@ -119,22 +186,18 @@ class BannerImageProcessor
             $sources[] = ['type' => 'image/webp', 'srcset' => $webpSrcset];
         }
 
-        $preferred = $this->preferredUrl($storedPath, $widths);
-
         return [
-            'src' => $preferred ?? $fallback,
+            'src' => $this->preferredUrl($storedPath, $widths) ?? $fallback,
             'srcset' => $webpSrcset,
             'sources' => $sources,
+            'fallback' => $fallback,
+            'sizes' => $empty['sizes'],
         ];
     }
 
     public function variantPath(string $storedPath, int $width, string $extension = self::EXTENSION): string
     {
-        $directory = trim(str_replace('\\', '/', (string) dirname($storedPath)), '/.');
-        $filename = (string) preg_replace('/-\d+$/', '', (string) pathinfo($storedPath, PATHINFO_FILENAME));
-        $prefix = $directory !== '' ? $directory.'/' : '';
-
-        return "{$prefix}{$filename}-{$width}.{$extension}";
+        return $this->join($this->directoryOf($storedPath), $this->basenameWithoutWidth($storedPath).'-'.$width.'.'.$extension);
     }
 
     /**
@@ -145,14 +208,68 @@ class BannerImageProcessor
         return self::PRESETS[$preset] ?? self::PRESETS['default'];
     }
 
+    public function isSizedVariant(string $storedPath): bool
+    {
+        return (bool) preg_match('/-\d+\.(webp|avif)$/i', $storedPath);
+    }
+
+    public function basenameWithoutWidth(string $storedPath): string
+    {
+        $filename = (string) pathinfo($storedPath, PATHINFO_FILENAME);
+
+        return (string) preg_replace('/-\d+$/', '', $filename);
+    }
+
     /**
-     * @param  list<int>  $widths
+     * @return list<int>
      */
-    public function hasVariants(string $storedPath, string $preset): bool
+    public function widthsForSource(int $sourceWidth, string $preset): array
+    {
+        $maxOutput = min(max(1, $sourceWidth), self::MAX_WIDTH);
+        $widths = array_values(array_filter(
+            $this->presetWidths($preset),
+            fn (int $width) => $width <= $maxOutput
+        ));
+
+        if (! in_array($maxOutput, $widths, true)) {
+            $widths[] = $maxOutput;
+        }
+
+        $widths = array_values(array_unique($widths));
+        rsort($widths);
+
+        return $widths;
+    }
+
+    public function hasAdequateVariants(string $storedPath, string $preset, ?string $sourceAbsolute = null): bool
     {
         $disk = Storage::disk('public');
+        $sourceAbsolute ??= $this->resolveSourceAbsolutePath($storedPath);
 
-        foreach ($this->presetWidths($preset) as $width) {
+        if ($sourceAbsolute === null) {
+            return false;
+        }
+
+        try {
+            $sourceWidth = $this->manager->read($sourceAbsolute)->width();
+        } catch (\Throwable) {
+            return false;
+        }
+
+        $needed = $this->widthsForSource($sourceWidth, $preset);
+        $largestNeeded = max($needed);
+
+        if (! $disk->exists($this->variantPath($storedPath, $largestNeeded))) {
+            return false;
+        }
+
+        $minimumHeroWidth = min(1600, $sourceWidth);
+
+        if (str_starts_with($preset, 'hero') && $largestNeeded < $minimumHeroWidth) {
+            return false;
+        }
+
+        foreach ($needed as $width) {
             if (! $disk->exists($this->variantPath($storedPath, $width))) {
                 return false;
             }
@@ -161,11 +278,56 @@ class BannerImageProcessor
         return true;
     }
 
-    public function canonicalPath(string $storedPath, string $preset): string
+    public function resolveSourceAbsolutePath(string $storedPath): ?string
     {
-        $largest = max($this->presetWidths($preset));
+        $disk = Storage::disk('public');
+        $original = $this->restoreOriginalPath($storedPath);
 
-        return $this->variantPath($storedPath, $largest);
+        if ($original !== null && $this->isReadableImage($disk->path($original))) {
+            return $disk->path($original);
+        }
+
+        foreach ($this->discoverVariantWidths($storedPath, 'webp') as $width) {
+            $variant = $this->variantPath($storedPath, $width);
+
+            if ($this->isReadableImage($disk->path($variant))) {
+                return $disk->path($variant);
+            }
+        }
+
+        if ($disk->exists($storedPath) && $this->isReadableImage($disk->path($storedPath))) {
+            return $disk->path($storedPath);
+        }
+
+        return null;
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function discoverVariantWidths(string $storedPath, string $extension = self::EXTENSION): array
+    {
+        $disk = Storage::disk('public');
+        $directory = $this->directoryOf($storedPath);
+        $basename = $this->basenameWithoutWidth($storedPath);
+        $widths = [];
+
+        foreach ($this->allKnownWidths() as $width) {
+            if ($disk->exists($this->variantPath($storedPath, $width, $extension))) {
+                $widths[] = $width;
+            }
+        }
+
+        foreach ($disk->files($directory !== '' ? $directory : self::DIRECTORY) as $file) {
+            if (preg_match('/'.preg_quote($basename, '/').'-(\d+)\.'.$extension.'$/i', $file, $matches)) {
+                $widths[] = (int) $matches[1];
+            }
+        }
+
+        $widths = array_values(array_unique($widths));
+        rsort($widths);
+
+        return $widths;
     }
 
     private function writeVariants(string $sourcePath, string $basename, string $preset): string
@@ -174,6 +336,7 @@ class BannerImageProcessor
         $sourceWidth = max(1, $image->width());
         $widths = $this->widthsForSource($sourceWidth, $preset);
         $disk = Storage::disk('public');
+        $quality = $this->qualityFor($preset);
         $largestPath = self::DIRECTORY.'/'.$basename.'-'.max($widths).'.'.self::EXTENSION;
 
         foreach ($widths as $width) {
@@ -184,28 +347,45 @@ class BannerImageProcessor
             }
 
             $path = self::DIRECTORY.'/'.$basename.'-'.$width.'.'.self::EXTENSION;
-            $disk->put($path, (string) $variant->toWebp(quality: self::QUALITY));
+            $disk->put($path, (string) $variant->toWebp(quality: $quality));
         }
 
         return $largestPath;
     }
 
-    /**
-     * @return list<int>
-     */
-    private function widthsForSource(int $sourceWidth, string $preset): array
+    private function qualityFor(string $preset): int
     {
-        $wanted = $this->presetWidths($preset);
-        $widths = array_values(array_filter($wanted, fn (int $width) => $width <= $sourceWidth));
+        return str_starts_with($preset, 'hero') ? self::HERO_QUALITY : self::CARD_QUALITY;
+    }
 
+    /**
+     * @param  list<int>  $widths
+     */
+    private function variantsAreUseful(string $storedPath, string $preset, array $widths): bool
+    {
         if ($widths === []) {
-            $widths[] = min($wanted);
+            return false;
         }
 
-        $widths = array_values(array_unique($widths));
-        rsort($widths);
+        $sourceWidth = $this->readImageWidth($this->resolveSourceAbsolutePath($storedPath));
+        $minimumUsefulWidth = str_starts_with($preset, 'hero')
+            ? min(1600, $sourceWidth ?? 1600)
+            : min(max($this->presetWidths($preset)), $sourceWidth ?? max($this->presetWidths($preset)));
 
-        return $widths;
+        return max($widths) >= $minimumUsefulWidth;
+    }
+
+    private function readImageWidth(?string $absolutePath): ?int
+    {
+        if ($absolutePath === null || ! is_file($absolutePath)) {
+            return null;
+        }
+
+        try {
+            return max(1, $this->manager->read($absolutePath)->width());
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     /**
@@ -239,7 +419,7 @@ class BannerImageProcessor
             }
         }
 
-        return public_media_url($storedPath);
+        return public_media_url($this->restoreOriginalPath($storedPath) ?? $storedPath);
     }
 
     /**
@@ -254,5 +434,20 @@ class BannerImageProcessor
         }
 
         return array_values(array_unique($widths));
+    }
+
+    private function directoryOf(string $storedPath): string
+    {
+        return trim(str_replace('\\', '/', (string) dirname($storedPath)), '/.');
+    }
+
+    private function join(string $directory, string $filename): string
+    {
+        return $directory !== '' ? $directory.'/'.$filename : $filename;
+    }
+
+    private function isReadableImage(string $absolutePath): bool
+    {
+        return is_file($absolutePath) && @getimagesize($absolutePath) !== false;
     }
 }
