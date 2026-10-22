@@ -16,6 +16,8 @@ return [
 
     'default_image' => 'images/logo-wide.png',
 
+    'logo' => 'images/logo-square.png',
+
     'locale' => 'bg_BG',
 
     'twitter_card' => 'summary_large_image',

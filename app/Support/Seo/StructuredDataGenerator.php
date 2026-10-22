@@ -260,7 +260,7 @@ class StructuredDataGenerator
             return absolute_url(public_media_url($this->settings->organization_logo));
         }
 
-        return absolute_url(asset(config('seo.default_image')));
+        return absolute_url(asset(config('seo.logo')));
     }
 
     /**

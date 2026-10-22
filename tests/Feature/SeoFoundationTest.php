@@ -63,6 +63,8 @@ class SeoFoundationTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('<link rel="canonical" href="'.route('home').'">', false);
+        $response->assertSee('images/favicon-192.png', false);
+        $response->assertSee('images/logo-square.png', false);
         $response->assertSee('<meta name="robots" content="index,follow">', false);
         $response->assertSee('application/ld+json', false);
         $response->assertSee('"@type": "Organization"', false);
