@@ -13,7 +13,10 @@
     />
     <x-structured-data :graphs="$structuredData ?? []" />
 
-    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/png">
+    <link rel="icon" href="{{ url('/favicon.ico') }}" sizes="48x48">
+    <link rel="icon" type="image/png" sizes="48x48" href="{{ asset('images/favicon-48.png') }}">
+    <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/favicon-192.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/apple-touch-icon.png') }}">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')

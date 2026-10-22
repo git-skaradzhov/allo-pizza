@@ -33,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Allo! Pizza')
             ->brandLogo(asset('images/logo-wide.png'))
             ->brandLogoHeight('2.25rem')
-            ->favicon(asset('images/logo.png'))
+            ->favicon(asset('images/favicon-48.png'))
             ->colors([
                 'primary' => Color::hex('#EB1C22'),
             ])

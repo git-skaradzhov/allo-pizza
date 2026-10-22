@@ -29,6 +29,32 @@ Route::post('/meta/events', [MetaEventController::class, 'store'])
     ->middleware('throttle:meta-events')
     ->name('meta.events.store');
 
+Route::get('/favicon.ico', function () {
+    return response()->file(public_path('favicon.ico'), [
+        'Content-Type' => 'image/x-icon',
+        'Cache-Control' => 'public, max-age=31536000, immutable',
+    ]);
+})->name('favicon')->withoutMiddleware([
+    EncryptCookies::class,
+    AddQueuedCookiesToResponse::class,
+    StartSession::class,
+    ShareErrorsFromSession::class,
+    ValidateCsrfToken::class,
+]);
+
+Route::get('/apple-touch-icon.png', function () {
+    return response()->file(public_path('apple-touch-icon.png'), [
+        'Content-Type' => 'image/png',
+        'Cache-Control' => 'public, max-age=31536000, immutable',
+    ]);
+})->name('apple-touch-icon')->withoutMiddleware([
+    EncryptCookies::class,
+    AddQueuedCookiesToResponse::class,
+    StartSession::class,
+    ShareErrorsFromSession::class,
+    ValidateCsrfToken::class,
+]);
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 Route::get('/robots.txt', [RobotsController::class, 'index'])->name('robots');
