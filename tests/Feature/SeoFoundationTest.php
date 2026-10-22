@@ -72,6 +72,12 @@ class SeoFoundationTest extends TestCase
         $response->assertSee('"hasMenu"', false);
         $response->assertSee('"servesCuisine"', false);
         $response->assertSee('<h1', false);
+        $response->assertSee('Защо Allo! Pizza', false);
+        $response->assertSee('Allo! Pizza – Поръчай пица онлайн в Русе', false);
+        $this->assertMatchesRegularExpression(
+            '/Защо Allo! Pizza.*Allo! Pizza – Поръчай пица онлайн в Русе/s',
+            $response->getContent(),
+        );
         $response->assertDontSee('sr-only">Allo! Pizza', false);
         $this->assertStringNotContainsString('Allo! Pizza | Allo! Pizza', $response->getContent());
         $this->assertStringNotContainsString('онлайн поръчка на пица | Allo! Pizza', $response->getContent());

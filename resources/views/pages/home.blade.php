@@ -12,7 +12,6 @@
 
 @section('full')
     <div id="main-content" class="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-5">
-        <h1 class="mb-4 text-2xl font-black tracking-tight text-stone-950 sm:mb-5 sm:text-3xl">{{ $pageHeading }}</h1>
         @php
             $isHeroCarousel = $heroBanners->count() > 1;
         @endphp
@@ -440,18 +439,22 @@
         @endif
 
         {{-- Editable information blocks --}}
-        @if ($homeInfoPage)
-            <section class="mb-10 grid gap-5 rounded-[1.5rem] bg-white p-4 shadow-soft sm:rounded-[2rem] sm:p-6 lg:grid-cols-[0.85fr_1.15fr] lg:p-8">
-                <div>
-                    <p class="text-sm font-bold text-brand-600">Защо Allo! Pizza</p>
-                    <h2 class="mt-1 text-2xl font-black tracking-tight text-stone-950 sm:text-3xl">{{ $homeInfoPage->title }}</h2>
-                    <p class="mt-3 text-sm text-stone-500 sm:text-base">Посетете ни на място или поръчайте онлайн с бърза доставка в Русе.</p>
-                </div>
+        <section class="mb-10 grid gap-5 rounded-[1.5rem] bg-white p-4 shadow-soft sm:rounded-[2rem] sm:p-6 lg:grid-cols-[0.85fr_1.15fr] lg:p-8">
+            <div>
+                <p class="text-sm font-bold text-brand-600">Защо Allo! Pizza</p>
+                @if ($homeInfoPage)
+                    <h1 class="mt-1 text-2xl font-black tracking-tight text-stone-950 sm:text-3xl">{{ $homeInfoPage->title }}</h1>
+                    <p class="mt-3 text-sm text-stone-500 sm:text-base">{{ $pageHeading }}</p>
+                @else
+                    <h1 class="mt-3 text-sm font-medium leading-relaxed text-stone-500 sm:text-base">{{ $pageHeading }}</h1>
+                @endif
+            </div>
+            @if ($homeInfoPage)
                 <div class="home-info-content text-sm leading-7 text-stone-700 [&_a]:font-bold [&_a]:text-brand-600 [&_p]:mb-3 [&_strong]:text-stone-950">
                     {!! $homeInfoPage->content !!}
                 </div>
-            </section>
-        @endif
+            @endif
+        </section>
 
         {{-- Menu by category --}}
         @forelse ($menuCategories as $category)
