@@ -14,6 +14,8 @@ class StoreSettingResource extends JsonResource
             'store_phone' => $this->store_phone,
             'store_phone_secondary' => $this->store_phone_secondary,
             'store_email' => $this->store_email,
+            'facebook_url' => $this->facebook_url,
+            'instagram_url' => $this->instagram_url,
             'store_address' => $this->store_address,
             'store_lat' => $this->store_lat ? (float) $this->store_lat : null,
             'store_lng' => $this->store_lng ? (float) $this->store_lng : null,

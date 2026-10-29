@@ -68,6 +68,9 @@ class SeoFoundationTest extends TestCase
         $response->assertSee('<meta name="robots" content="index,follow">', false);
         $response->assertSee('application/ld+json', false);
         $response->assertSee('"@type": "Organization"', false);
+        $response->assertSee('https://www.facebook.com/share/1BaUfp47Gd/', false);
+        $response->assertSee('https://www.instagram.com/allopizza_bg', false);
+        $response->assertSee('"sameAs"', false);
         $response->assertSee('"Restaurant"', false);
         $response->assertSee('"LocalBusiness"', false);
         $response->assertSee('"openingHours"', false);

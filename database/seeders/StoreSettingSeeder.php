@@ -18,6 +18,8 @@ class StoreSettingSeeder extends Seeder
             'store_phone' => '0899 679 006',
             'store_phone_secondary' => '0899 679 710',
             'store_email' => 'allopizza@abv.bg',
+            'facebook_url' => 'https://www.facebook.com/share/1BaUfp47Gd/',
+            'instagram_url' => 'https://www.instagram.com/allopizza_bg',
             'store_address' => 'гр. Русе, ул. „Мария Луиза“, 22',
             'store_city' => 'Русе',
             'store_lat' => 43.8407475,

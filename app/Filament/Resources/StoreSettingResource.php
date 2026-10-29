@@ -51,6 +51,16 @@ class StoreSettingResource extends Resource
                             ->label('Имейл')
                             ->email()
                             ->maxLength(255),
+                        Forms\Components\TextInput::make('facebook_url')
+                            ->label('Facebook')
+                            ->url()
+                            ->maxLength(255)
+                            ->placeholder('https://www.facebook.com/...'),
+                        Forms\Components\TextInput::make('instagram_url')
+                            ->label('Instagram')
+                            ->url()
+                            ->maxLength(255)
+                            ->placeholder('https://www.instagram.com/...'),
                         Forms\Components\Textarea::make('store_address')
                             ->label('Адрес')
                             ->rows(2)

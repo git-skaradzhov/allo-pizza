@@ -57,6 +57,7 @@ class StructuredDataGenerator
             'email' => $this->settings->store_email,
             'telephone' => $this->telephoneList(),
             'address' => $this->postalAddress(),
+            'sameAs' => $this->settings->socialProfileUrls(),
             'description' => $this->settings->organization_description
                 ?: $this->settings->seo_default_description
                 ?: config('seo.default_description'),

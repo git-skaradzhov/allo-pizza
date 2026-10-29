@@ -15,6 +15,8 @@ class StoreSetting extends Model
         'store_phone',
         'store_phone_secondary',
         'store_email',
+        'facebook_url',
+        'instagram_url',
         'store_address',
         'store_city',
         'store_lat',
@@ -68,6 +70,8 @@ class StoreSetting extends Model
             'store_phone' => '0899 679 006',
             'store_phone_secondary' => '0899 679 710',
             'store_email' => 'allopizza@abv.bg',
+            'facebook_url' => 'https://www.facebook.com/share/1BaUfp47Gd/',
+            'instagram_url' => 'https://www.instagram.com/allopizza_bg',
             'store_address' => 'гр. Русе, ул. „Мария Луиза“, 22',
             'store_city' => 'Русе',
             'store_lat' => 43.8407475,
@@ -134,6 +138,17 @@ class StoreSetting extends Model
             $this->store_phone,
             $this->store_phone_secondary,
         ]));
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public function socialProfileUrls(): array
+    {
+        return array_values(array_filter([
+            $this->facebook_url,
+            $this->instagram_url,
+        ], fn (mixed $url): bool => is_string($url) && trim($url) !== ''));
     }
 
     public static function normalizePhone(string $phone): string
