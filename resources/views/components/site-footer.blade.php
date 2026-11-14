@@ -104,9 +104,13 @@
                 </button>
             </nav>
 
-            <p class="mt-8 border-t border-stone-100 pt-6 text-xs text-stone-600">
-                &copy; {{ date('Y') }} {{ $storeSetting->store_name ?? 'Allo! Pizza' }}. Всички права запазени.
-            </p>
+            <div class="mt-8 flex flex-col gap-2 border-t border-stone-100 pt-6 text-xs text-stone-600 sm:flex-row sm:items-center sm:justify-between">
+                <p>&copy; {{ date('Y') }} {{ $storeSetting->store_name ?? 'Allo! Pizza' }}. Всички права запазени.</p>
+                <p>
+                    Web Design &amp; Development by
+                    <a href="https://skaradzhov.com" target="_blank" rel="noopener noreferrer" class="font-medium text-stone-700 transition hover:text-brand-600">skaradzhov.com</a>
+                </p>
+            </div>
         </div>
     </div>
 </footer>
