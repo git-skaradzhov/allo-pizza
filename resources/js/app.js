@@ -1,6 +1,7 @@
 import './bootstrap';
 import './product-gallery';
 import { initHeroCarousel } from './hero-carousel';
+import { initPhoneReveal } from './phone-reveal';
 
 function enableDragScroll(track) {
     if (track.dataset.dragScrollInit === 'true') {
@@ -148,6 +149,7 @@ function initMobileMenu() {
 document.addEventListener('DOMContentLoaded', () => {
     initMobileMenu();
     initHeroCarousel();
+    initPhoneReveal();
 
     document.querySelectorAll('[data-slider-track]').forEach((track) => {
         enableDragScroll(track);

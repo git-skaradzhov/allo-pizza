@@ -12,6 +12,7 @@ use App\Http\Controllers\Web\MenuController;
 use App\Http\Controllers\Web\MetaEventController;
 use App\Http\Controllers\Web\NewMenuHighlightController;
 use App\Http\Controllers\Web\PageController;
+use App\Http\Controllers\Web\PhoneRevealController;
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\RobotsController;
 use App\Http\Controllers\Web\SitemapController;
@@ -29,6 +30,9 @@ Route::post('/cookie-consent', [CookieConsentController::class, 'store'])
 Route::post('/meta/events', [MetaEventController::class, 'store'])
     ->middleware('throttle:meta-events')
     ->name('meta.events.store');
+Route::post('/phone-reveal', [PhoneRevealController::class, 'store'])
+    ->middleware('throttle:phone-reveal')
+    ->name('phone-reveal.store');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');

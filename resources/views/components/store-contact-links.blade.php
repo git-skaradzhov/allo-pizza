@@ -4,19 +4,12 @@
 ])
 
 @php
-    use App\Models\StoreSetting;
-
-    $storeSetting = StoreSetting::current();
-    $phones = $storeSetting->phoneNumbers();
+    $storeSetting = $storeSetting ?? \App\Models\StoreSetting::current();
 @endphp
 
 @if ($stacked)
     <div {{ $attributes->class(['space-y-1']) }}>
-        @foreach ($phones as $phone)
-            <a href="tel:{{ \App\Models\StoreSetting::normalizePhone($phone) }}" @class([$linkClass, 'block'])>
-                {{ $phone }}
-            </a>
-        @endforeach
+        <x-phone-reveal variant="footer" :number-class="$linkClass.' block'" />
 
         @if (! empty($storeSetting?->store_email))
             <a href="mailto:{{ $storeSetting->store_email }}" @class([$linkClass, 'block'])>
@@ -26,11 +19,7 @@
     </div>
 @else
     <div {{ $attributes->class(['flex flex-wrap items-center gap-x-3 gap-y-1']) }}>
-        @foreach ($phones as $phone)
-            <a href="tel:{{ \App\Models\StoreSetting::normalizePhone($phone) }}" class="{{ $linkClass }}">
-                {{ $phone }}
-            </a>
-        @endforeach
+        <x-phone-reveal variant="footer" :number-class="$linkClass" />
 
         @if (! empty($storeSetting?->store_email))
             <a href="mailto:{{ $storeSetting->store_email }}" class="{{ $linkClass }}">

@@ -94,6 +94,7 @@ class AppServiceProvider extends ServiceProvider
                 $shared['metaTrackingConfig'] = [
                     'consentUrl' => route('cookie-consent.store'),
                     'eventsUrl' => route('meta.events.store'),
+                    'phoneRevealUrl' => route('phone-reveal.store'),
                     'pixelId' => app(MetaPixelIdResolver::class)->resolve($settings),
                     'serverMarketingConsent' => app(MetaConsentService::class)->status(request()),
                 ];
@@ -122,5 +123,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('meta-consent', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
 
         RateLimiter::for('meta-events', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
+
+        RateLimiter::for('phone-reveal', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
     }
 }

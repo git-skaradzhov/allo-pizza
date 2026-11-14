@@ -62,19 +62,7 @@
                     <x-store-logo />
                 </a>
 
-                @if ($storeSetting?->phoneNumbers())
-                    <div class="flex min-w-0 flex-col gap-0.5 lg:hidden">
-                        @foreach ($storeSetting->phoneNumbers() as $phone)
-                            <a href="tel:{{ \App\Models\StoreSetting::normalizePhone($phone) }}"
-                               class="inline-flex items-center gap-1 whitespace-nowrap text-xs font-bold leading-tight text-brand-600 transition hover:text-brand-700 sm:text-sm">
-                                <svg class="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                                </svg>
-                                {{ $phone }}
-                            </a>
-                        @endforeach
-                    </div>
-                @endif
+                <x-phone-reveal variant="header-mobile" class="min-w-0 lg:hidden" />
             </div>
 
             <div class="hidden flex-1 items-center lg:flex">
@@ -112,19 +100,7 @@
                         </a>
                     @endif
 
-                    @if ($storeSetting?->phoneNumbers())
-                        <div class="flex flex-col gap-0.5 border-l border-stone-200 pl-3">
-                            @foreach ($storeSetting->phoneNumbers() as $phone)
-                                <a href="tel:{{ \App\Models\StoreSetting::normalizePhone($phone) }}"
-                                   class="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-bold leading-tight text-brand-600 transition hover:bg-brand-50">
-                                    <svg class="h-3.5 w-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                                    </svg>
-                                    {{ $phone }}
-                                </a>
-                            @endforeach
-                        </div>
-                    @endif
+                    <x-phone-reveal variant="header" class="border-l border-stone-200 pl-3" />
 
                     @auth
                         <a href="{{ route('account.index') }}"

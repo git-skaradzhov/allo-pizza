@@ -240,17 +240,17 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-BBMUWHih.css",
+    "file": "assets/app-DtHTL4s8.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/css/filament/admin/theme.css": {
-    "file": "assets/theme-DUaeRr6Z.css",
+    "file": "assets/theme-BzGdBcvJ.css",
     "src": "resources/css/filament/admin/theme.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-DwNNFMsa.js",
+    "file": "assets/app-CVB2jEbh.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

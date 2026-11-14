@@ -19,6 +19,7 @@
     $metaTrackingConfig = $trackingConfig ?? [
         'consentUrl' => route('cookie-consent.store'),
         'eventsUrl' => route('meta.events.store'),
+        'phoneRevealUrl' => route('phone-reveal.store'),
         'pixelId' => $metaPixelId,
         'serverMarketingConsent' => app(MetaConsentService::class)->status(request()),
     ];
