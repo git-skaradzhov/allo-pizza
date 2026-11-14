@@ -22,11 +22,7 @@ class NewOrderAlert extends Component
             return;
         }
 
-        $this->queue = Order::query()
-            ->where('status', OrderStatus::New)
-            ->orderBy('id')
-            ->pluck('id')
-            ->all();
+        $this->queue = $this->pendingOrderIds();
 
         if ($this->queue !== []) {
             $this->showNextOrder(playSound: true);
@@ -38,6 +34,10 @@ class NewOrderAlert extends Component
      */
     public function getListeners(): array
     {
+        if (blank(config('filament.broadcasting.echo.key'))) {
+            return [];
+        }
+
         return [
             'echo-private:admin.orders,.order.created' => 'handleNewOrder',
         ];
@@ -45,17 +45,13 @@ class NewOrderAlert extends Component
 
     public function handleNewOrder(mixed $payload): void
     {
-        $orderId = is_array($payload) ? ($payload['orderId'] ?? null) : $payload;
+        $orderId = $this->normalizeOrderId($payload);
 
-        if (! is_int($orderId)) {
+        if ($orderId === null) {
             return;
         }
 
-        if (in_array($orderId, $this->queue, true)) {
-            return;
-        }
-
-        if ($this->currentOrder?->id === $orderId) {
+        if (in_array($orderId, $this->knownOrderIds(), true)) {
             return;
         }
 
@@ -80,19 +76,9 @@ class NewOrderAlert extends Component
             return;
         }
 
-        $knownIds = $this->queue;
+        $knownIds = $this->knownOrderIds();
 
-        if ($this->currentOrder !== null) {
-            $knownIds[] = $this->currentOrder->id;
-        }
-
-        $pendingIds = Order::query()
-            ->where('status', OrderStatus::New)
-            ->orderBy('id')
-            ->pluck('id')
-            ->all();
-
-        foreach ($pendingIds as $orderId) {
+        foreach ($this->pendingOrderIds() as $orderId) {
             if (! in_array($orderId, $knownIds, true)) {
                 $this->handleNewOrder($orderId);
                 $knownIds[] = $orderId;
@@ -157,6 +143,49 @@ class NewOrderAlert extends Component
         if ($playSound) {
             $this->dispatch('new-order-sound');
         }
+    }
+
+    /**
+     * @return array<int>
+     */
+    protected function pendingOrderIds(): array
+    {
+        return Order::query()
+            ->where('status', OrderStatus::New)
+            ->orderBy('id')
+            ->pluck('id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->values()
+            ->all();
+    }
+
+    /**
+     * @return array<int>
+     */
+    protected function knownOrderIds(): array
+    {
+        $ids = array_map(fn (mixed $id): int => (int) $id, $this->queue);
+
+        if ($this->currentOrder !== null) {
+            $ids[] = (int) $this->currentOrder->id;
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    protected function normalizeOrderId(mixed $payload): ?int
+    {
+        if (is_array($payload)) {
+            $payload = $payload['orderId'] ?? $payload['id'] ?? null;
+        }
+
+        if (! is_numeric($payload)) {
+            return null;
+        }
+
+        $orderId = (int) $payload;
+
+        return $orderId > 0 ? $orderId : null;
     }
 
     public function render()

@@ -1,9 +1,14 @@
 <div
-    wire:poll.15s="pollForNewOrders"
+    wire:poll.5s="pollForNewOrders"
     x-data="{
         audio: null,
         audioUnlocked: false,
         unlockListenersRegistered: false,
+        pollTimer: null,
+        sessionExpired: false,
+        watching: true,
+        pingUrl: @js(route('admin.kitchen.pending-orders')),
+        loginUrl: @js(url('/admin/user/login/login')),
         init() {
             if (this.unlockListenersRegistered) {
                 return;
@@ -15,6 +20,90 @@
 
             window.addEventListener('pointerdown', unlock, { once: true, passive: true });
             window.addEventListener('keydown', unlock, { once: true });
+
+            this.startWatching();
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' && ! this.sessionExpired) {
+                    this.pollRemote();
+                    $wire.pollForNewOrders();
+                }
+            });
+
+            if (window.Livewire) {
+                Livewire.hook('request', ({ fail }) => {
+                    fail(({ status }) => {
+                        if ([401, 403, 419].includes(status)) {
+                            this.markDisconnected();
+                        }
+                    });
+                });
+            }
+        },
+        startWatching() {
+            this.pollRemote();
+
+            if (this.pollTimer) {
+                clearInterval(this.pollTimer);
+            }
+
+            this.pollTimer = setInterval(() => this.pollRemote(), 5000);
+        },
+        knownIds() {
+            const ids = ($wire.queue || []).map(Number);
+            const current = $wire.currentOrder;
+
+            if (current && current.id) {
+                ids.push(Number(current.id));
+            }
+
+            return ids;
+        },
+        async pollRemote() {
+            if (this.sessionExpired) {
+                return;
+            }
+
+            try {
+                const response = await fetch(this.pingUrl, {
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                    cache: 'no-store',
+                });
+
+                if ([401, 403, 419].includes(response.status) || response.redirected) {
+                    this.markDisconnected();
+                    return;
+                }
+
+                if (! response.ok) {
+                    return;
+                }
+
+                const data = await response.json();
+                this.watching = true;
+
+                const incoming = (data.orderIds || []).map(Number);
+                const known = this.knownIds();
+
+                if (incoming.some((id) => ! known.includes(id))) {
+                    $wire.pollForNewOrders();
+                }
+            } catch (error) {
+                // Keep retrying on network blips; only auth failures are fatal.
+            }
+        },
+        markDisconnected() {
+            if (this.sessionExpired) {
+                return;
+            }
+
+            this.sessionExpired = true;
+            this.watching = false;
+            this.startSound();
         },
         unlockSound() {
             if (this.audioUnlocked) {
@@ -23,7 +112,7 @@
 
             this.audioUnlocked = true;
 
-            if (@js($currentOrder !== null)) {
+            if (@js($currentOrder !== null) || this.sessionExpired) {
                 this.startSound();
             }
         },
@@ -55,6 +144,7 @@
     x-on:new-order-sound-stop.window="stopSound()"
     wire:ignore.self
 >
+    <style>[x-cloak]{display:none!important}</style>
     @if ($soundBlocked)
         <div class="fixed bottom-4 right-4 z-[10000]">
             <button
@@ -67,6 +157,41 @@
             </button>
         </div>
     @endif
+
+    <div
+        x-show="watching && ! sessionExpired"
+        x-cloak
+        class="pointer-events-none fixed bottom-4 left-4 z-[9998]"
+    >
+        <div class="inline-flex items-center gap-2 rounded-full bg-white/95 px-3 py-1.5 text-xs font-medium text-gray-700 shadow-md ring-1 ring-gray-950/10 dark:bg-gray-900/95 dark:text-gray-200 dark:ring-white/10">
+            <span class="h-2 w-2 animate-pulse rounded-full bg-green-500"></span>
+            Следим за поръчки
+        </div>
+    </div>
+
+    <div
+        x-show="sessionExpired"
+        x-cloak
+        class="fixed inset-0 z-[10001] flex items-center justify-center bg-red-950/80 p-4"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="admin-session-expired-title"
+    >
+        <div class="w-full max-w-lg rounded-xl bg-white p-8 text-center shadow-2xl dark:bg-gray-900">
+            <h2 id="admin-session-expired-title" class="text-2xl font-black text-red-600">
+                Връзката с админа прекъсна
+            </h2>
+            <p class="mt-3 text-base text-gray-700 dark:text-gray-200">
+                Сесията е изтекла, затова нови поръчки вече не изскачат. Влезте отново веднага, за да не пропускате поръчки.
+            </p>
+            <a
+                x-bind:href="loginUrl"
+                class="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-primary-600 px-6 py-4 text-xl font-bold text-white hover:bg-primary-500"
+            >
+                Влез отново
+            </a>
+        </div>
+    </div>
 
     @if ($currentOrder)
         <div

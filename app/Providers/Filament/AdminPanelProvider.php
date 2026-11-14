@@ -25,7 +25,7 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        return $panel
+        $panel = $panel
             ->default()
             ->id('admin')
             ->path('admin/user/login')
@@ -70,7 +70,6 @@ class AdminPanelProvider extends PanelProvider
                     return view('filament.hooks.new-order-alert');
                 },
             )
-            ->broadcasting()
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->middleware([
                 EncryptCookies::class,
@@ -86,5 +85,11 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+
+        if (filled(config('filament.broadcasting.echo.key'))) {
+            $panel = $panel->broadcasting();
+        }
+
+        return $panel;
     }
 }

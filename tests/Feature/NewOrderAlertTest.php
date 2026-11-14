@@ -143,4 +143,68 @@ class NewOrderAlertTest extends TestCase
             ->call('pollForNewOrders')
             ->assertSet('currentOrder.id', $order->id);
     }
+
+    public function test_new_order_alert_accepts_string_order_ids_from_mysql(): void
+    {
+        $admin = User::factory()->administrator()->create();
+        $order = Order::factory()->create(['status' => OrderStatus::New]);
+
+        Livewire::actingAs($admin)
+            ->test(NewOrderAlert::class)
+            ->set('currentOrder', null)
+            ->set('queue', [])
+            ->call('handleNewOrder', (string) $order->id)
+            ->assertSet('currentOrder.id', $order->id);
+    }
+
+    public function test_new_order_alert_accepts_array_payload_with_string_order_id(): void
+    {
+        $admin = User::factory()->administrator()->create();
+        $order = Order::factory()->create(['status' => OrderStatus::New]);
+
+        Livewire::actingAs($admin)
+            ->test(NewOrderAlert::class)
+            ->set('currentOrder', null)
+            ->set('queue', [])
+            ->call('handleNewOrder', ['orderId' => (string) $order->id])
+            ->assertSet('currentOrder.id', $order->id);
+    }
+
+    public function test_pending_orders_ping_returns_new_order_ids_for_administrators(): void
+    {
+        $admin = User::factory()->administrator()->create();
+        $order = Order::factory()->create(['status' => OrderStatus::New]);
+        Order::factory()->create(['status' => OrderStatus::Accepted]);
+
+        $this->actingAs($admin)
+            ->getJson(route('admin.kitchen.pending-orders'))
+            ->assertOk()
+            ->assertJson([
+                'ok' => true,
+                'orderIds' => [$order->id],
+            ]);
+    }
+
+    public function test_pending_orders_ping_rejects_guests_with_json(): void
+    {
+        $this->getJson(route('admin.kitchen.pending-orders'))
+            ->assertUnauthorized()
+            ->assertJson([
+                'ok' => false,
+                'reason' => 'unauthenticated',
+            ]);
+    }
+
+    public function test_pending_orders_ping_rejects_customers_with_json(): void
+    {
+        $customer = User::factory()->create(['role' => UserRole::Customer]);
+
+        $this->actingAs($customer)
+            ->getJson(route('admin.kitchen.pending-orders'))
+            ->assertUnauthorized()
+            ->assertJson([
+                'ok' => false,
+                'reason' => 'unauthenticated',
+            ]);
+    }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PendingOrdersPingController;
 use App\Http\Controllers\Web\AccountController;
 use App\Http\Controllers\Web\CartController;
 use App\Http\Controllers\Web\CategoryController;
@@ -75,5 +76,9 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     Route::patch('/addresses/{address}', [AccountController::class, 'updateAddress'])->name('addresses.update');
     Route::delete('/addresses/{address}', [AccountController::class, 'destroyAddress'])->name('addresses.destroy');
 });
+
+Route::get('/admin/kitchen/pending-orders', PendingOrdersPingController::class)
+    ->middleware('throttle:60,1')
+    ->name('admin.kitchen.pending-orders');
 
 require __DIR__.'/auth.php';
