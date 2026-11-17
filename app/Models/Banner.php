@@ -20,6 +20,7 @@ class Banner extends Model
         'button_url',
         'position',
         'is_active',
+        'is_highlighted',
         'sort_order',
         'starts_at',
         'ends_at',
@@ -31,6 +32,7 @@ class Banner extends Model
             'position' => BannerPosition::class,
             'image_only' => 'boolean',
             'is_active' => 'boolean',
+            'is_highlighted' => 'boolean',
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
         ];

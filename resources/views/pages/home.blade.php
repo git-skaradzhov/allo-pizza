@@ -309,13 +309,22 @@
                     <div class="min-w-0 flex-1">
                         <div class="flex cursor-grab snap-x snap-mandatory gap-3 overflow-x-auto pb-2 scroll-smooth [scrollbar-width:none] sm:gap-4 [&::-webkit-scrollbar]:hidden"
                              data-slider-track>
-                            @if ($showWorkingHoursCard)
-                                <x-working-hours-summary />
-                            @endif
-                            @foreach ($smallBanners as $index => $banner)
+                            @php
+                                $smallBannerCards = $smallBanners
+                                    ->sortBy(fn ($banner) => sprintf('%d-%06d-%010d', $banner->is_highlighted ? 0 : 1, $banner->sort_order, $banner->id))
+                                    ->values();
+                                $workingHoursInserted = false;
+                            @endphp
+                            @foreach ($smallBannerCards as $index => $banner)
+                                @if ($showWorkingHoursCard && ! $workingHoursInserted && ! $banner->is_highlighted)
+                                    <x-working-hours-summary />
+                                    @php $workingHoursInserted = true; @endphp
+                                @endif
                                 @php
                                     $bannerMedia = optimized_image($banner->image, 'card');
                                     $bannerImage = $bannerMedia['src'];
+                                    $imageOnly = (bool) $banner->image_only;
+                                    $highlighted = (bool) $banner->is_highlighted;
                                     $theme = $cardThemes[$index % count($cardThemes)];
                                     $titleLower = mb_strtolower($banner->title);
                                     $bannerEmoji = match (true) {
@@ -331,35 +340,62 @@
                                         str_contains($titleLower, 'пърлен') => '🫓',
                                         default => '🍕',
                                     };
+                                    $faceClass = $imageOnly
+                                        ? 'bg-[#f3eadc]'
+                                        : ($bannerImage ? 'bg-stone-900 p-4' : 'bg-gradient-to-br '.$theme['bg'].' p-4');
                                 @endphp
                                 <a href="{{ $banner->button_url ?: route('menu') }}"
                                    draggable="false"
                                    style="width: 200px; max-width: 200px; height: 260px;"
-                                   class="group relative flex shrink-0 snap-start overflow-hidden rounded-[1.35rem] p-4 shadow-soft transition hover:-translate-y-0.5 hover:shadow-card sm:rounded-[1.65rem] {{ $bannerImage ? 'bg-stone-900' : 'bg-gradient-to-br '.$theme['bg'] }}">
+                                   @class([
+                                       'group relative flex shrink-0 snap-start shadow-soft transition hover:-translate-y-0.5 hover:shadow-card',
+                                       'promo-accent rounded-[1.45rem] sm:rounded-[1.75rem]' => $highlighted,
+                                       'overflow-hidden rounded-[1.35rem] sm:rounded-[1.65rem]' => ! $highlighted,
+                                       $faceClass => ! $highlighted,
+                                   ])>
+                                    @if ($highlighted)
+                                        <span class="promo-accent__spin" aria-hidden="true"></span>
+                                        <span @class([
+                                            'promo-accent__face relative flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-[1.15rem] sm:rounded-[1.45rem]',
+                                            $faceClass,
+                                        ])>
+                                    @endif
                                     @if ($bannerImage)
                                         <img src="{{ $bannerImage }}" alt="{{ $banner->title }}" loading="lazy" draggable="false"
                                              @if ($bannerMedia['srcset']) srcset="{{ $bannerMedia['srcset'] }}" sizes="200px" @endif
-                                             style="filter: brightness(0.82);"
-                                             class="absolute inset-0 z-0 h-full w-full object-cover transition duration-300 group-hover:scale-105">
-                                        <span class="absolute inset-0 z-10" style="background: {{ $theme['overlay'] }}"></span>
+                                             @unless ($imageOnly) style="filter: brightness(0.82);" @endunless
+                                             class="absolute inset-0 z-0 h-full w-full {{ $imageOnly ? 'object-contain' : 'object-cover transition duration-300 group-hover:scale-105' }}">
+                                        @unless ($imageOnly)
+                                            <span class="absolute inset-0 z-10" style="background: {{ $theme['overlay'] }}"></span>
+                                        @endunless
                                     @else
                                         <span class="absolute right-2 top-2 z-0 text-5xl font-black leading-none opacity-25 {{ $theme['text'] }} sm:text-6xl">
                                             {{ $bannerEmoji }}
                                         </span>
                                     @endif
 
-                                    <span class="relative z-20 mt-auto block w-full">
-                                        <span class="block text-xl font-black leading-[1.05] tracking-tight {{ $bannerImage ? 'text-white' : $theme['text'] }}">
-                                            {{ $banner->title }}
-                                        </span>
-                                        @if ($banner->subtitle)
-                                            <span class="mt-2 block line-clamp-5 text-[13px] font-semibold leading-snug {{ $bannerImage ? 'text-white/90' : ($theme['text'] === 'text-white' ? 'text-white/85' : 'text-stone-800/80') }}">
-                                                {{ $banner->subtitle }}
+                                    @if ($imageOnly)
+                                        <span class="sr-only">{{ $banner->title }}</span>
+                                    @else
+                                        <span class="relative z-20 mt-auto block w-full">
+                                            <span class="block text-xl font-black leading-[1.05] tracking-tight {{ $bannerImage ? 'text-white' : $theme['text'] }}">
+                                                {{ $banner->title }}
                                             </span>
-                                        @endif
-                                    </span>
+                                            @if ($banner->subtitle)
+                                                <span class="mt-2 block line-clamp-5 text-[13px] font-semibold leading-snug {{ $bannerImage ? 'text-white/90' : ($theme['text'] === 'text-white' ? 'text-white/85' : 'text-stone-800/80') }}">
+                                                    {{ $banner->subtitle }}
+                                                </span>
+                                            @endif
+                                        </span>
+                                    @endif
+                                    @if ($highlighted)
+                                        </span>
+                                    @endif
                                 </a>
                             @endforeach
+                            @if ($showWorkingHoursCard && ! $workingHoursInserted)
+                                <x-working-hours-summary />
+                            @endif
                         </div>
                     </div>
 

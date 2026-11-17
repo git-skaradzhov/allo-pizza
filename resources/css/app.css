@@ -142,6 +142,66 @@
     }
 }
 
+.promo-accent {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    isolation: isolate;
+    padding: 4px;
+}
+
+.promo-accent__spin {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    border-radius: inherit;
+}
+
+.promo-accent__spin::before {
+    content: "";
+    position: absolute;
+    inset: -70%;
+    background: conic-gradient(
+        #eb1c22 0deg 70deg,
+        #ffe566 70deg 150deg,
+        #ff7a00 150deg 230deg,
+        #fffaf0 230deg 290deg,
+        #eb1c22 290deg 360deg
+    );
+    animation: promo-accent-spin 2.2s linear infinite;
+}
+
+.promo-accent__face {
+    position: relative;
+    z-index: 1;
+    animation: promo-accent-pulse 1.7s ease-in-out infinite;
+}
+
+@keyframes promo-accent-spin {
+    to {
+        transform: rotate(1turn);
+    }
+}
+
+@keyframes promo-accent-pulse {
+    0%,
+    100% {
+        box-shadow: inset 0 0 0 0 rgba(255, 214, 74, 0);
+    }
+
+    50% {
+        box-shadow: inset 0 0 22px 1px rgba(255, 196, 40, 0.72);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .promo-accent__spin::before,
+    .promo-accent__face {
+        animation: none;
+    }
+}
+
 @layer utilities {
     .sr-only {
         position: absolute;

@@ -173,8 +173,13 @@
             <p class="text-sm text-stone-500">Кликнете на картата, за да проверите дали адресът ви попада в района.</p>
         </div>
     @elseif ($featuredImage)
-        <div class="mb-6 overflow-hidden rounded-[1.5rem] shadow-soft sm:rounded-[2rem]">
-            <img src="{{ $featuredImage }}" alt="{{ $page->title }}" class="aspect-[21/9] w-full object-cover">
+        <div class="mb-6 overflow-hidden rounded-[1.5rem] bg-[#f3eadc] shadow-soft sm:rounded-[2rem]">
+            <img src="{{ $featuredImage }}" alt="{{ $page->title }}"
+                 @class([
+                     'w-full',
+                     'mx-auto h-auto max-w-3xl object-contain' => $page->slug === 'kombo-menyu',
+                     'aspect-[21/9] object-cover' => $page->slug !== 'kombo-menyu',
+                 ])>
         </div>
     @endif
 

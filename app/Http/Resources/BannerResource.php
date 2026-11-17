@@ -21,6 +21,7 @@ class BannerResource extends JsonResource
             'position' => $this->position->value,
             'position_label' => $this->position->label(),
             'is_active' => $this->is_active,
+            'is_highlighted' => $this->is_highlighted,
             'sort_order' => $this->sort_order,
             'starts_at' => $this->starts_at?->toIso8601String(),
             'ends_at' => $this->ends_at?->toIso8601String(),

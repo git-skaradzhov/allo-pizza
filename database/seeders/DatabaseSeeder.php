@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             ProductImageSeeder::class,
             BannerImageSeeder::class,
+            ComboMenuBannerSeeder::class,
             LunchMenuItemSeeder::class,
             LunchMenuSeeder::class,
             NewMenuHighlightSeeder::class,

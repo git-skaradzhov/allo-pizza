@@ -75,9 +75,19 @@ class BannerResource extends Resource
                             ->visible(fn (Forms\Get $get): bool => $get('position') === BannerPosition::HomeHero->value),
                         Forms\Components\Toggle::make('image_only')
                             ->label('Само изображение')
-                            ->helperText('Скрива текста и градиента върху hero банера. Използвай, когато текстът е вграден в самото изображение.')
+                            ->helperText(fn (Forms\Get $get): string => $get('position') === BannerPosition::HomeHero->value
+                                ? 'Скрива текста и градиента върху hero банера. Използвай, когато текстът е вграден в самото изображение.'
+                                : 'Скрива заглавието и тъмния слой върху малкото каре. Използвай, когато текстът е в самото изображение.')
                             ->default(false)
-                            ->visible(fn (Forms\Get $get): bool => $get('position') === BannerPosition::HomeHero->value),
+                            ->visible(fn (Forms\Get $get): bool => in_array($get('position'), [
+                                BannerPosition::HomeHero->value,
+                                BannerPosition::HomeSmallCards->value,
+                            ], true)),
+                        Forms\Components\Toggle::make('is_highlighted')
+                            ->label('Акцентиран банер')
+                            ->helperText('Цветна рамка обикаля карето с пулсиращ блясък, за да се набива на очи. Застава най-вляво в лентата.')
+                            ->default(false)
+                            ->visible(fn (Forms\Get $get): bool => $get('position') === BannerPosition::HomeSmallCards->value),
                         Forms\Components\TextInput::make('button_text')
                             ->label('Текст на бутона')
                             ->maxLength(255),
@@ -129,6 +139,9 @@ class BannerResource extends Resource
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->label('Активен')
                     ->sortable(),
+                Tables\Columns\IconColumn::make('is_highlighted')
+                    ->label('Акцент')
+                    ->boolean(),
                 Tables\Columns\TextColumn::make('sort_order')
                     ->label('Подредба')
                     ->sortable(),
