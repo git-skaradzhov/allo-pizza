@@ -63,7 +63,7 @@ HTML,
                 'is_highlighted' => true,
                 'sort_order' => 0,
                 'starts_at' => '2026-11-18 00:00:00',
-                'ends_at' => '2026-11-25 23:59:59',
+                'ends_at' => '2026-11-30 23:59:59',
             ]
         );
     }

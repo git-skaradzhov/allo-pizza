@@ -51,7 +51,7 @@ class HighlightedBannerTest extends TestCase
             'is_active' => true,
             'sort_order' => 5,
             'starts_at' => '2026-11-18 00:00:00',
-            'ends_at' => '2026-11-25 23:59:59',
+            'ends_at' => '2026-11-30 23:59:59',
         ]);
 
         $response = $this->get('/');
@@ -86,7 +86,7 @@ class HighlightedBannerTest extends TestCase
             'is_active' => true,
             'sort_order' => 0,
             'starts_at' => '2026-11-18 00:00:00',
-            'ends_at' => '2026-11-25 23:59:59',
+            'ends_at' => '2026-11-30 23:59:59',
         ]);
 
         $this->travelTo('2026-11-17 23:59:00');
@@ -95,10 +95,10 @@ class HighlightedBannerTest extends TestCase
         $this->travelTo('2026-11-18 00:00:00');
         $this->get('/')->assertSee('promo-accent', false);
 
-        $this->travelTo('2026-11-25 23:59:59');
+        $this->travelTo('2026-11-30 23:59:59');
         $this->get('/')->assertSee('promo-accent', false);
 
-        $this->travelTo('2026-11-26 00:00:00');
+        $this->travelTo('2026-12-01 00:00:00');
         $this->get('/')->assertDontSee('promo-accent', false);
     }
 
