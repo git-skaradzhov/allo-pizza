@@ -13,7 +13,7 @@ return [
         'X-Content-Type-Options' => 'nosniff',
         'X-Frame-Options' => 'SAMEORIGIN',
         'Referrer-Policy' => 'strict-origin-when-cross-origin',
-        'Permissions-Policy' => 'camera=(), microphone=(), payment=(), usb=(), geolocation=(self)',
+        'Permissions-Policy' => 'camera=(), microphone=(), payment=(), usb=(), geolocation=(self), wake-lock=(self)',
         'Content-Security-Policy' => "frame-ancestors 'self'",
         'Strict-Transport-Security' => 'max-age=31536000; includeSubDomains',
     ],

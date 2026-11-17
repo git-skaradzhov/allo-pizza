@@ -81,8 +81,11 @@ Route::middleware('auth')->prefix('account')->name('account.')->group(function (
     Route::delete('/addresses/{address}', [AccountController::class, 'destroyAddress'])->name('addresses.destroy');
 });
 
-Route::get('/admin/kitchen/pending-orders', PendingOrdersPingController::class)
-    ->middleware('throttle:60,1')
+Route::post('/admin/kitchen/pending-orders', PendingOrdersPingController::class)
+    ->middleware('throttle:kitchen-heartbeat')
     ->name('admin.kitchen.pending-orders');
+Route::post('/admin/kitchen/orders/{order}/accept', [PendingOrdersPingController::class, 'accept'])
+    ->middleware('throttle:kitchen-heartbeat')
+    ->name('admin.kitchen.orders.accept');
 
 require __DIR__.'/auth.php';

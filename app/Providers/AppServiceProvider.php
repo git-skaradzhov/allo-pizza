@@ -125,5 +125,7 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('meta-events', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
 
         RateLimiter::for('phone-reveal', fn (Request $request) => Limit::perMinute(20)->by($request->ip()));
+
+        RateLimiter::for('kitchen-heartbeat', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
     }
 }

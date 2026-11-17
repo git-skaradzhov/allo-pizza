@@ -9,6 +9,7 @@ use App\Livewire\Admin\NewOrderAlert;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\OrderNotificationService;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
@@ -176,18 +177,28 @@ class NewOrderAlertTest extends TestCase
         $order = Order::factory()->create(['status' => OrderStatus::New]);
         Order::factory()->create(['status' => OrderStatus::Accepted]);
 
-        $this->actingAs($admin)
-            ->getJson(route('admin.kitchen.pending-orders'))
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+
+        $response = $this->actingAs($admin)
+            ->postJson(route('admin.kitchen.pending-orders'))
             ->assertOk()
             ->assertJson([
                 'ok' => true,
                 'orderIds' => [$order->id],
-            ]);
+            ])
+            ->assertJsonPath('orders.0.id', $order->id)
+            ->assertJsonPath('orders.0.order_number', $order->order_number);
+
+        $cacheControl = strtolower((string) $response->headers->get('Cache-Control'));
+        $this->assertStringContainsString('no-store', $cacheControl);
+        $this->assertStringContainsString('private', $cacheControl);
     }
 
     public function test_pending_orders_ping_rejects_guests_with_json(): void
     {
-        $this->getJson(route('admin.kitchen.pending-orders'))
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+
+        $this->postJson(route('admin.kitchen.pending-orders'))
             ->assertUnauthorized()
             ->assertJson([
                 'ok' => false,
@@ -197,14 +208,34 @@ class NewOrderAlertTest extends TestCase
 
     public function test_pending_orders_ping_rejects_customers_with_json(): void
     {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+
         $customer = User::factory()->create(['role' => UserRole::Customer]);
 
         $this->actingAs($customer)
-            ->getJson(route('admin.kitchen.pending-orders'))
+            ->postJson(route('admin.kitchen.pending-orders'))
             ->assertUnauthorized()
             ->assertJson([
                 'ok' => false,
                 'reason' => 'unauthenticated',
             ]);
+    }
+
+    public function test_kitchen_accept_endpoint_marks_new_order_as_accepted(): void
+    {
+        $this->withoutMiddleware(ValidateCsrfToken::class);
+
+        $admin = User::factory()->administrator()->create();
+        $order = Order::factory()->create(['status' => OrderStatus::New]);
+
+        $this->actingAs($admin)
+            ->postJson(route('admin.kitchen.orders.accept', $order))
+            ->assertOk()
+            ->assertJson([
+                'ok' => true,
+                'accepted' => true,
+            ]);
+
+        $this->assertSame(OrderStatus::Accepted, $order->fresh()->status);
     }
 }
